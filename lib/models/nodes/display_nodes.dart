@@ -127,4 +127,12 @@ class SegmentDisplayNode extends CircuitNode {
       outputPins: outputPins.map((p) => p.clone(newId)).toList(),
     );
   }
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      ...super.toMap(),
+      'type': 'segment_display',
+    };
+  }
 }

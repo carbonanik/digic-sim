@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../controllers/circuit_controller.dart';
 import '../editor/editor_tools.dart';
+import '../models/nodes/composed_node.dart';
 
 class ComponentToolbar extends StatelessWidget {
   final CircuitController controller;
@@ -137,25 +139,153 @@ class ComponentToolbar extends StatelessWidget {
             ),
             if (controller.customDefinitions.isNotEmpty) ...[
               const SizedBox(height: 16),
-              const Text(
-                'Saved ICs',
-                style: TextStyle(
-                  color: Color(0xff94a3b8),
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Saved ICs',
+                    style: TextStyle(
+                      color: Color(0xff94a3b8),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  TextButton.icon(
+                    onPressed: () => _showImportDialog(context),
+                    icon: const Icon(Icons.upload, size: 14),
+                    label: const Text('Import', style: TextStyle(fontSize: 12)),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 12),
-              ...controller.customDefinitions.map((def) => _ToolButton(
-                    icon: Icons.developer_board,
-                    label: def.name,
-                    selected: false,
-                    onTap: () => controller.addCustomComponent(def, const Offset(100, 100)),
-                  )),
+              ...controller.customDefinitions.map(
+                (def) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: _ToolButton(
+                          icon: Icons.developer_board,
+                          label: def.name,
+                          selected: false,
+                          margin: EdgeInsets.zero,
+                          onTap: () => controller.addCustomComponent(
+                            def,
+                            const Offset(100, 100),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      IconButton(
+                        icon: const Icon(
+                          Icons.copy_all,
+                          size: 18,
+                          color: Color(0xff94a3b8),
+                        ),
+                        tooltip: 'Copy JSON',
+                        onPressed: () {
+                          final json = controller.exportIC(def);
+                          Clipboard.setData(ClipboardData(text: json));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('${def.name} JSON copied!'),
+                              behavior: SnackBarBehavior.floating,
+                              width: 200,
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ],
             const _HintCard(),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showImportDialog(BuildContext context) {
+    final textController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xff0b1120),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text(
+          'Import Custom IC',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Paste the JSON definition of your custom component below:',
+              style: TextStyle(color: Color(0xff94a3b8), fontSize: 13),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: textController,
+              maxLines: 6,
+              style: const TextStyle(
+                color: Colors.white,
+                fontFamily: 'monospace',
+                fontSize: 12,
+              ),
+              decoration: InputDecoration(
+                hintText: '{"name": "My IC", ...}',
+                hintStyle: const TextStyle(color: Color(0xff4b5563)),
+                fillColor: const Color(0xff020617),
+                filled: true,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xff1f2937)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xff1f2937)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xff38bdf8)),
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Color(0xff94a3b8)),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (textController.text.trim().isNotEmpty) {
+                controller.importIC(textController.text.trim());
+              }
+              Navigator.pop(context);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xff2563eb),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: const Text('Import Component'),
+          ),
+        ],
       ),
     );
   }
@@ -194,18 +324,20 @@ class _ToolButton extends StatelessWidget {
   final String label;
   final bool selected;
   final VoidCallback onTap;
+  final EdgeInsets? margin;
 
   const _ToolButton({
     required this.icon,
     required this.label,
     required this.selected,
     required this.onTap,
+    this.margin,
   });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: margin ?? const EdgeInsets.only(bottom: 8),
       child: Material(
         color: selected ? const Color(0xff1e40af) : const Color(0xff111827),
         borderRadius: BorderRadius.circular(14),

@@ -23,4 +23,13 @@ abstract class CircuitNode {
   bool onAction(Offset localPosition) => false;
 
   CircuitNode clone(String newId);
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'position': {'dx': position.dx, 'dy': position.dy},
+      'inputPins': inputPins.map((p) => p.toMap()).toList(),
+      'outputPins': outputPins.map((p) => p.toMap()).toList(),
+    };
+  }
 }

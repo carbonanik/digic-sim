@@ -36,8 +36,8 @@ class _CircuitCanvasState extends State<CircuitCanvas> {
         cursor: _isSpacePressed
             ? SystemMouseCursors.grab
             : widget.controller.hoveredPin != null
-                ? SystemMouseCursors.precise
-                : SystemMouseCursors.basic,
+            ? SystemMouseCursors.precise
+            : SystemMouseCursors.basic,
         child: KeyboardListener(
           focusNode: _focusNode,
           autofocus: true,
@@ -64,8 +64,10 @@ class _CircuitCanvasState extends State<CircuitCanvas> {
                 controller.setHoveredPin(pinHit);
 
                 if (pinHit == null) {
-                  final nodeHit =
-                      HitTesting.findNodeAt(controller.circuit, point);
+                  final nodeHit = HitTesting.findNodeAt(
+                    controller.circuit,
+                    point,
+                  );
                   controller.setHoveredNode(nodeHit?.id);
                 } else {
                   controller.setHoveredNode(null);

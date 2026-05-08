@@ -100,6 +100,15 @@ class InputNode extends CircuitNode {
       outputPins: outputPins.map((p) => p.clone(newId)).toList(),
     );
   }
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      ...super.toMap(),
+      'type': 'input',
+      'value': value,
+    };
+  }
 }
 
 class OutputNode extends CircuitNode {
@@ -192,5 +201,13 @@ class OutputNode extends CircuitNode {
       inputPins: inputPins.map((p) => p.clone(newId)).toList(),
       outputPins: outputPins.map((p) => p.clone(newId)).toList(),
     );
+  }
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      ...super.toMap(),
+      'type': 'output',
+    };
   }
 }

@@ -104,4 +104,13 @@ class GateNode extends CircuitNode {
       outputPins: outputPins.map((p) => p.clone(newId)).toList(),
     );
   }
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      ...super.toMap(),
+      'type': 'gate',
+      'gateType': type.name,
+    };
+  }
 }

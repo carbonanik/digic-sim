@@ -15,8 +15,24 @@ import '../models/nodes/display_nodes.dart';
 import '../models/nodes/clock_node.dart';
 import '../models/nodes/composed_node.dart';
 import 'dart:async';
+import 'dart:convert';
 
 class CircuitController extends ChangeNotifier {
+  String exportIC(SubCircuitDefinition definition) {
+    return jsonEncode(definition.toMap());
+  }
+
+  void importIC(String json) {
+    try {
+      final map = jsonDecode(json);
+      final definition = SubCircuitDefinition.fromMap(map);
+      customDefinitions.add(definition);
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error importing IC: $e');
+    }
+  }
+
   Circuit circuit = Circuit(nodes: [], wires: []);
 
   List<SubCircuitDefinition> customDefinitions = [];

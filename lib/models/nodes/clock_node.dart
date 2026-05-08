@@ -95,4 +95,13 @@ class ClockNode extends CircuitNode {
       outputPins: outputPins.map((p) => p.clone(newId)).toList(),
     )..frequency = frequency;
   }
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      ...super.toMap(),
+      'type': 'clock',
+      'frequency': frequency,
+    };
+  }
 }

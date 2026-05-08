@@ -24,4 +24,21 @@ class Pin {
       value: value,
     );
   }
+
+  Map<String, dynamic> toMap() => {
+        'id': id,
+        'nodeId': nodeId,
+        'isInput': isInput,
+        'localPosition': {'dx': localPosition.dx, 'dy': localPosition.dy},
+        'value': value,
+      };
+
+  static Pin fromMap(Map<String, dynamic> map) => Pin(
+        id: map['id'],
+        nodeId: map['nodeId'],
+        isInput: map['isInput'],
+        localPosition:
+            Offset(map['localPosition']['dx'], map['localPosition']['dy']),
+        value: map['value'] ?? false,
+      );
 }

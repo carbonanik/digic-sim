@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../simulator/logic_simulator.dart';
 import '../circuit.dart';
 import '../circuit_node.dart';
+import '../node_factory.dart';
 import '../wire.dart';
 import 'io_nodes.dart';
 
@@ -21,6 +22,32 @@ class SubCircuitDefinition {
     this.inputLabels = const [],
     this.outputLabels = const [],
   });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      'nodes': nodes.map((n) => n.toMap()).toList(),
+      'wires': wires.map((w) => w.toMap()).toList(),
+      'color': color.value,
+      'inputLabels': inputLabels,
+      'outputLabels': outputLabels,
+    };
+  }
+
+  static SubCircuitDefinition fromMap(Map<String, dynamic> map) {
+    return SubCircuitDefinition(
+      name: map['name'],
+      nodes: (map['nodes'] as List)
+          .map((n) => NodeFactory.fromMap(n as Map<String, dynamic>))
+          .toList(),
+      wires: (map['wires'] as List)
+          .map((w) => Wire.fromMap(w as Map<String, dynamic>))
+          .toList(),
+      color: Color(map['color']),
+      inputLabels: List<String>.from(map['inputLabels'] ?? []),
+      outputLabels: List<String>.from(map['outputLabels'] ?? []),
+    );
+  }
 }
 
 class ComposedNode extends CircuitNode {
@@ -204,5 +231,14 @@ class ComposedNode extends CircuitNode {
       inputPins: inputPins.map((p) => p.clone(newId)).toList(),
       outputPins: outputPins.map((p) => p.clone(newId)).toList(),
     );
+  }
+
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      ...super.toMap(),
+      'type': 'composed',
+      'definition': definition.toMap(),
+    };
   }
 }
