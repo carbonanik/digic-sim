@@ -1,3 +1,4 @@
+import 'package:digital_logic_sim_2/controllers/circuit_action.dart';
 import 'package:digital_logic_sim_2/simulator/logic_simulator.dart';
 import 'package:flutter/material.dart';
 
@@ -19,6 +20,9 @@ class CircuitController extends ChangeNotifier {
 
   Offset? temporaryWireEnd;
 
+  List<CircuitAction> undoStack = [];
+  List<CircuitAction> redoStack = [];
+
   void selectTool(EditorTool tool) {
     selectedTool = tool;
     selectedNodeId = null;
@@ -33,6 +37,8 @@ class CircuitController extends ChangeNotifier {
     selectedNodeId = null;
     wireStart = null;
     temporaryWireEnd = null;
+    undoStack.clear();
+    redoStack.clear();
     notifyListeners();
   }
 
@@ -51,9 +57,87 @@ class CircuitController extends ChangeNotifier {
 
     if (type == null) return;
 
-    circuit.nodes.add(_createNode(type, position));
+    final node = _createNode(type, position);
+    circuit.nodes.add(node);
+
+    undoStack.add(CircuitAction(addedNodes: [node]));
+    redoStack.clear(); // Clear redo stack after new action
+
     LogicSimulator.simulate(circuit);
     notifyListeners();
+  }
+
+  void removeNode(CircuitNode node) {
+    final removedWires = circuit.wires.where((w) {
+      return w.fromNodeId == node.id || w.toNodeId == node.id;
+    }).toList();
+
+    for (final wire in removedWires) {
+      circuit.wires.remove(wire);
+    }
+
+    circuit.nodes.remove(node);
+
+    undoStack.add(CircuitAction(
+      removedNodes: [node],
+      removedWires: removedWires,
+    ));
+    redoStack.clear(); // Clear redo stack
+
+    LogicSimulator.simulate(circuit);
+    notifyListeners();
+  }
+
+  void undo() {
+    if (undoStack.isEmpty) return;
+
+    final action = undoStack.removeLast();
+    _applyAction(action, undo: true);
+    redoStack.add(action);
+
+    LogicSimulator.simulate(circuit);
+    notifyListeners();
+  }
+
+  void redo() {
+    if (redoStack.isEmpty) return;
+
+    final action = redoStack.removeLast();
+    _applyAction(action, undo: false);
+    undoStack.add(action);
+
+    LogicSimulator.simulate(circuit);
+    notifyListeners();
+  }
+
+  void _applyAction(CircuitAction action, {required bool undo}) {
+    if (undo) {
+      for (final node in action.addedNodes) {
+        circuit.nodes.remove(node);
+      }
+      for (final wire in action.addedWires) {
+        circuit.wires.remove(wire);
+      }
+      for (final node in action.removedNodes) {
+        circuit.nodes.add(node);
+      }
+      for (final wire in action.removedWires) {
+        circuit.wires.add(wire);
+      }
+    } else {
+      for (final node in action.addedNodes) {
+        circuit.nodes.add(node);
+      }
+      for (final wire in action.addedWires) {
+        circuit.wires.add(wire);
+      }
+      for (final node in action.removedNodes) {
+        circuit.nodes.remove(node);
+      }
+      for (final wire in action.removedWires) {
+        circuit.wires.remove(wire);
+      }
+    }
   }
 
   void selectNode(String? nodeId) {
@@ -123,15 +207,17 @@ class CircuitController extends ChangeNotifier {
       return;
     }
 
-    circuit.wires.add(
-      Wire(
-        id: UniqueKey().toString(),
-        fromNodeId: start.node.id,
-        fromPinId: start.pin.id,
-        toNodeId: node.id,
-        toPinId: pin.id,
-      ),
+    final wire = Wire(
+      id: UniqueKey().toString(),
+      fromNodeId: start.node.id,
+      fromPinId: start.pin.id,
+      toNodeId: node.id,
+      toPinId: pin.id,
     );
+    circuit.wires.add(wire);
+
+    undoStack.add(CircuitAction(addedWires: [wire]));
+    redoStack.clear();
 
     wireStart = null;
     temporaryWireEnd = null;

@@ -97,6 +97,17 @@ class _TopBar extends StatelessWidget {
               style: const TextStyle(fontSize: 12, color: Color(0xff93c5fd)),
             ),
           ),
+          FilledButton.icon(
+            onPressed: controller.undo,
+            icon: const Icon(Icons.undo),
+            label: const Text('Undo'),
+          ),
+          const SizedBox(width: 8),
+          FilledButton.icon(
+            onPressed: controller.redo,
+            icon: const Icon(Icons.redo),
+            label: const Text('Redo'),
+          ),
           const Spacer(),
           FilledButton.icon(
             onPressed: controller.clear,
