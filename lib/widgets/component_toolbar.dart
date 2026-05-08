@@ -17,103 +17,127 @@ class ComponentToolbar extends StatelessWidget {
         color: Color(0xff0b1120),
         border: Border(right: BorderSide(color: Color(0xff1f2937))),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const _AppLogo(),
-          const SizedBox(height: 24),
-          const Text(
-            'Components',
-            style: TextStyle(
-              color: Color(0xff94a3b8),
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
+      child: SingleChildScrollView(
+        // Wrap the Column with SingleChildScrollView
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const _AppLogo(),
+            const SizedBox(height: 24),
+            const Text(
+              'Components',
+              style: TextStyle(
+                color: Color(0xff94a3b8),
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
             ),
-          ),
-          const SizedBox(height: 12),
-          _ToolButton(
-            icon: Icons.mouse,
-            label: 'Select / Move',
-            selected: controller.selectedTool == EditorTool.select,
-            onTap: () => controller.selectTool(EditorTool.select),
-          ),
-          _ToolButton(
-            icon: Icons.cable,
-            label: 'Wire',
-            selected: controller.selectedTool == EditorTool.wire,
-            onTap: () => controller.selectTool(EditorTool.wire),
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            'Inputs / Outputs',
-            style: TextStyle(
-              color: Color(0xff94a3b8),
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
+            const SizedBox(height: 12),
+            _ToolButton(
+              icon: Icons.mouse,
+              label: 'Select / Move',
+              selected: controller.selectedTool == EditorTool.select,
+              onTap: () => controller.selectTool(EditorTool.select),
             ),
-          ),
-          const SizedBox(height: 12),
-          _ToolButton(
-            icon: Icons.input,
-            label: 'Input',
-            selected: controller.selectedTool == EditorTool.input,
-            onTap: () => controller.selectTool(EditorTool.input),
-          ),
-          _ToolButton(
-            icon: Icons.output,
-            label: 'Output',
-            selected: controller.selectedTool == EditorTool.output,
-            onTap: () => controller.selectTool(EditorTool.output),
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            'Logic Gates',
-            style: TextStyle(
-              color: Color(0xff94a3b8),
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
+            _ToolButton(
+              icon: Icons.cable,
+              label: 'Wire',
+              selected: controller.selectedTool == EditorTool.wire,
+              onTap: () => controller.selectTool(EditorTool.wire),
             ),
-          ),
-          const SizedBox(height: 12),
-          _ToolButton(
-            icon: Icons.join_inner,
-            label: 'AND Gate',
-            selected: controller.selectedTool == EditorTool.and,
-            onTap: () => controller.selectTool(EditorTool.and),
-          ),
-          _ToolButton(
-            icon: Icons.call_split,
-            label: 'OR Gate',
-            selected: controller.selectedTool == EditorTool.or,
-            onTap: () => controller.selectTool(EditorTool.or),
-          ),
-          _ToolButton(
-            icon: Icons.change_circle_outlined,
-            label: 'NOT Gate',
-            selected: controller.selectedTool == EditorTool.not,
-            onTap: () => controller.selectTool(EditorTool.not),
-          ),
-          _ToolButton(
-            icon: Icons.join_full,
-            label: 'NAND Gate',
-            selected: controller.selectedTool == EditorTool.nand,
-            onTap: () => controller.selectTool(EditorTool.nand),
-          ),
-          _ToolButton(
-            icon: Icons.device_hub,
-            label: 'NOR Gate',
-            selected: controller.selectedTool == EditorTool.nor,
-            onTap: () => controller.selectTool(EditorTool.nor),
-          ),
-          _ToolButton(
-            icon: Icons.merge,
-            label: 'XOR Gate',
-            selected: controller.selectedTool == EditorTool.xor,
-            onTap: () => controller.selectTool(EditorTool.xor),
-          ),
-          const Spacer(),
-          const _HintCard(),
-        ],
+            const SizedBox(height: 16),
+            const Text(
+              'Inputs / Outputs',
+              style: TextStyle(
+                color: Color(0xff94a3b8),
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 12),
+            _ToolButton(
+              icon: Icons.input,
+              label: 'Input',
+              selected: controller.selectedTool == EditorTool.input,
+              onTap: () => controller.selectTool(EditorTool.input),
+            ),
+            _ToolButton(
+              icon: Icons.output,
+              label: 'Output',
+              selected: controller.selectedTool == EditorTool.output,
+              onTap: () => controller.selectTool(EditorTool.output),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Logic Gates',
+              style: TextStyle(
+                color: Color(0xff94a3b8),
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 12),
+            _ToolButton(
+              icon: Icons.join_inner,
+              label: 'AND Gate',
+              selected: controller.selectedTool == EditorTool.and,
+              onTap: () => controller.selectTool(EditorTool.and),
+            ),
+            _ToolButton(
+              icon: Icons.call_split,
+              label: 'OR Gate',
+              selected: controller.selectedTool == EditorTool.or,
+              onTap: () => controller.selectTool(EditorTool.or),
+            ),
+            _ToolButton(
+              icon: Icons.change_circle_outlined,
+              label: 'NOT Gate',
+              selected: controller.selectedTool == EditorTool.not,
+              onTap: () => controller.selectTool(EditorTool.not),
+            ),
+            _ToolButton(
+              icon: Icons.join_full,
+              label: 'NAND Gate',
+              selected: controller.selectedTool == EditorTool.nand,
+              onTap: () => controller.selectTool(EditorTool.nand),
+            ),
+            _ToolButton(
+              icon: Icons.device_hub,
+              label: 'NOR Gate',
+              selected: controller.selectedTool == EditorTool.nor,
+              onTap: () => controller.selectTool(EditorTool.nor),
+            ),
+            _ToolButton(
+              icon: Icons.merge,
+              label: 'XOR Gate',
+              selected: controller.selectedTool == EditorTool.xor,
+              onTap: () => controller.selectTool(EditorTool.xor),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Complex Components',
+              style: TextStyle(
+                color: Color(0xff94a3b8),
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 12),
+            _ToolButton(
+              icon: Icons.display_settings,
+              label: '7-Segment Display',
+              selected: controller.selectedTool == EditorTool.segmentDisplay,
+              onTap: () => controller.selectTool(EditorTool.segmentDisplay),
+            ),
+            _ToolButton(
+              icon: Icons.timer,
+              label: 'Clock (1Hz)',
+              selected: controller.selectedTool == EditorTool.clock,
+              onTap: () => controller.selectTool(EditorTool.clock),
+            ),
+            const _HintCard(),
+          ],
+        ),
       ),
     );
   }

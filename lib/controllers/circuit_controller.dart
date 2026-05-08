@@ -8,9 +8,16 @@ import '../models/circuit_node.dart';
 import '../models/gate_type.dart';
 import '../models/pin.dart';
 import '../models/wire.dart';
+import '../models/nodes/gate_node.dart';
+import '../models/nodes/io_nodes.dart';
+import '../models/nodes/display_nodes.dart';
+import '../models/nodes/clock_node.dart';
+import 'dart:async';
 
 class CircuitController extends ChangeNotifier {
   Circuit circuit = Circuit(nodes: [], wires: []);
+
+  Timer? _clockTimer;
 
   EditorTool selectedTool = EditorTool.select;
 
@@ -39,7 +46,30 @@ class CircuitController extends ChangeNotifier {
     temporaryWireEnd = null;
     undoStack.clear();
     redoStack.clear();
+    _updateClockTimer();
     notifyListeners();
+  }
+
+  void _updateClockTimer() {
+    final hasClocks = circuit.nodes.any((n) => n is ClockNode);
+    if (hasClocks && _clockTimer == null) {
+      _clockTimer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
+        bool changed = false;
+        for (final node in circuit.nodes) {
+          if (node is ClockNode) {
+            node.value = !node.value;
+            changed = true;
+          }
+        }
+        if (changed) {
+          LogicSimulator.simulate(circuit);
+          notifyListeners();
+        }
+      });
+    } else if (!hasClocks && _clockTimer != null) {
+      _clockTimer?.cancel();
+      _clockTimer = null;
+    }
   }
 
   void addGateFromTool(Offset position) {
@@ -52,13 +82,23 @@ class CircuitController extends ChangeNotifier {
       EditorTool.nand => GateType.nand,
       EditorTool.nor => GateType.nor,
       EditorTool.xor => GateType.xor,
+      EditorTool.segmentDisplay => null,
+      EditorTool.clock => null,
       _ => null,
     };
 
-    if (type == null) return;
+    if (type == null && 
+        selectedTool != EditorTool.segmentDisplay &&
+        selectedTool != EditorTool.clock) return;
 
-    final node = _createNode(type, position);
+    final node = switch (selectedTool) {
+      EditorTool.segmentDisplay => _createSegmentDisplay(position),
+      EditorTool.clock => _createClock(position),
+      _ => _createNode(type!, position),
+    };
     circuit.nodes.add(node);
+
+    _updateClockTimer();
 
     undoStack.add(CircuitAction(addedNodes: [node]));
     redoStack.clear(); // Clear redo stack after new action
@@ -77,6 +117,8 @@ class CircuitController extends ChangeNotifier {
     }
 
     circuit.nodes.remove(node);
+
+    _updateClockTimer();
 
     undoStack.add(CircuitAction(
       removedNodes: [node],
@@ -138,6 +180,7 @@ class CircuitController extends ChangeNotifier {
         circuit.wires.remove(wire);
       }
     }
+    _updateClockTimer();
   }
 
   void selectNode(String? nodeId) {
@@ -163,12 +206,11 @@ class CircuitController extends ChangeNotifier {
     return null;
   }
 
-  void toggleInput(String nodeId) {
+  void handleNodeAction(String nodeId, Offset localPosition) {
     final node = circuit.nodes.where((n) => n.id == nodeId).firstOrNull;
     if (node == null) return;
 
-    if (node.type == GateType.input) {
-      node.value = !node.value;
+    if (node.onAction(localPosition)) {
       LogicSimulator.simulate(circuit);
       notifyListeners();
     }
@@ -237,90 +279,123 @@ class CircuitController extends ChangeNotifier {
 
     switch (type) {
       case GateType.input:
-        return CircuitNode(
+        return InputNode(
           id: id,
-          type: type,
           position: position,
-          value: false,
           inputPins: const [],
           outputPins: [
             Pin(
               id: 'out',
-              nodeId: '',
+              nodeId: id,
               isInput: false,
-              localPosition: Offset(110, 32),
+              localPosition: const Offset(110, 32),
             ),
           ],
         );
 
       case GateType.output:
-        return CircuitNode(
+        return OutputNode(
           id: id,
-          type: type,
           position: position,
           inputPins: [
             Pin(
               id: 'in',
-              nodeId: '',
+              nodeId: id,
               isInput: true,
-              localPosition: Offset(0, 32),
+              localPosition: const Offset(0, 32),
             ),
           ],
           outputPins: const [],
         );
 
       case GateType.not:
-        return CircuitNode(
+        return GateNode(
           id: id,
           type: type,
           position: position,
           inputPins: [
             Pin(
               id: 'in',
-              nodeId: '',
+              nodeId: id,
               isInput: true,
-              localPosition: Offset(0, 32),
+              localPosition: const Offset(0, 32),
             ),
           ],
           outputPins: [
             Pin(
               id: 'out',
-              nodeId: '',
+              nodeId: id,
               isInput: false,
-              localPosition: Offset(110, 32),
+              localPosition: const Offset(110, 32),
             ),
           ],
         );
 
       default:
-        return CircuitNode(
+        return GateNode(
           id: id,
           type: type,
           position: position,
           inputPins: [
             Pin(
               id: 'a',
-              nodeId: '',
+              nodeId: id,
               isInput: true,
-              localPosition: Offset(0, 22),
+              localPosition: const Offset(0, 22),
             ),
             Pin(
               id: 'b',
-              nodeId: '',
+              nodeId: id,
               isInput: true,
-              localPosition: Offset(0, 42),
+              localPosition: const Offset(0, 42),
             ),
           ],
           outputPins: [
             Pin(
               id: 'out',
-              nodeId: '',
+              nodeId: id,
               isInput: false,
-              localPosition: Offset(110, 32),
+              localPosition: const Offset(110, 32),
             ),
           ],
         );
     }
+  }
+
+  CircuitNode _createSegmentDisplay(Offset position) {
+    final id = UniqueKey().toString();
+    final inputPins = List.generate(7, (i) {
+      return Pin(
+        id: 'seg_$i',
+        nodeId: id,
+        isInput: true,
+        localPosition: Offset(0, 15.0 + i * 15.0),
+      );
+    });
+
+    return SegmentDisplayNode(
+      id: id,
+      position: position,
+      inputPins: inputPins,
+      outputPins: const [],
+    );
+  }
+
+  CircuitNode _createClock(Offset position) {
+    final id = UniqueKey().toString();
+    return ClockNode(
+      id: id,
+      position: position,
+      inputPins: const [],
+      outputPins: [
+        Pin(
+          id: 'out',
+          nodeId: id,
+          isInput: false,
+          localPosition: const Offset(110, 32),
+        ),
+      ],
+    );
   }
 }
 

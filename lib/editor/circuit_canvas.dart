@@ -59,10 +59,8 @@ class _CircuitCanvasState extends State<CircuitCanvas> {
             final nodeHit = HitTesting.findNodeAt(controller.circuit, point);
 
             if (nodeHit != null) {
-              if (nodeHit.type.name == 'input') {
-                controller.toggleInput(nodeHit.id);
-              }
-
+              final localPoint = point - nodeHit.position;
+              controller.handleNodeAction(nodeHit.id, localPoint);
               controller.selectNode(nodeHit.id);
               return;
             }

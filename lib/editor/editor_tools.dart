@@ -1,1 +1,14 @@
-enum EditorTool { select, wire, input, output, and, or, not, nand, nor, xor }
+enum EditorTool {
+  select,
+  wire,
+  input,
+  output,
+  and,
+  or,
+  not,
+  nand,
+  nor,
+  xor,
+  segmentDisplay,
+  clock
+}

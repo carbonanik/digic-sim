@@ -96,83 +96,9 @@ class CircuitPainter extends CustomPainter {
   void _drawNodes(Canvas canvas) {
     for (final node in circuit.nodes) {
       final isSelected = node.id == selectedNodeId;
-
-      final rect = RRect.fromRectAndRadius(
-        node.rect,
-        const Radius.circular(16),
-      );
-
-      final fillPaint = Paint()..color = _nodeFillColor(node);
-
-      final borderPaint = Paint()
-        ..color = isSelected ? const Color(0xfffacc15) : const Color(0xff475569)
-        ..strokeWidth = isSelected ? 3 : 2
-        ..style = PaintingStyle.stroke;
-
-      canvas.drawRRect(rect, fillPaint);
-      canvas.drawRRect(rect, borderPaint);
-
-      _drawNodeLabel(canvas, node);
-      _drawNodeValue(canvas, node);
+      node.paint(canvas, isSelected);
       _drawPins(canvas, node);
     }
-  }
-
-  Color _nodeFillColor(CircuitNode node) {
-    if (node.type == GateType.input && node.value) {
-      return const Color(0xff14532d);
-    }
-
-    if (node.type == GateType.output && node.value) {
-      return const Color(0xff1d4ed8);
-    }
-
-    return const Color(0xff111827);
-  }
-
-  void _drawNodeLabel(Canvas canvas, CircuitNode node) {
-    final textPainter = TextPainter(
-      text: TextSpan(
-        text: node.type.label,
-        style: const TextStyle(
-          color: Color(0xffe5e7eb),
-          fontSize: 16,
-          fontWeight: FontWeight.w700,
-        ),
-      ),
-      textDirection: TextDirection.ltr,
-    );
-
-    textPainter.layout();
-
-    final offset = Offset(node.position.dx + 16, node.position.dy + 14);
-
-    textPainter.paint(canvas, offset);
-  }
-
-  void _drawNodeValue(Canvas canvas, CircuitNode node) {
-    if (node.type != GateType.input && node.type != GateType.output) return;
-
-    final valueText = node.value ? '1' : '0';
-
-    final textPainter = TextPainter(
-      text: TextSpan(
-        text: valueText,
-        style: TextStyle(
-          color: node.value ? const Color(0xff86efac) : const Color(0xff94a3b8),
-          fontSize: 15,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      textDirection: TextDirection.ltr,
-    );
-
-    textPainter.layout();
-
-    textPainter.paint(
-      canvas,
-      Offset(node.position.dx + 16, node.position.dy + 38),
-    );
   }
 
   void _drawPins(Canvas canvas, CircuitNode node) {
