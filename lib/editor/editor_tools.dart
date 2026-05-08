@@ -1,0 +1,1 @@
+enum EditorTool { select, wire, input, output, and, or, not, nand, nor, xor }
