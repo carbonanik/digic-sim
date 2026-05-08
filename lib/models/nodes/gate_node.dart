@@ -83,4 +83,15 @@ class GateNode extends CircuitNode {
     textPainter.paint(canvas, Offset.zero);
     canvas.restore();
   }
+
+  @override
+  CircuitNode clone(String newId) {
+    return GateNode(
+      id: newId,
+      position: position,
+      type: type,
+      inputPins: inputPins.map((p) => p.clone(newId)).toList(),
+      outputPins: outputPins.map((p) => p.clone(newId)).toList(),
+    );
+  }
 }

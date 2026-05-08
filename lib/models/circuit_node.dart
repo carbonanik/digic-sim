@@ -22,4 +22,6 @@ abstract class CircuitNode {
   void paint(Canvas canvas, bool isSelected);
   void evaluate(List<bool> inputs);
   bool onAction(Offset localPosition) => false;
+
+  CircuitNode clone(String newId);
 }

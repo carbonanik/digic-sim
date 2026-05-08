@@ -75,4 +75,15 @@ class ClockNode extends CircuitNode {
 
     canvas.drawPath(path, paint);
   }
+
+  @override
+  CircuitNode clone(String newId) {
+    return ClockNode(
+      id: newId,
+      position: position,
+      value: value,
+      inputPins: inputPins.map((p) => p.clone(newId)).toList(),
+      outputPins: outputPins.map((p) => p.clone(newId)).toList(),
+    )..frequency = frequency;
+  }
 }

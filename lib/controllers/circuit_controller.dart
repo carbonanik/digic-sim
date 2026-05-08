@@ -12,10 +12,13 @@ import '../models/nodes/gate_node.dart';
 import '../models/nodes/io_nodes.dart';
 import '../models/nodes/display_nodes.dart';
 import '../models/nodes/clock_node.dart';
+import '../models/nodes/composed_node.dart';
 import 'dart:async';
 
 class CircuitController extends ChangeNotifier {
   Circuit circuit = Circuit(nodes: [], wires: []);
+
+  List<SubCircuitDefinition> customDefinitions = [];
 
   Timer? _clockTimer;
 
@@ -396,6 +399,83 @@ class CircuitController extends ChangeNotifier {
         ),
       ],
     );
+  }
+
+  void saveCurrentAsComponent({
+    required String name,
+    required Color color,
+    required List<String> inputLabels,
+    required List<String> outputLabels,
+  }) {
+    if (circuit.nodes.isEmpty) return;
+
+    // 1. Identify external inputs and outputs
+    final inputNodes = circuit.nodes.whereType<InputNode>().toList();
+    final outputNodes = circuit.nodes.whereType<OutputNode>().toList();
+
+    // 2. Clone current nodes and wires
+    final clonedNodes = circuit.nodes.map((n) => n.clone(n.id)).toList();
+    final clonedWires = circuit.wires.map((w) => Wire(
+      id: w.id,
+      fromNodeId: w.fromNodeId,
+      fromPinId: w.fromPinId,
+      toNodeId: w.toNodeId,
+      toPinId: w.toPinId,
+    )).toList();
+
+    // 3. Create definition
+    final definition = SubCircuitDefinition(
+      name: name,
+      nodes: clonedNodes,
+      wires: clonedWires,
+      color: color,
+      inputLabels: inputLabels,
+      outputLabels: outputLabels,
+    );
+
+    customDefinitions.add(definition);
+    notifyListeners();
+  }
+
+  void addCustomComponent(SubCircuitDefinition definition, Offset position) {
+    final id = UniqueKey().toString();
+    
+    // Create external pins based on internal Input/Output nodes
+    final inputNodes = definition.nodes.whereType<InputNode>().toList();
+    final outputNodes = definition.nodes.whereType<OutputNode>().toList();
+
+    final inputPins = List.generate(inputNodes.length, (i) {
+      return Pin(
+        id: 'in_$i',
+        nodeId: id,
+        isInput: true,
+        localPosition: Offset(0, 30.0 + i * 20.0),
+      );
+    });
+
+    final outputPins = List.generate(outputNodes.length, (i) {
+      return Pin(
+        id: 'out_$i',
+        nodeId: id,
+        isInput: false,
+        localPosition: Offset(140, 30.0 + i * 20.0),
+      );
+    });
+
+    final node = ComposedNode(
+      id: id,
+      position: position,
+      definition: definition,
+      inputPins: inputPins,
+      outputPins: outputPins,
+    );
+
+    circuit.nodes.add(node);
+    undoStack.add(CircuitAction(addedNodes: [node]));
+    redoStack.clear();
+    
+    LogicSimulator.simulate(circuit);
+    notifyListeners();
   }
 }
 

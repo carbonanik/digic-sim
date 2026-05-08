@@ -135,6 +135,24 @@ class ComponentToolbar extends StatelessWidget {
               selected: controller.selectedTool == EditorTool.clock,
               onTap: () => controller.selectTool(EditorTool.clock),
             ),
+            if (controller.customDefinitions.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              const Text(
+                'Saved ICs',
+                style: TextStyle(
+                  color: Color(0xff94a3b8),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 12),
+              ...controller.customDefinitions.map((def) => _ToolButton(
+                    icon: Icons.developer_board,
+                    label: def.name,
+                    selected: false,
+                    onTap: () => controller.addCustomComponent(def, const Offset(100, 100)),
+                  )),
+            ],
             const _HintCard(),
           ],
         ),

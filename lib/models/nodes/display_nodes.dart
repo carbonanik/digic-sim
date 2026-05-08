@@ -79,4 +79,14 @@ class SegmentDisplayNode extends CircuitNode {
     drawSeg(5, const Offset(-segmentWidth/2 - gap/2, -segmentWidth/2 - gap/2), false);
     drawSeg(6, const Offset(0, 0), true);
   }
+
+  @override
+  CircuitNode clone(String newId) {
+    return SegmentDisplayNode(
+      id: newId,
+      position: position,
+      inputPins: inputPins.map((p) => p.clone(newId)).toList(),
+      outputPins: outputPins.map((p) => p.clone(newId)).toList(),
+    );
+  }
 }

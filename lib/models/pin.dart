@@ -14,4 +14,14 @@ class Pin {
     required this.localPosition,
     this.value = false,
   });
+
+  Pin clone(String newNodeId) {
+    return Pin(
+      id: id,
+      nodeId: newNodeId,
+      isInput: isInput,
+      localPosition: localPosition,
+      value: value,
+    );
+  }
 }

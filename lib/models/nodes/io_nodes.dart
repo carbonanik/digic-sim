@@ -80,6 +80,17 @@ class InputNode extends CircuitNode {
     textPainter.layout();
     textPainter.paint(canvas, position + const Offset(16, 38));
   }
+
+  @override
+  CircuitNode clone(String newId) {
+    return InputNode(
+      id: newId,
+      position: position,
+      value: value,
+      inputPins: inputPins.map((p) => p.clone(newId)).toList(),
+      outputPins: outputPins.map((p) => p.clone(newId)).toList(),
+    );
+  }
 }
 
 class OutputNode extends CircuitNode {
@@ -152,5 +163,15 @@ class OutputNode extends CircuitNode {
     );
     textPainter.layout();
     textPainter.paint(canvas, position + const Offset(16, 38));
+  }
+
+  @override
+  CircuitNode clone(String newId) {
+    return OutputNode(
+      id: newId,
+      position: position,
+      inputPins: inputPins.map((p) => p.clone(newId)).toList(),
+      outputPins: outputPins.map((p) => p.clone(newId)).toList(),
+    );
   }
 }
