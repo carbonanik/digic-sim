@@ -47,6 +47,43 @@ class ComponentToolbar extends StatelessWidget {
               selected: false,
               onTap: () => controller.deleteSelected(),
             ),
+            _ToolButton(
+              icon: Icons.layers_clear,
+              label: 'Clear Canvas',
+              selected: false,
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    backgroundColor: const Color(0xff0b1120),
+                    title: const Text(
+                      'Clear Canvas?',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    content: const Text(
+                      'This will delete everything on the canvas. Continue?',
+                      style: TextStyle(color: Color(0xff94a3b8)),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('Cancel'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          controller.clear();
+                          Navigator.pop(context);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red.shade900,
+                        ),
+                        child: const Text('Clear Everything'),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
             const SizedBox(height: 16),
             const Text(
               'Inputs / Outputs',
@@ -137,74 +174,96 @@ class ComponentToolbar extends StatelessWidget {
               selected: controller.selectedTool == EditorTool.clock,
               onTap: () => controller.selectTool(EditorTool.clock),
             ),
-            if (controller.customDefinitions.isNotEmpty) ...[
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Saved ICs',
-                    style: TextStyle(
-                      color: Color(0xff94a3b8),
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                    ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Saved ICs',
+                  style: TextStyle(
+                    color: Color(0xff94a3b8),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
                   ),
-                  TextButton.icon(
-                    onPressed: () => _showImportDialog(context),
-                    icon: const Icon(Icons.upload, size: 14),
-                    label: const Text('Import', style: TextStyle(fontSize: 12)),
-                    style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      minimumSize: Size.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
+                ),
+                TextButton.icon(
+                  onPressed: () => _showImportDialog(context),
+                  icon: const Icon(Icons.upload, size: 14),
+                  label: const Text('Import', style: TextStyle(fontSize: 12)),
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
-                ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            if (controller.customDefinitions.isEmpty)
+              const Padding(
+                padding: EdgeInsets.only(bottom: 16, left: 4),
+                child: Text(
+                  'Import a JSON to see it here',
+                  style: TextStyle(
+                    color: Color(0xff4b5563),
+                    fontSize: 12,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
               ),
-              const SizedBox(height: 12),
-              ...controller.customDefinitions.map(
-                (def) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Row(
+            ...controller.customDefinitions.map(
+              (def) => Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xff111827),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: const Color(0xff1f2937)),
+                  ),
+                  child: Column(
                     children: [
-                      Expanded(
-                        child: _ToolButton(
-                          icon: Icons.developer_board,
-                          label: def.name,
-                          selected: false,
-                          margin: EdgeInsets.zero,
-                          onTap: () => controller.addCustomComponent(
-                            def,
-                            const Offset(100, 100),
-                          ),
+                      _ToolButton(
+                        icon: Icons.developer_board,
+                        label: def.name,
+                        selected: false,
+                        margin: EdgeInsets.zero,
+                        onTap: () => controller.addCustomComponent(
+                          def,
+                          const Offset(100, 100),
                         ),
                       ),
-                      const SizedBox(width: 4),
-                      IconButton(
-                        icon: const Icon(
-                          Icons.copy_all,
-                          size: 18,
-                          color: Color(0xff94a3b8),
-                        ),
-                        tooltip: 'Copy JSON',
-                        onPressed: () {
-                          final json = controller.exportIC(def);
-                          Clipboard.setData(ClipboardData(text: json));
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('${def.name} JSON copied!'),
-                              behavior: SnackBarBehavior.floating,
-                              width: 200,
-                            ),
-                          );
-                        },
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          _SmallIconButton(
+                            icon: Icons.visibility,
+                            tooltip: 'Open in Canvas',
+                            onTap: () => controller.loadDefinition(def),
+                          ),
+                          _SmallIconButton(
+                            icon: Icons.copy_all,
+                            tooltip: 'Copy JSON',
+                            onTap: () {
+                              final json = controller.exportIC(def);
+                              Clipboard.setData(ClipboardData(text: json));
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('${def.name} JSON copied!'),
+                                  behavior: SnackBarBehavior.floating,
+                                  width: 200,
+                                ),
+                              );
+                            },
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ),
               ),
-            ],
+            ),
             const _HintCard(),
           ],
         ),
@@ -286,6 +345,37 @@ class ComponentToolbar extends StatelessWidget {
             child: const Text('Import Component'),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _SmallIconButton extends StatelessWidget {
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onTap;
+
+  const _SmallIconButton({
+    required this.icon,
+    required this.tooltip,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: const Color(0xff1f2937),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, size: 16, color: const Color(0xff94a3b8)),
+        ),
       ),
     );
   }

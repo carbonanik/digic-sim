@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../controllers/circuit_controller.dart';
+import '../models/nodes/composed_node.dart';
 import 'editor_tools.dart';
 import 'hit_test.dart';
 
@@ -135,6 +136,17 @@ class _CircuitCanvasState extends State<CircuitCanvas> {
                           controller.addGateFromTool(point);
                         }
                       },
+                onDoubleTap: () {
+                  if (widget.controller.mousePosition != null) {
+                    final nodeHit = HitTesting.findNodeAt(
+                      widget.controller.circuit,
+                      widget.controller.mousePosition!,
+                    );
+                    if (nodeHit is ComposedNode) {
+                      widget.controller.loadDefinition(nodeHit.definition);
+                    }
+                  }
+                },
                 onPanStart: _isSpacePressed
                     ? null
                     : (details) {

@@ -645,6 +645,31 @@ class CircuitController extends ChangeNotifier {
     _selectionStart = null;
     notifyListeners();
   }
+
+  void loadDefinition(SubCircuitDefinition definition) {
+    clear();
+    // Use a map to track original IDs to new IDs if we were re-generating IDs,
+    // but here we can just use the same IDs or clone them properly.
+    // Since we are loading it as the MAIN circuit, we can use the original IDs.
+    
+    for (final node in definition.nodes) {
+      circuit.nodes.add(node.clone(node.id));
+    }
+    
+    for (final wire in definition.wires) {
+      circuit.wires.add(Wire(
+        id: wire.id,
+        fromNodeId: wire.fromNodeId,
+        fromPinId: wire.fromPinId,
+        toNodeId: wire.toNodeId,
+        toPinId: wire.toPinId,
+      ));
+    }
+    
+    _updateClockTimer();
+    LogicSimulator.simulate(circuit);
+    notifyListeners();
+  }
 }
 
 class PinSelection {
