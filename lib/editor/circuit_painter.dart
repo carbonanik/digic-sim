@@ -10,12 +10,14 @@ import '../models/wire.dart';
 class CircuitPainter extends CustomPainter {
   final Circuit circuit;
   final String? selectedNodeId;
+  final String? selectedWireId;
   final PinSelection? wireStart;
   final Offset? temporaryWireEnd;
 
   CircuitPainter({
     required this.circuit,
     required this.selectedNodeId,
+    this.selectedWireId,
     required this.wireStart,
     required this.temporaryWireEnd,
   });
@@ -51,8 +53,21 @@ class CircuitPainter extends CustomPainter {
 
       if (start == null || end == null) continue;
 
+      final isSelected = wire.id == selectedWireId;
+
+      if (isSelected) {
+        // Draw glow for selected wire
+        final glowPaint = Paint()
+          ..color = const Color(0xfff43f5e).withOpacity(0.3)
+          ..strokeWidth = 8
+          ..style = PaintingStyle.stroke
+          ..strokeCap = StrokeCap.round
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
+        _drawSmoothWire(canvas, start, end, glowPaint);
+      }
+
       final paint = Paint()
-        ..color = const Color(0xff38bdf8)
+        ..color = isSelected ? const Color(0xfff43f5e) : const Color(0xff38bdf8)
         ..strokeWidth = 3
         ..style = PaintingStyle.stroke
         ..strokeCap = StrokeCap.round;

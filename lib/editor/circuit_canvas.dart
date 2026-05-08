@@ -66,6 +66,11 @@ class _CircuitCanvasState extends State<CircuitCanvas> {
             }
 
             if (controller.selectedTool == EditorTool.select) {
+              final wireHit = HitTesting.findWireAt(controller.circuit, point);
+              if (wireHit != null) {
+                controller.selectWire(wireHit.id);
+                return;
+              }
               controller.selectNode(null);
             } else {
               controller.addGateFromTool(point);
@@ -90,6 +95,7 @@ class _CircuitCanvasState extends State<CircuitCanvas> {
             painter: CircuitPainter(
               circuit: widget.controller.circuit,
               selectedNodeId: widget.controller.selectedNodeId,
+              selectedWireId: widget.controller.selectedWireId,
               wireStart: widget.controller.wireStart,
               temporaryWireEnd: widget.controller.temporaryWireEnd,
             ),

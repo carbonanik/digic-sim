@@ -1,5 +1,7 @@
+import 'package:digital_logic_sim_2/models/nodes/io_nodes.dart';
 import 'package:flutter/material.dart';
 
+import 'package:flutter/services.dart';
 import 'controllers/circuit_controller.dart';
 import 'editor/circuit_canvas.dart';
 import 'widgets/component_toolbar.dart';
@@ -42,24 +44,33 @@ class _LogicDesignerScreenState extends State<LogicDesignerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: AnimatedBuilder(
-        animation: controller,
-        builder: (context, _) {
-          return Row(
-            children: [
-              ComponentToolbar(controller: controller),
-              Expanded(
-                child: Column(
-                  children: [
-                    _TopBar(controller: controller),
-                    Expanded(child: CircuitCanvas(controller: controller)),
-                  ],
-                ),
-              ),
-            ],
-          );
-        },
+    return CallbackShortcuts(
+      bindings: <ShortcutActivator, VoidCallback>{
+        const SingleActivator(LogicalKeyboardKey.delete): () => controller.deleteSelected(),
+        const SingleActivator(LogicalKeyboardKey.backspace): () => controller.deleteSelected(),
+      },
+      child: Focus(
+        autofocus: true,
+        child: Scaffold(
+          body: AnimatedBuilder(
+            animation: controller,
+            builder: (context, _) {
+              return Row(
+                children: [
+                  ComponentToolbar(controller: controller),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        _TopBar(controller: controller),
+                        Expanded(child: CircuitCanvas(controller: controller)),
+                      ],
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
       ),
     );
   }
@@ -108,6 +119,16 @@ class _TopBar extends StatelessWidget {
             icon: const Icon(Icons.redo),
             label: const Text('Redo'),
           ),
+          const SizedBox(width: 8),
+          if (controller.selectedNodeId != null || controller.selectedWireId != null)
+            FilledButton.icon(
+              onPressed: controller.deleteSelected,
+              icon: const Icon(Icons.delete, color: Colors.white),
+              label: const Text('Delete'),
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xff991b1b),
+              ),
+            ),
           const Spacer(),
           FilledButton.icon(
             onPressed: () => _showSaveDialog(context),
@@ -130,14 +151,22 @@ class _TopBar extends StatelessWidget {
 
   void _showSaveDialog(BuildContext context) {
     final inputNodes = controller.circuit.nodes.whereType<InputNode>().toList();
-    final outputNodes = controller.circuit.nodes.whereType<OutputNode>().toList();
-    
+    final outputNodes = controller.circuit.nodes
+        .whereType<OutputNode>()
+        .toList();
+
     final nameController = TextEditingController();
-    final inputControllers = List.generate(inputNodes.length, (_) => TextEditingController());
-    final outputControllers = List.generate(outputNodes.length, (_) => TextEditingController());
-    
+    final inputControllers = List.generate(
+      inputNodes.length,
+      (_) => TextEditingController(),
+    );
+    final outputControllers = List.generate(
+      outputNodes.length,
+      (_) => TextEditingController(),
+    );
+
     Color selectedColor = const Color(0xff1e3a8a);
-    
+
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
@@ -162,52 +191,66 @@ class _TopBar extends StatelessWidget {
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
-                    children: [
-                      const Color(0xff1e3a8a),
-                      const Color(0xff581c87),
-                      const Color(0xff701a75),
-                      const Color(0xff14532d),
-                      const Color(0xff7c2d12),
-                      const Color(0xff0f172a),
-                    ].map((color) => GestureDetector(
-                      onTap: () => setState(() => selectedColor = color),
-                      child: Container(
-                        width: 32,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          color: color,
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: selectedColor == color ? Colors.white : Colors.transparent,
-                            width: 2,
-                          ),
-                        ),
-                      ),
-                    )).toList(),
+                    children:
+                        [
+                              const Color(0xff1e3a8a),
+                              const Color(0xff581c87),
+                              const Color(0xff701a75),
+                              const Color(0xff14532d),
+                              const Color(0xff7c2d12),
+                              const Color(0xff0f172a),
+                            ]
+                            .map(
+                              (color) => GestureDetector(
+                                onTap: () =>
+                                    setState(() => selectedColor = color),
+                                child: Container(
+                                  width: 32,
+                                  height: 32,
+                                  decoration: BoxDecoration(
+                                    color: color,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: selectedColor == color
+                                          ? Colors.white
+                                          : Colors.transparent,
+                                      width: 2,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            )
+                            .toList(),
                   ),
                   const SizedBox(height: 20),
                   if (inputNodes.isNotEmpty) ...[
                     const Text('INPUT LABELS', style: _headerStyle),
                     const SizedBox(height: 8),
-                    ...List.generate(inputNodes.length, (i) => Padding(
-                      padding: const EdgeInsets.only(bottom: 8.0),
-                      child: TextField(
-                        controller: inputControllers[i],
-                        decoration: _inputDeco('Input ${i+1} Label'),
+                    ...List.generate(
+                      inputNodes.length,
+                      (i) => Padding(
+                        padding: const EdgeInsets.only(bottom: 8.0),
+                        child: TextField(
+                          controller: inputControllers[i],
+                          decoration: _inputDeco('Input ${i + 1} Label'),
+                        ),
                       ),
-                    )),
+                    ),
                     const SizedBox(height: 12),
                   ],
                   if (outputNodes.isNotEmpty) ...[
                     const Text('OUTPUT LABELS', style: _headerStyle),
                     const SizedBox(height: 8),
-                    ...List.generate(outputNodes.length, (i) => Padding(
-                      padding: const EdgeInsets.only(bottom: 8.0),
-                      child: TextField(
-                        controller: outputControllers[i],
-                        decoration: _inputDeco('Output ${i+1} Label'),
+                    ...List.generate(
+                      outputNodes.length,
+                      (i) => Padding(
+                        padding: const EdgeInsets.only(bottom: 8.0),
+                        child: TextField(
+                          controller: outputControllers[i],
+                          decoration: _inputDeco('Output ${i + 1} Label'),
+                        ),
                       ),
-                    )),
+                    ),
                   ],
                 ],
               ),
@@ -216,7 +259,10 @@ class _TopBar extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel', style: TextStyle(color: Colors.white70)),
+              child: const Text(
+                'Cancel',
+                style: TextStyle(color: Colors.white70),
+              ),
             ),
             ElevatedButton(
               onPressed: () {

@@ -25,6 +25,7 @@ class CircuitController extends ChangeNotifier {
   EditorTool selectedTool = EditorTool.select;
 
   String? selectedNodeId;
+  String? selectedWireId;
 
   PinSelection? wireStart;
 
@@ -36,6 +37,7 @@ class CircuitController extends ChangeNotifier {
   void selectTool(EditorTool tool) {
     selectedTool = tool;
     selectedNodeId = null;
+    selectedWireId = null;
     wireStart = null;
     temporaryWireEnd = null;
     notifyListeners();
@@ -45,6 +47,7 @@ class CircuitController extends ChangeNotifier {
     circuit.nodes.clear();
     circuit.wires.clear();
     selectedNodeId = null;
+    selectedWireId = null;
     wireStart = null;
     temporaryWireEnd = null;
     undoStack.clear();
@@ -117,9 +120,16 @@ class CircuitController extends ChangeNotifier {
 
     for (final wire in removedWires) {
       circuit.wires.remove(wire);
+      if (selectedWireId == wire.id) {
+        selectedWireId = null;
+      }
     }
 
     circuit.nodes.remove(node);
+
+    if (selectedNodeId == node.id) {
+      selectedNodeId = null;
+    }
 
     _updateClockTimer();
 
@@ -127,10 +137,40 @@ class CircuitController extends ChangeNotifier {
       removedNodes: [node],
       removedWires: removedWires,
     ));
-    redoStack.clear(); // Clear redo stack
+    redoStack.clear();
 
     LogicSimulator.simulate(circuit);
     notifyListeners();
+  }
+
+  void removeWire(Wire wire) {
+    circuit.wires.remove(wire);
+
+    if (selectedWireId == wire.id) {
+      selectedWireId = null;
+    }
+
+    undoStack.add(CircuitAction(
+      removedWires: [wire],
+    ));
+    redoStack.clear();
+
+    LogicSimulator.simulate(circuit);
+    notifyListeners();
+  }
+
+  void deleteSelected() {
+    if (selectedNodeId != null) {
+      final node = getSelectedNode();
+      if (node != null) {
+        removeNode(node);
+      }
+    } else if (selectedWireId != null) {
+      final wire = circuit.wires.where((w) => w.id == selectedWireId).firstOrNull;
+      if (wire != null) {
+        removeWire(wire);
+      }
+    }
   }
 
   void undo() {
@@ -188,6 +228,13 @@ class CircuitController extends ChangeNotifier {
 
   void selectNode(String? nodeId) {
     selectedNodeId = nodeId;
+    selectedWireId = null;
+    notifyListeners();
+  }
+
+  void selectWire(String? wireId) {
+    selectedWireId = wireId;
+    selectedNodeId = null;
     notifyListeners();
   }
 
