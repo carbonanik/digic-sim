@@ -31,53 +31,49 @@ class _CircuitCanvasState extends State<CircuitCanvas> {
   Widget build(BuildContext context) {
     return Container(
       color: const Color(0xff020617),
-      child: Focus(
-        focusNode: _focusNode,
-        autofocus: true,
-        onKeyEvent: (node, event) {
-          if (event.logicalKey == LogicalKeyboardKey.space) {
-            setState(() {
-              _isSpacePressed =
-                  event is KeyDownEvent || event is KeyRepeatEvent;
-            });
-            return KeyEventResult.handled;
-          }
-          return KeyEventResult.ignored;
-        },
-        child: InteractiveViewer(
-          transformationController: transformationController,
-          minScale: 0.2,
-          maxScale: 3,
-          boundaryMargin: const EdgeInsets.all(2000),
-          child: MouseRegion(
-            cursor: _isSpacePressed
-                ? SystemMouseCursors.grab
-                : widget.controller.hoveredPin != null
+      child: MouseRegion(
+        onEnter: (_) => _focusNode.requestFocus(),
+        cursor: _isSpacePressed
+            ? SystemMouseCursors.grab
+            : widget.controller.hoveredPin != null
                 ? SystemMouseCursors.precise
                 : SystemMouseCursors.basic,
-            onHover: (event) {
-              final controller = widget.controller;
-              final point = event.localPosition;
-              controller.setMousePosition(point);
+        onHover: (event) {
+          final controller = widget.controller;
+          final point = event.localPosition;
+          controller.setMousePosition(point);
 
-              final pinHit = HitTesting.findPinAt(controller.circuit, point);
-              controller.setHoveredPin(pinHit);
+          final pinHit = HitTesting.findPinAt(controller.circuit, point);
+          controller.setHoveredPin(pinHit);
 
-              if (pinHit == null) {
-                final nodeHit = HitTesting.findNodeAt(
-                  controller.circuit,
-                  point,
-                );
-                controller.setHoveredNode(nodeHit?.id);
-              } else {
-                controller.setHoveredNode(null);
-              }
-            },
-            onExit: (event) {
-              widget.controller.setHoveredPin(null);
-              widget.controller.setHoveredNode(null);
-              widget.controller.setMousePosition(null);
-            },
+          if (pinHit == null) {
+            final nodeHit = HitTesting.findNodeAt(controller.circuit, point);
+            controller.setHoveredNode(nodeHit?.id);
+          } else {
+            controller.setHoveredNode(null);
+          }
+        },
+        onExit: (event) {
+          widget.controller.setHoveredPin(null);
+          widget.controller.setHoveredNode(null);
+          widget.controller.setMousePosition(null);
+        },
+        child: KeyboardListener(
+          focusNode: _focusNode,
+          autofocus: true,
+          onKeyEvent: (event) {
+            if (event.logicalKey == LogicalKeyboardKey.space) {
+              setState(() {
+                _isSpacePressed =
+                    event is KeyDownEvent || event is KeyRepeatEvent;
+              });
+            }
+          },
+          child: InteractiveViewer(
+            transformationController: transformationController,
+            minScale: 0.2,
+            maxScale: 3,
+            boundaryMargin: const EdgeInsets.all(2000),
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTapDown: _isSpacePressed
@@ -173,7 +169,15 @@ class _CircuitCanvasState extends State<CircuitCanvas> {
                       }
                     },
               onPanUpdate: _isSpacePressed
-                  ? null
+                  ? (details) {
+                      final matrix = transformationController.value;
+                      final scale = matrix.getMaxScaleOnAxis();
+                      transformationController.value = matrix.clone()
+                        ..translate(
+                          details.delta.dx / scale,
+                          details.delta.dy / scale,
+                        );
+                    }
                   : (details) {
                       final controller = widget.controller;
 
