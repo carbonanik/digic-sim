@@ -27,69 +27,120 @@ class _CircuitCanvasState extends State<CircuitCanvas> {
         minScale: 0.2,
         maxScale: 3,
         boundaryMargin: const EdgeInsets.all(2000),
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTapDown: (details) {
-            final point = details.localPosition;
-            final controller = widget.controller;
+        child: MouseRegion(
+          cursor: widget.controller.hoveredPin != null
+              ? SystemMouseCursors.precise
+              : SystemMouseCursors.basic,
+          onHover: (event) {
+            final pinHit = HitTesting.findPinAt(
+              widget.controller.circuit,
+              event.localPosition,
+            );
+            widget.controller.setHoveredPin(pinHit);
+          },
+          onExit: (event) => widget.controller.setHoveredPin(null),
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTapDown: (details) {
+              final point = details.localPosition;
+              final controller = widget.controller;
 
-            final pinHit = HitTesting.findPinAt(controller.circuit, point);
+              final pinHit = HitTesting.findPinAt(controller.circuit, point);
 
-            if (controller.selectedTool == EditorTool.wire) {
-              if (pinHit != null) {
-                if (controller.wireStart == null) {
-                  controller.startWire(pinHit.node, pinHit.pin);
+              // Context-aware wiring or Wire tool wiring
+              if (controller.selectedTool == EditorTool.wire ||
+                  (controller.selectedTool == EditorTool.select &&
+                      pinHit != null)) {
+                if (pinHit != null) {
+                  if (controller.wireStart == null) {
+                    controller.startWire(pinHit.node, pinHit.pin);
+                  } else {
+                    controller.finishWire(pinHit.node, pinHit.pin);
+                  }
                 } else {
-                  controller.finishWire(pinHit.node, pinHit.pin);
+                  controller.cancelWire();
                 }
-              } else {
-                controller.cancelWire();
-              }
-              return;
-            }
-
-            if (pinHit != null) return;
-
-            final nodeHit = HitTesting.findNodeAt(controller.circuit, point);
-
-            if (nodeHit != null) {
-              final localPoint = point - nodeHit.position;
-              controller.handleNodeAction(nodeHit.id, localPoint);
-              controller.selectNode(nodeHit.id);
-              return;
-            }
-
-            if (controller.selectedTool == EditorTool.select) {
-              final wireHit = HitTesting.findWireAt(controller.circuit, point);
-              if (wireHit != null) {
-                controller.selectWire(wireHit.id);
                 return;
               }
-              controller.selectNode(null);
-            } else {
-              controller.addGateFromTool(point);
-            }
-          },
-          onPanUpdate: (details) {
-            final controller = widget.controller;
 
-            if (controller.selectedTool == EditorTool.select) {
-              controller.moveSelectedNode(details.delta);
-            }
+              if (pinHit != null) return;
 
-            if (controller.selectedTool == EditorTool.wire &&
-                controller.wireStart != null) {
-              controller.updateTemporaryWire(details.localPosition);
-            }
-          },
-          child: CustomPaint(
-            size: const Size(3000, 2200),
-            painter: CircuitPainter(
-              circuit: widget.controller.circuit,
-              selectedNodeId: widget.controller.selectedNodeId,
-              selectedWireId: widget.controller.selectedWireId,
-              wireStart: widget.controller.wireStart,
-              temporaryWireEnd: widget.controller.temporaryWireEnd,
+              final nodeHit = HitTesting.findNodeAt(controller.circuit, point);
+
+              if (nodeHit != null) {
+                final localPoint = point - nodeHit.position;
+                controller.handleNodeAction(nodeHit.id, localPoint);
+                controller.selectNode(nodeHit.id);
+                return;
+              }
+
+              if (controller.selectedTool == EditorTool.select) {
+                final wireHit = HitTesting.findWireAt(
+                  controller.circuit,
+                  point,
+                );
+                if (wireHit != null) {
+                  controller.selectWire(wireHit.id);
+                  return;
+                }
+                controller.selectNode(null);
+              } else {
+                controller.addGateFromTool(point);
+              }
+            },
+            onPanStart: (details) {
+              final controller = widget.controller;
+              final pinHit = HitTesting.findPinAt(
+                controller.circuit,
+                details.localPosition,
+              );
+
+              if (pinHit != null &&
+                  controller.selectedTool == EditorTool.select) {
+                controller.startWire(pinHit.node, pinHit.pin);
+              }
+            },
+            onPanUpdate: (details) {
+              final controller = widget.controller;
+
+              if (controller.wireStart != null) {
+                controller.updateTemporaryWire(details.localPosition);
+                return;
+              }
+
+              if (controller.selectedTool == EditorTool.select) {
+                controller.moveSelectedNode(details.delta);
+              }
+
+              if (controller.selectedTool == EditorTool.wire &&
+                  controller.wireStart != null) {
+                controller.updateTemporaryWire(details.localPosition);
+              }
+            },
+            onPanEnd: (details) {
+              final controller = widget.controller;
+              if (controller.wireStart != null &&
+                  controller.temporaryWireEnd != null) {
+                final pinHit = HitTesting.findPinAt(
+                  controller.circuit,
+                  controller.temporaryWireEnd!,
+                );
+                if (pinHit != null) {
+                  controller.finishWire(pinHit.node, pinHit.pin);
+                } else {
+                  controller.cancelWire();
+                }
+              }
+            },
+            child: CustomPaint(
+              size: const Size(3000, 2200),
+              painter: CircuitPainter(
+                circuit: widget.controller.circuit,
+                selectedNodeId: widget.controller.selectedNodeId,
+                selectedWireId: widget.controller.selectedWireId,
+                wireStart: widget.controller.wireStart,
+                temporaryWireEnd: widget.controller.temporaryWireEnd,
+              ),
             ),
           ),
         ),

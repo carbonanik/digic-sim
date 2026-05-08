@@ -3,6 +3,7 @@ import 'package:digital_logic_sim_2/simulator/logic_simulator.dart';
 import 'package:flutter/material.dart';
 
 import '../editor/editor_tools.dart';
+import '../editor/hit_test.dart';
 import '../models/circuit.dart';
 import '../models/circuit_node.dart';
 import '../models/gate_type.dart';
@@ -28,6 +29,7 @@ class CircuitController extends ChangeNotifier {
   String? selectedWireId;
 
   PinSelection? wireStart;
+  PinHit? hoveredPin;
 
   Offset? temporaryWireEnd;
 
@@ -39,8 +41,16 @@ class CircuitController extends ChangeNotifier {
     selectedNodeId = null;
     selectedWireId = null;
     wireStart = null;
+    hoveredPin = null;
     temporaryWireEnd = null;
     notifyListeners();
+  }
+
+  void setHoveredPin(PinHit? pinHit) {
+    if (hoveredPin != pinHit) {
+      hoveredPin = pinHit;
+      notifyListeners();
+    }
   }
 
   void clear() {

@@ -40,12 +40,6 @@ class ComponentToolbar extends StatelessWidget {
               onTap: () => controller.selectTool(EditorTool.select),
             ),
             _ToolButton(
-              icon: Icons.cable,
-              label: 'Wire',
-              selected: controller.selectedTool == EditorTool.wire,
-              onTap: () => controller.selectTool(EditorTool.wire),
-            ),
-            _ToolButton(
               icon: Icons.delete_forever,
               label: 'Delete Selected',
               selected: false,
@@ -272,7 +266,7 @@ class _HintCard extends StatelessWidget {
         border: Border.all(color: const Color(0xff1f2937)),
       ),
       child: const Text(
-        'Tip: Select a component, tap canvas to place it. Use Wire tool to connect pins. Select and press Delete/Backspace to remove items.',
+        'Tip: Select a component, tap canvas to place it. Drag from any Pin to create a wire instantly! Select and press Delete/Backspace to remove items.',
         style: TextStyle(color: Color(0xff94a3b8), height: 1.4, fontSize: 13),
       ),
     );
