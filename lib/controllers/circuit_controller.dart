@@ -93,9 +93,10 @@ class CircuitController extends ChangeNotifier {
       _ => null,
     };
 
-    if (type == null && 
+    if (type == null &&
         selectedTool != EditorTool.segmentDisplay &&
-        selectedTool != EditorTool.clock) return;
+        selectedTool != EditorTool.clock)
+      return;
 
     final node = switch (selectedTool) {
       EditorTool.segmentDisplay => _createSegmentDisplay(position),
@@ -133,10 +134,9 @@ class CircuitController extends ChangeNotifier {
 
     _updateClockTimer();
 
-    undoStack.add(CircuitAction(
-      removedNodes: [node],
-      removedWires: removedWires,
-    ));
+    undoStack.add(
+      CircuitAction(removedNodes: [node], removedWires: removedWires),
+    );
     redoStack.clear();
 
     LogicSimulator.simulate(circuit);
@@ -150,9 +150,7 @@ class CircuitController extends ChangeNotifier {
       selectedWireId = null;
     }
 
-    undoStack.add(CircuitAction(
-      removedWires: [wire],
-    ));
+    undoStack.add(CircuitAction(removedWires: [wire]));
     redoStack.clear();
 
     LogicSimulator.simulate(circuit);
@@ -166,7 +164,9 @@ class CircuitController extends ChangeNotifier {
         removeNode(node);
       }
     } else if (selectedWireId != null) {
-      final wire = circuit.wires.where((w) => w.id == selectedWireId).firstOrNull;
+      final wire = circuit.wires
+          .where((w) => w.id == selectedWireId)
+          .firstOrNull;
       if (wire != null) {
         removeWire(wire);
       }
@@ -462,13 +462,17 @@ class CircuitController extends ChangeNotifier {
 
     // 2. Clone current nodes and wires
     final clonedNodes = circuit.nodes.map((n) => n.clone(n.id)).toList();
-    final clonedWires = circuit.wires.map((w) => Wire(
-      id: w.id,
-      fromNodeId: w.fromNodeId,
-      fromPinId: w.fromPinId,
-      toNodeId: w.toNodeId,
-      toPinId: w.toPinId,
-    )).toList();
+    final clonedWires = circuit.wires
+        .map(
+          (w) => Wire(
+            id: w.id,
+            fromNodeId: w.fromNodeId,
+            fromPinId: w.fromPinId,
+            toNodeId: w.toNodeId,
+            toPinId: w.toPinId,
+          ),
+        )
+        .toList();
 
     // 3. Create definition
     final definition = SubCircuitDefinition(
@@ -486,7 +490,7 @@ class CircuitController extends ChangeNotifier {
 
   void addCustomComponent(SubCircuitDefinition definition, Offset position) {
     final id = UniqueKey().toString();
-    
+
     // Create external pins based on internal Input/Output nodes
     final inputNodes = definition.nodes.whereType<InputNode>().toList();
     final outputNodes = definition.nodes.whereType<OutputNode>().toList();
@@ -520,7 +524,7 @@ class CircuitController extends ChangeNotifier {
     circuit.nodes.add(node);
     undoStack.add(CircuitAction(addedNodes: [node]));
     redoStack.clear();
-    
+
     LogicSimulator.simulate(circuit);
     notifyListeners();
   }

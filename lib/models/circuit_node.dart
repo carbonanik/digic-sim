@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'gate_type.dart';
 import 'pin.dart';
 
 abstract class CircuitNode {

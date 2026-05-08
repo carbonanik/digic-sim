@@ -1,5 +1,4 @@
 import '../models/circuit.dart';
-import '../models/pin.dart';
 
 class LogicSimulator {
   static void simulate(Circuit circuit) {
@@ -10,7 +9,7 @@ class LogicSimulator {
       for (final node in circuit.nodes) {
         for (final inputPin in node.inputPins) {
           final oldValue = inputPin.value;
-          
+
           final wire = circuit.wires.where((w) {
             return w.toNodeId == node.id && w.toPinId == inputPin.id;
           }).firstOrNull;
@@ -18,13 +17,17 @@ class LogicSimulator {
           if (wire == null) {
             inputPin.value = false;
           } else {
-            final fromNode = circuit.nodes.where((n) => n.id == wire.fromNodeId).firstOrNull;
+            final fromNode = circuit.nodes
+                .where((n) => n.id == wire.fromNodeId)
+                .firstOrNull;
             if (fromNode != null) {
-              final fromPin = fromNode.outputPins.where((p) => p.id == wire.fromPinId).firstOrNull;
+              final fromPin = fromNode.outputPins
+                  .where((p) => p.id == wire.fromPinId)
+                  .firstOrNull;
               inputPin.value = fromPin?.value ?? false;
             }
           }
-          
+
           if (oldValue != inputPin.value) changed = true;
         }
       }
@@ -32,12 +35,12 @@ class LogicSimulator {
       // 3. Evaluate each node based on its new inputs
       for (final node in circuit.nodes) {
         final previousOutputs = node.outputPins.map((p) => p.value).toList();
-        
+
         final inputs = node.inputPins.map((p) => p.value).toList();
         node.evaluate(inputs);
-        
+
         final currentOutputs = node.outputPins.map((p) => p.value).toList();
-        
+
         if (!_listsEqual(previousOutputs, currentOutputs)) {
           changed = true;
         }

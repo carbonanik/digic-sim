@@ -46,8 +46,10 @@ class _LogicDesignerScreenState extends State<LogicDesignerScreen> {
   Widget build(BuildContext context) {
     return CallbackShortcuts(
       bindings: <ShortcutActivator, VoidCallback>{
-        const SingleActivator(LogicalKeyboardKey.delete): () => controller.deleteSelected(),
-        const SingleActivator(LogicalKeyboardKey.backspace): () => controller.deleteSelected(),
+        const SingleActivator(LogicalKeyboardKey.delete): () =>
+            controller.deleteSelected(),
+        const SingleActivator(LogicalKeyboardKey.backspace): () =>
+            controller.deleteSelected(),
       },
       child: Focus(
         autofocus: true,
@@ -120,7 +122,8 @@ class _TopBar extends StatelessWidget {
             label: const Text('Redo'),
           ),
           const SizedBox(width: 8),
-          if (controller.selectedNodeId != null || controller.selectedWireId != null)
+          if (controller.selectedNodeId != null ||
+              controller.selectedWireId != null)
             FilledButton.icon(
               onPressed: controller.deleteSelected,
               icon: const Icon(Icons.delete, color: Colors.white),

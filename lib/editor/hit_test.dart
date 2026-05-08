@@ -41,8 +41,10 @@ class HitTesting {
     for (final wire in circuit.wires) {
       final fromNode = circuit.nodes.firstWhere((n) => n.id == wire.fromNodeId);
       final toNode = circuit.nodes.firstWhere((n) => n.id == wire.toNodeId);
-      
-      final fromPin = fromNode.outputPins.firstWhere((p) => p.id == wire.fromPinId);
+
+      final fromPin = fromNode.outputPins.firstWhere(
+        (p) => p.id == wire.fromPinId,
+      );
       final toPin = toNode.inputPins.firstWhere((p) => p.id == wire.toPinId);
 
       final start = fromNode.position + fromPin.localPosition;
@@ -76,7 +78,13 @@ class HitTesting {
     return null;
   }
 
-  static double _bezier(double t, double p1, double cp1, double cp2, double p2) {
+  static double _bezier(
+    double t,
+    double p1,
+    double cp1,
+    double cp2,
+    double p2,
+  ) {
     return (1 - t) * (1 - t) * (1 - t) * p1 +
         3 * (1 - t) * (1 - t) * t * cp1 +
         3 * (1 - t) * t * t * cp2 +
@@ -86,7 +94,8 @@ class HitTesting {
   static double _distToSegment(Offset p, Offset v, Offset w) {
     final l2 = (v - w).distanceSquared;
     if (l2 == 0.0) return (p - v).distance;
-    final t = ((p.dx - v.dx) * (w.dx - v.dx) + (p.dy - v.dy) * (w.dy - v.dy)) / l2;
+    final t =
+        ((p.dx - v.dx) * (w.dx - v.dx) + (p.dy - v.dy) * (w.dy - v.dy)) / l2;
     if (t < 0.0) return (p - v).distance;
     if (t > 1.0) return (p - w).distance;
     final projection = v + (w - v) * t;

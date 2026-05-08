@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../circuit_node.dart';
 import '../gate_type.dart';
-import '../pin.dart';
 
 class GateNode extends CircuitNode {
   final GateType type;
@@ -39,7 +38,7 @@ class GateNode extends CircuitNode {
       default:
         break;
     }
-    
+
     if (outputPins.isNotEmpty) {
       outputPins.first.value = result;
     }
@@ -47,10 +46,7 @@ class GateNode extends CircuitNode {
 
   @override
   void paint(Canvas canvas, bool isSelected) {
-    final rect = RRect.fromRectAndRadius(
-      this.rect,
-      const Radius.circular(16),
-    );
+    final rect = RRect.fromRectAndRadius(this.rect, const Radius.circular(16));
 
     final fillPaint = Paint()..color = const Color(0xff111827);
     final borderPaint = Paint()

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../circuit_node.dart';
-import '../pin.dart';
 
 class ClockNode extends CircuitNode {
   bool value = false;
@@ -23,14 +22,11 @@ class ClockNode extends CircuitNode {
 
   @override
   void paint(Canvas canvas, bool isSelected) {
-    final rect = RRect.fromRectAndRadius(
-      this.rect,
-      const Radius.circular(16),
-    );
+    final rect = RRect.fromRectAndRadius(this.rect, const Radius.circular(16));
 
     final fillPaint = Paint()
       ..color = value ? const Color(0xff14532d) : const Color(0xff111827);
-    
+
     final borderPaint = Paint()
       ..color = isSelected ? const Color(0xfffacc15) : const Color(0xff475569)
       ..strokeWidth = isSelected ? 3 : 2

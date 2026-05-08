@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../controllers/circuit_controller.dart';
 import '../models/circuit.dart';
 import '../models/circuit_node.dart';
-import '../models/gate_type.dart';
 import '../models/pin.dart';
 import '../models/wire.dart';
 

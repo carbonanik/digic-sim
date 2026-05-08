@@ -18,7 +18,6 @@ class _CircuitCanvasState extends State<CircuitCanvas> {
   final TransformationController transformationController =
       TransformationController();
 
-
   @override
   Widget build(BuildContext context) {
     return Container(

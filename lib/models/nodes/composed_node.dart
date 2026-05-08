@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../simulator/logic_simulator.dart';
 import '../circuit.dart';
 import '../circuit_node.dart';
-import '../pin.dart';
 import '../wire.dart';
 import 'io_nodes.dart';
 
@@ -52,13 +51,15 @@ class ComposedNode extends CircuitNode {
 
     internalWires = [];
     for (final wire in definition.wires) {
-      internalWires.add(Wire(
-        id: 'wire_${id}_${wire.id}',
-        fromNodeId: nodeMap[wire.fromNodeId]!.id,
-        fromPinId: wire.fromPinId,
-        toNodeId: nodeMap[wire.toNodeId]!.id,
-        toPinId: wire.toPinId,
-      ));
+      internalWires.add(
+        Wire(
+          id: 'wire_${id}_${wire.id}',
+          fromNodeId: nodeMap[wire.fromNodeId]!.id,
+          fromPinId: wire.fromPinId,
+          toNodeId: nodeMap[wire.toNodeId]!.id,
+          toPinId: wire.toPinId,
+        ),
+      );
     }
 
     internalCircuit = Circuit(nodes: internalNodes, wires: internalWires);
@@ -66,8 +67,8 @@ class ComposedNode extends CircuitNode {
 
   @override
   Size get size {
-    final maxPins = (inputPins.length > outputPins.length) 
-        ? inputPins.length 
+    final maxPins = (inputPins.length > outputPins.length)
+        ? inputPins.length
         : outputPins.length;
     final height = (maxPins * 24.0 + 40.0).clamp(80.0, 600.0);
     return Size(160, height);
@@ -94,10 +95,7 @@ class ComposedNode extends CircuitNode {
 
   @override
   void paint(Canvas canvas, bool isSelected) {
-    final rect = RRect.fromRectAndRadius(
-      this.rect,
-      const Radius.circular(12),
-    );
+    final rect = RRect.fromRectAndRadius(this.rect, const Radius.circular(12));
 
     final fillPaint = Paint()..color = definition.color;
     final borderPaint = Paint()
@@ -127,7 +125,7 @@ class ComposedNode extends CircuitNode {
     );
     textPainter.layout(maxWidth: size.width - 20);
     textPainter.paint(
-      canvas, 
+      canvas,
       position + Offset((size.width - textPainter.width) / 2, 10),
     );
   }
@@ -136,19 +134,33 @@ class ComposedNode extends CircuitNode {
     // Draw Input Labels
     for (int i = 0; i < inputPins.length; i++) {
       final pin = inputPins[i];
-      final label = i < definition.inputLabels.length ? definition.inputLabels[i] : '';
+      final label = i < definition.inputLabels.length
+          ? definition.inputLabels[i]
+          : '';
       if (label.isEmpty) continue;
 
-      _drawPinLabel(canvas, label, position + pin.localPosition + const Offset(10, -8), true);
+      _drawPinLabel(
+        canvas,
+        label,
+        position + pin.localPosition + const Offset(10, -8),
+        true,
+      );
     }
 
     // Draw Output Labels
     for (int i = 0; i < outputPins.length; i++) {
       final pin = outputPins[i];
-      final label = i < definition.outputLabels.length ? definition.outputLabels[i] : '';
+      final label = i < definition.outputLabels.length
+          ? definition.outputLabels[i]
+          : '';
       if (label.isEmpty) continue;
 
-      _drawPinLabel(canvas, label, position + pin.localPosition + const Offset(-10, -8), false);
+      _drawPinLabel(
+        canvas,
+        label,
+        position + pin.localPosition + const Offset(-10, -8),
+        false,
+      );
     }
   }
 
@@ -165,7 +177,7 @@ class ComposedNode extends CircuitNode {
       textDirection: TextDirection.ltr,
     );
     textPainter.layout();
-    
+
     final x = isLeft ? pos.dx : pos.dx - textPainter.width;
     textPainter.paint(canvas, Offset(x, pos.dy));
   }
