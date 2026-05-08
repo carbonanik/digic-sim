@@ -1,3 +1,5 @@
+import 'package:digital_logic_sim_2/editor/editor_tools.dart';
+import 'package:digital_logic_sim_2/editor/hit_test.dart';
 import 'package:flutter/material.dart';
 
 import '../controllers/circuit_controller.dart';
@@ -13,6 +15,10 @@ class CircuitPainter extends CustomPainter {
   final PinSelection? wireStart;
   final Offset? temporaryWireEnd;
   final Rect? selectionRect;
+  final String? hoveredNodeId;
+  final PinHit? hoveredPin;
+  final Offset? mousePosition;
+  final EditorTool selectedTool;
 
   CircuitPainter({
     required this.circuit,
@@ -21,6 +27,10 @@ class CircuitPainter extends CustomPainter {
     this.wireStart,
     this.temporaryWireEnd,
     this.selectionRect,
+    this.hoveredNodeId,
+    this.hoveredPin,
+    this.mousePosition,
+    required this.selectedTool,
   });
 
   @override
@@ -29,6 +39,7 @@ class CircuitPainter extends CustomPainter {
     _drawWires(canvas);
     _drawTemporaryWire(canvas);
     _drawNodes(canvas);
+    _drawGhost(canvas);
   }
 
   void _drawGrid(Canvas canvas, Size size) {
@@ -112,7 +123,8 @@ class CircuitPainter extends CustomPainter {
   void _drawNodes(Canvas canvas) {
     for (final node in circuit.nodes) {
       final isSelected = selectedNodeIds.contains(node.id);
-      node.paint(canvas, isSelected);
+      final isHovered = node.id == hoveredNodeId;
+      node.paint(canvas, isSelected, isHovered: isHovered);
       _drawPins(canvas, node);
     }
 
@@ -142,18 +154,89 @@ class CircuitPainter extends CustomPainter {
 
   void _drawPin(Canvas canvas, CircuitNode node, Pin pin) {
     final position = node.position + pin.localPosition;
+    final isHovered =
+        hoveredPin?.pin.id == pin.id && hoveredPin?.node.id == node.id;
+
+    final radius = isHovered ? 9.0 : 7.0;
 
     final paint = Paint()
       ..color = pin.isInput ? const Color(0xfff97316) : const Color(0xff22c55e)
       ..style = PaintingStyle.fill;
 
     final border = Paint()
-      ..color = const Color(0xffe5e7eb)
+      ..color = isHovered ? Colors.white : const Color(0xffe5e7eb)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2;
+      ..strokeWidth = isHovered ? 2.5 : 2;
 
-    canvas.drawCircle(position, 7, paint);
-    canvas.drawCircle(position, 7, border);
+    if (isHovered) {
+      final glow = Paint()
+        ..color =
+            (pin.isInput ? const Color(0xfff97316) : const Color(0xff22c55e))
+                .withOpacity(0.4)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
+      canvas.drawCircle(position, radius + 2, glow);
+    }
+
+    canvas.drawCircle(position, radius, paint);
+    canvas.drawCircle(position, radius, border);
+  }
+
+  void _drawGhost(Canvas canvas) {
+    if (mousePosition == null) return;
+    if (selectedTool == EditorTool.select || selectedTool == EditorTool.wire)
+      return;
+
+    // Draw a semi-transparent ghost of the selected gate
+    final ghostPos = mousePosition!;
+    final isDisplay = selectedTool == EditorTool.segmentDisplay;
+    final size = isDisplay ? const Size(80, 120) : const Size(110, 64);
+
+    canvas.saveLayer(
+      Rect.fromLTWH(
+        ghostPos.dx,
+        ghostPos.dy,
+        size.width + 10,
+        size.height + 10,
+      ),
+      Paint()..color = Colors.white.withOpacity(0.35),
+    );
+
+    final ghostRect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(ghostPos.dx, ghostPos.dy, size.width, size.height),
+      Radius.circular(isDisplay ? 8 : 16),
+    );
+
+    final fillPaint = Paint()..color = const Color(0xff1e293b);
+    final borderPaint = Paint()
+      ..color = const Color(0xff94a3b8)
+      ..strokeWidth = 2
+      ..style = PaintingStyle.stroke;
+
+    canvas.drawRRect(ghostRect, fillPaint);
+    canvas.drawRRect(ghostRect, borderPaint);
+
+    final label = isDisplay ? '7-SEG' : selectedTool.name.toUpperCase();
+
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: label,
+        style: const TextStyle(
+          color: Color(0xfff8fafc),
+          fontSize: 14,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 0.5,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    textPainter.layout(maxWidth: size.width - 20);
+    textPainter.paint(
+      canvas,
+      ghostPos +
+          Offset((size.width - textPainter.width) / 2, isDisplay ? 10 : 22),
+    );
+
+    canvas.restore();
   }
 
   Offset? _getWireStart(Wire wire) {

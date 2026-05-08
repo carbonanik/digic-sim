@@ -33,7 +33,9 @@ class CircuitController extends ChangeNotifier {
 
   PinSelection? wireStart;
   PinHit? hoveredPin;
+  String? hoveredNodeId;
 
+  Offset? mousePosition;
   Offset? temporaryWireEnd;
 
   List<CircuitAction> undoStack = [];
@@ -53,6 +55,20 @@ class CircuitController extends ChangeNotifier {
   void setHoveredPin(PinHit? pinHit) {
     if (hoveredPin != pinHit) {
       hoveredPin = pinHit;
+      notifyListeners();
+    }
+  }
+
+  void setHoveredNode(String? nodeId) {
+    if (hoveredNodeId != nodeId) {
+      hoveredNodeId = nodeId;
+      notifyListeners();
+    }
+  }
+
+  void setMousePosition(Offset? pos) {
+    if (mousePosition != pos) {
+      mousePosition = pos;
       notifyListeners();
     }
   }
@@ -210,7 +226,9 @@ class CircuitController extends ChangeNotifier {
       LogicSimulator.simulate(circuit);
       notifyListeners();
     } else if (selectedWireId != null) {
-      final wire = circuit.wires.where((w) => w.id == selectedWireId).firstOrNull;
+      final wire = circuit.wires
+          .where((w) => w.id == selectedWireId)
+          .firstOrNull;
       if (wire != null) {
         removeWire(wire);
       }
@@ -308,9 +326,7 @@ class CircuitController extends ChangeNotifier {
   }
 
   List<CircuitNode> getSelectedNodes() {
-    return circuit.nodes
-        .where((n) => selectedNodeIds.contains(n.id))
-        .toList();
+    return circuit.nodes.where((n) => selectedNodeIds.contains(n.id)).toList();
   }
 
   bool isNodeSelected(String nodeId) => selectedNodeIds.contains(nodeId);

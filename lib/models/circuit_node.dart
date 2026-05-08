@@ -18,7 +18,7 @@ abstract class CircuitNode {
   Size get size => const Size(110, 64);
   Rect get rect => position & size;
 
-  void paint(Canvas canvas, bool isSelected);
+  void paint(Canvas canvas, bool isSelected, {bool isHovered = false});
   void evaluate(List<bool> inputs);
   bool onAction(Offset localPosition) => false;
 

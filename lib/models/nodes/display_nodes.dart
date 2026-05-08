@@ -26,16 +26,29 @@ class SegmentDisplayNode extends CircuitNode {
   }
 
   @override
-  void paint(Canvas canvas, bool isSelected) {
+  void paint(Canvas canvas, bool isSelected, {bool isHovered = false}) {
     final rect = RRect.fromRectAndRadius(this.rect, const Radius.circular(8));
 
     final fillPaint = Paint()..color = const Color(0xff0f172a);
     final borderPaint = Paint()
-      ..color = isSelected ? const Color(0xfffacc15) : const Color(0xff334155)
-      ..strokeWidth = 2
+      ..color = isSelected
+          ? const Color(0xfffacc15)
+          : (isHovered ? const Color(0xff475569) : const Color(0xff334155))
+      ..strokeWidth = isSelected ? 3 : (isHovered ? 2.5 : 2)
       ..style = PaintingStyle.stroke;
 
     canvas.drawRRect(rect, fillPaint);
+
+    if (isHovered && !isSelected) {
+      final hoverGlow = Paint()
+        ..color = const Color(0xff475569).withOpacity(0.3)
+        ..strokeWidth = 6
+        ..style = PaintingStyle.stroke
+        ..strokeCap = StrokeCap.round
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2);
+      canvas.drawRRect(rect, hoverGlow);
+    }
+
     canvas.drawRRect(rect, borderPaint);
 
     _drawSegments(canvas);

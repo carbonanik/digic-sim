@@ -32,13 +32,25 @@ class _CircuitCanvasState extends State<CircuitCanvas> {
               ? SystemMouseCursors.precise
               : SystemMouseCursors.basic,
           onHover: (event) {
-            final pinHit = HitTesting.findPinAt(
-              widget.controller.circuit,
-              event.localPosition,
-            );
-            widget.controller.setHoveredPin(pinHit);
+            final controller = widget.controller;
+            final point = event.localPosition;
+            controller.setMousePosition(point);
+
+            final pinHit = HitTesting.findPinAt(controller.circuit, point);
+            controller.setHoveredPin(pinHit);
+
+            if (pinHit == null) {
+              final nodeHit = HitTesting.findNodeAt(controller.circuit, point);
+              controller.setHoveredNode(nodeHit?.id);
+            } else {
+              controller.setHoveredNode(null);
+            }
           },
-          onExit: (event) => widget.controller.setHoveredPin(null),
+          onExit: (event) {
+            widget.controller.setHoveredPin(null);
+            widget.controller.setHoveredNode(null);
+            widget.controller.setMousePosition(null);
+          },
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTapDown: (details) {
@@ -168,6 +180,10 @@ class _CircuitCanvasState extends State<CircuitCanvas> {
                 wireStart: widget.controller.wireStart,
                 temporaryWireEnd: widget.controller.temporaryWireEnd,
                 selectionRect: widget.controller.selectionRect,
+                hoveredNodeId: widget.controller.hoveredNodeId,
+                hoveredPin: widget.controller.hoveredPin,
+                mousePosition: widget.controller.mousePosition,
+                selectedTool: widget.controller.selectedTool,
               ),
             ),
           ),
