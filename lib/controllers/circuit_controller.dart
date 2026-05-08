@@ -33,6 +33,11 @@ class CircuitController extends ChangeNotifier {
     }
   }
 
+  void removeCustomDefinition(SubCircuitDefinition definition) {
+    customDefinitions.remove(definition);
+    notifyListeners();
+  }
+
   Circuit circuit = Circuit(nodes: [], wires: []);
 
   List<SubCircuitDefinition> customDefinitions = [];

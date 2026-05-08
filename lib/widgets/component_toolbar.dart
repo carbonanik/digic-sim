@@ -257,6 +257,44 @@ class ComponentToolbar extends StatelessWidget {
                               );
                             },
                           ),
+                          _SmallIconButton(
+                            icon: Icons.delete_outline,
+                            tooltip: 'Delete IC',
+                            onTap: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  backgroundColor: const Color(0xff0b1120),
+                                  title: const Text(
+                                    'Delete IC?',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                  content: Text(
+                                    'Are you sure you want to delete "${def.name}"?',
+                                    style: const TextStyle(
+                                      color: Color(0xff94a3b8),
+                                    ),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: const Text('Cancel'),
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        controller.removeCustomDefinition(def);
+                                        Navigator.pop(context);
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.red.shade900,
+                                      ),
+                                      child: const Text('Delete'),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
                         ],
                       ),
                     ],
