@@ -18,11 +18,6 @@ class _CircuitCanvasState extends State<CircuitCanvas> {
   final TransformationController transformationController =
       TransformationController();
 
-  Offset _toCanvasOffset(Offset localPosition) {
-    final matrix = transformationController.value;
-    final inverseMatrix = Matrix4.inverted(matrix);
-    return MatrixUtils.transformPoint(inverseMatrix, localPosition);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +31,7 @@ class _CircuitCanvasState extends State<CircuitCanvas> {
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTapDown: (details) {
-            final point = _toCanvasOffset(details.localPosition);
+            final point = details.localPosition;
             final controller = widget.controller;
 
             final pinHit = HitTesting.findPinAt(controller.circuit, point);
@@ -80,14 +75,12 @@ class _CircuitCanvasState extends State<CircuitCanvas> {
             final controller = widget.controller;
 
             if (controller.selectedTool == EditorTool.select) {
-              final scale = transformationController.value.getMaxScaleOnAxis();
-              controller.moveSelectedNode(details.delta / scale);
+              controller.moveSelectedNode(details.delta);
             }
 
             if (controller.selectedTool == EditorTool.wire &&
                 controller.wireStart != null) {
-              final point = _toCanvasOffset(details.localPosition);
-              controller.updateTemporaryWire(point);
+              controller.updateTemporaryWire(details.localPosition);
             }
           },
           child: CustomPaint(
