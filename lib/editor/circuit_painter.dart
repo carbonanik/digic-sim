@@ -8,17 +8,19 @@ import '../models/wire.dart';
 
 class CircuitPainter extends CustomPainter {
   final Circuit circuit;
-  final String? selectedNodeId;
+  final Set<String> selectedNodeIds;
   final String? selectedWireId;
   final PinSelection? wireStart;
   final Offset? temporaryWireEnd;
+  final Rect? selectionRect;
 
   CircuitPainter({
     required this.circuit,
-    required this.selectedNodeId,
+    required this.selectedNodeIds,
     this.selectedWireId,
-    required this.wireStart,
-    required this.temporaryWireEnd,
+    this.wireStart,
+    this.temporaryWireEnd,
+    this.selectionRect,
   });
 
   @override
@@ -109,9 +111,22 @@ class CircuitPainter extends CustomPainter {
 
   void _drawNodes(Canvas canvas) {
     for (final node in circuit.nodes) {
-      final isSelected = node.id == selectedNodeId;
+      final isSelected = selectedNodeIds.contains(node.id);
       node.paint(canvas, isSelected);
       _drawPins(canvas, node);
+    }
+
+    if (selectionRect != null) {
+      final paint = Paint()
+        ..color = Colors.blue.withOpacity(0.3)
+        ..style = PaintingStyle.fill;
+      canvas.drawRect(selectionRect!, paint);
+
+      final borderPaint = Paint()
+        ..color = Colors.blue
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.0;
+      canvas.drawRect(selectionRect!, borderPaint);
     }
   }
 

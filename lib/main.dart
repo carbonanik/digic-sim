@@ -122,7 +122,7 @@ class _TopBar extends StatelessWidget {
             label: const Text('Redo'),
           ),
           const SizedBox(width: 8),
-          if (controller.selectedNodeId != null ||
+          if (controller.selectedNodeIds.isNotEmpty ||
               controller.selectedWireId != null)
             FilledButton.icon(
               onPressed: controller.deleteSelected,

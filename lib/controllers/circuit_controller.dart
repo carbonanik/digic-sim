@@ -25,8 +25,11 @@ class CircuitController extends ChangeNotifier {
 
   EditorTool selectedTool = EditorTool.select;
 
-  String? selectedNodeId;
+  Set<String> selectedNodeIds = {};
   String? selectedWireId;
+
+  Rect? selectionRect;
+  Offset? _selectionStart;
 
   PinSelection? wireStart;
   PinHit? hoveredPin;
@@ -38,8 +41,9 @@ class CircuitController extends ChangeNotifier {
 
   void selectTool(EditorTool tool) {
     selectedTool = tool;
-    selectedNodeId = null;
+    selectedNodeIds.clear();
     selectedWireId = null;
+    selectionRect = null;
     wireStart = null;
     hoveredPin = null;
     temporaryWireEnd = null;
@@ -56,8 +60,9 @@ class CircuitController extends ChangeNotifier {
   void clear() {
     circuit.nodes.clear();
     circuit.wires.clear();
-    selectedNodeId = null;
+    selectedNodeIds.clear();
     selectedWireId = null;
+    selectionRect = null;
     wireStart = null;
     temporaryWireEnd = null;
     undoStack.clear();
@@ -138,9 +143,7 @@ class CircuitController extends ChangeNotifier {
 
     circuit.nodes.remove(node);
 
-    if (selectedNodeId == node.id) {
-      selectedNodeId = null;
-    }
+    selectedNodeIds.remove(node.id);
 
     _updateClockTimer();
 
@@ -168,15 +171,46 @@ class CircuitController extends ChangeNotifier {
   }
 
   void deleteSelected() {
-    if (selectedNodeId != null) {
-      final node = getSelectedNode();
-      if (node != null) {
-        removeNode(node);
+    if (selectedNodeIds.isNotEmpty) {
+      final nodesToRemove = circuit.nodes
+          .where((n) => selectedNodeIds.contains(n.id))
+          .toList();
+
+      final removedWires = <Wire>[];
+      final removedNodes = <CircuitNode>[];
+
+      for (final node in nodesToRemove) {
+        final nodeWires = circuit.wires.where((w) {
+          return w.fromNodeId == node.id || w.toNodeId == node.id;
+        }).toList();
+
+        for (final wire in nodeWires) {
+          circuit.wires.remove(wire);
+          if (selectedWireId == wire.id) {
+            selectedWireId = null;
+          }
+          if (!removedWires.contains(wire)) {
+            removedWires.add(wire);
+          }
+        }
+
+        circuit.nodes.remove(node);
+        removedNodes.add(node);
       }
+
+      selectedNodeIds.clear();
+
+      _updateClockTimer();
+
+      undoStack.add(
+        CircuitAction(removedNodes: removedNodes, removedWires: removedWires),
+      );
+      redoStack.clear();
+
+      LogicSimulator.simulate(circuit);
+      notifyListeners();
     } else if (selectedWireId != null) {
-      final wire = circuit.wires
-          .where((w) => w.id == selectedWireId)
-          .firstOrNull;
+      final wire = circuit.wires.where((w) => w.id == selectedWireId).firstOrNull;
       if (wire != null) {
         removeWire(wire);
       }
@@ -236,35 +270,50 @@ class CircuitController extends ChangeNotifier {
     _updateClockTimer();
   }
 
-  void selectNode(String? nodeId) {
-    selectedNodeId = nodeId;
+  void selectNode(String? nodeId, {bool multi = false}) {
+    if (nodeId == null) {
+      selectedNodeIds.clear();
+    } else {
+      if (multi) {
+        if (selectedNodeIds.contains(nodeId)) {
+          selectedNodeIds.remove(nodeId);
+        } else {
+          selectedNodeIds.add(nodeId);
+        }
+      } else {
+        if (!selectedNodeIds.contains(nodeId)) {
+          selectedNodeIds = {nodeId};
+        }
+      }
+    }
     selectedWireId = null;
     notifyListeners();
   }
 
   void selectWire(String? wireId) {
     selectedWireId = wireId;
-    selectedNodeId = null;
+    selectedNodeIds.clear();
     notifyListeners();
   }
 
-  void moveSelectedNode(Offset delta) {
-    final node = getSelectedNode();
-    if (node == null) return;
-
-    node.position += delta;
-    notifyListeners();
-  }
-
-  CircuitNode? getSelectedNode() {
-    if (selectedNodeId == null) return null;
+  void moveSelectedNodes(Offset delta) {
+    if (selectedNodeIds.isEmpty) return;
 
     for (final node in circuit.nodes) {
-      if (node.id == selectedNodeId) return node;
+      if (selectedNodeIds.contains(node.id)) {
+        node.position += delta;
+      }
     }
-
-    return null;
+    notifyListeners();
   }
+
+  List<CircuitNode> getSelectedNodes() {
+    return circuit.nodes
+        .where((n) => selectedNodeIds.contains(n.id))
+        .toList();
+  }
+
+  bool isNodeSelected(String nodeId) => selectedNodeIds.contains(nodeId);
 
   void handleNodeAction(String nodeId, Offset localPosition) {
     final node = circuit.nodes.where((n) => n.id == nodeId).firstOrNull;
@@ -536,6 +585,32 @@ class CircuitController extends ChangeNotifier {
     redoStack.clear();
 
     LogicSimulator.simulate(circuit);
+    notifyListeners();
+  }
+
+  void startMarqueeSelection(Offset position) {
+    _selectionStart = position;
+    selectionRect = Rect.fromPoints(position, position);
+    notifyListeners();
+  }
+
+  void updateMarqueeSelection(Offset position) {
+    if (_selectionStart == null) return;
+    selectionRect = Rect.fromPoints(_selectionStart!, position);
+
+    // Dynamic selection while dragging
+    selectedNodeIds.clear();
+    final nodes = HitTesting.findNodesInRect(circuit, selectionRect!);
+    for (final node in nodes) {
+      selectedNodeIds.add(node.id);
+    }
+
+    notifyListeners();
+  }
+
+  void endMarqueeSelection() {
+    selectionRect = null;
+    _selectionStart = null;
     notifyListeners();
   }
 }

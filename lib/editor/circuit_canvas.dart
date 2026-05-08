@@ -90,14 +90,29 @@ class _CircuitCanvasState extends State<CircuitCanvas> {
             },
             onPanStart: (details) {
               final controller = widget.controller;
-              final pinHit = HitTesting.findPinAt(
-                controller.circuit,
-                details.localPosition,
-              );
+              final point = details.localPosition;
+
+              final pinHit = HitTesting.findPinAt(controller.circuit, point);
 
               if (pinHit != null &&
                   controller.selectedTool == EditorTool.select) {
                 controller.startWire(pinHit.node, pinHit.pin);
+                return;
+              }
+
+              if (controller.selectedTool == EditorTool.select) {
+                final nodeHit = HitTesting.findNodeAt(controller.circuit, point);
+                if (nodeHit != null) {
+                  // If we click a node that's not selected, select it (clearing others unless shift)
+                  // For now, let's just support single click select or drag already selected.
+                  if (!controller.selectedNodeIds.contains(nodeHit.id)) {
+                    controller.selectNode(nodeHit.id);
+                  }
+                  // We'll move all selected nodes
+                } else {
+                  // Clicked empty space
+                  controller.startMarqueeSelection(point);
+                }
               }
             },
             onPanUpdate: (details) {
@@ -108,8 +123,14 @@ class _CircuitCanvasState extends State<CircuitCanvas> {
                 return;
               }
 
-              if (controller.selectedTool == EditorTool.select) {
-                controller.moveSelectedNode(details.delta);
+              if (controller.selectionRect != null) {
+                controller.updateMarqueeSelection(details.localPosition);
+                return;
+              }
+
+              if (controller.selectedTool == EditorTool.select &&
+                  controller.selectedNodeIds.isNotEmpty) {
+                controller.moveSelectedNodes(details.delta);
               }
 
               if (controller.selectedTool == EditorTool.wire &&
@@ -119,6 +140,12 @@ class _CircuitCanvasState extends State<CircuitCanvas> {
             },
             onPanEnd: (details) {
               final controller = widget.controller;
+
+              if (controller.selectionRect != null) {
+                controller.endMarqueeSelection();
+                return;
+              }
+
               if (controller.wireStart != null &&
                   controller.temporaryWireEnd != null) {
                 final pinHit = HitTesting.findPinAt(
@@ -136,10 +163,11 @@ class _CircuitCanvasState extends State<CircuitCanvas> {
               size: const Size(3000, 2200),
               painter: CircuitPainter(
                 circuit: widget.controller.circuit,
-                selectedNodeId: widget.controller.selectedNodeId,
+                selectedNodeIds: widget.controller.selectedNodeIds,
                 selectedWireId: widget.controller.selectedWireId,
                 wireStart: widget.controller.wireStart,
                 temporaryWireEnd: widget.controller.temporaryWireEnd,
+                selectionRect: widget.controller.selectionRect,
               ),
             ),
           ),

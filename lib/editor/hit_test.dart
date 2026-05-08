@@ -15,6 +15,12 @@ class HitTesting {
     return null;
   }
 
+  static List<CircuitNode> findNodesInRect(Circuit circuit, Rect rect) {
+    return circuit.nodes.where((node) {
+      return rect.overlaps(node.rect);
+    }).toList();
+  }
+
   static PinHit? findPinAt(Circuit circuit, Offset point) {
     const hitRadius = 12.0;
 
