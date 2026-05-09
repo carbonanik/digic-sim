@@ -45,6 +45,7 @@ class CircuitController extends ChangeNotifier {
   Timer? _clockTimer;
 
   EditorTool selectedTool = EditorTool.select;
+  SubCircuitDefinition? selectedCustomComponent;
 
   Set<String> selectedNodeIds = {};
   String? selectedWireId;
@@ -85,6 +86,21 @@ class CircuitController extends ChangeNotifier {
 
   void selectTool(EditorTool tool) {
     selectedTool = tool;
+    if (tool != EditorTool.custom) {
+      selectedCustomComponent = null;
+    }
+    selectedNodeIds.clear();
+    selectedWireId = null;
+    selectionRect = null;
+    wireStart = null;
+    hoveredPin = null;
+    temporaryWireEnd = null;
+    notifyListeners();
+  }
+
+  void selectCustomComponent(SubCircuitDefinition definition) {
+    selectedTool = EditorTool.custom;
+    selectedCustomComponent = definition;
     selectedNodeIds.clear();
     selectedWireId = null;
     selectionRect = null;
@@ -171,8 +187,15 @@ class CircuitController extends ChangeNotifier {
 
     if (type == null &&
         selectedTool != EditorTool.segmentDisplay &&
-        selectedTool != EditorTool.clock)
+        selectedTool != EditorTool.clock &&
+        selectedTool != EditorTool.custom) {
       return;
+    }
+
+    if (selectedTool == EditorTool.custom && selectedCustomComponent != null) {
+      addCustomComponent(selectedCustomComponent!, position);
+      return;
+    }
 
     final node = switch (selectedTool) {
       EditorTool.segmentDisplay => _createSegmentDisplay(position),

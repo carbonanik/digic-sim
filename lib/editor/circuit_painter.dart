@@ -9,6 +9,8 @@ import '../models/pin.dart';
 import '../models/wire.dart';
 import '../models/gate_type.dart';
 import '../models/nodes/gate_node.dart';
+import '../models/nodes/composed_node.dart';
+import '../models/nodes/io_nodes.dart';
 
 class CircuitPainter extends CustomPainter {
   final Circuit circuit;
@@ -21,6 +23,7 @@ class CircuitPainter extends CustomPainter {
   final PinHit? hoveredPin;
   final Offset? mousePosition;
   final EditorTool selectedTool;
+  final SubCircuitDefinition? selectedCustomComponent;
 
   CircuitPainter({
     required this.circuit,
@@ -33,6 +36,7 @@ class CircuitPainter extends CustomPainter {
     this.hoveredPin,
     this.mousePosition,
     required this.selectedTool,
+    this.selectedCustomComponent,
   });
 
   @override
@@ -107,7 +111,12 @@ class CircuitPainter extends CustomPainter {
     _drawOrthogonalWire(canvas, start, temporaryWireEnd!, paint);
   }
 
-  void _drawOrthogonalWire(Canvas canvas, Offset start, Offset end, Paint paint) {
+  void _drawOrthogonalWire(
+    Canvas canvas,
+    Offset start,
+    Offset end,
+    Paint paint,
+  ) {
     final path = Path()..moveTo(start.dx, start.dy);
 
     const minExtension = 16.0;
@@ -122,7 +131,7 @@ class CircuitPainter extends CustomPainter {
       final midY = (start.dy + end.dy) / 2;
       final outX = start.dx + minExtension;
       final inX = end.dx - minExtension;
-      
+
       path
         ..lineTo(outX, start.dy)
         ..lineTo(outX, midY)
@@ -202,7 +211,23 @@ class CircuitPainter extends CustomPainter {
 
     final ghostPos = mousePosition!;
     final isDisplay = selectedTool == EditorTool.segmentDisplay;
-    final size = isDisplay ? const Size(80, 120) : const Size(110, 64);
+    final isCustom =
+        selectedTool == EditorTool.custom && selectedCustomComponent != null;
+
+    Size size;
+    if (isCustom) {
+      final inputCount = selectedCustomComponent!.nodes
+          .whereType<InputNode>()
+          .length;
+      final outputCount = selectedCustomComponent!.nodes
+          .whereType<OutputNode>()
+          .length;
+      final maxPins = (inputCount > outputCount) ? inputCount : outputCount;
+      final height = (maxPins * 24.0 + 40.0).clamp(80.0, 600.0);
+      size = Size(160, height);
+    } else {
+      size = isDisplay ? const Size(80, 120) : const Size(110, 64);
+    }
 
     canvas.saveLayer(
       Rect.fromLTWH(
@@ -216,13 +241,26 @@ class CircuitPainter extends CustomPainter {
 
     GateType? gateType;
     switch (selectedTool) {
-      case EditorTool.and: gateType = GateType.and; break;
-      case EditorTool.or: gateType = GateType.or; break;
-      case EditorTool.not: gateType = GateType.not; break;
-      case EditorTool.nand: gateType = GateType.nand; break;
-      case EditorTool.nor: gateType = GateType.nor; break;
-      case EditorTool.xor: gateType = GateType.xor; break;
-      default: break;
+      case EditorTool.and:
+        gateType = GateType.and;
+        break;
+      case EditorTool.or:
+        gateType = GateType.or;
+        break;
+      case EditorTool.not:
+        gateType = GateType.not;
+        break;
+      case EditorTool.nand:
+        gateType = GateType.nand;
+        break;
+      case EditorTool.nor:
+        gateType = GateType.nor;
+        break;
+      case EditorTool.xor:
+        gateType = GateType.xor;
+        break;
+      default:
+        break;
     }
 
     final fillPaint = Paint()..color = const Color(0xff1e293b);
@@ -241,15 +279,35 @@ class CircuitPainter extends CustomPainter {
 
       final inputPins = <Pin>[
         if (gateType != GateType.not)
-          Pin(id: 'a', nodeId: 'ghost', isInput: true, localPosition: const Offset(0, 22)),
+          Pin(
+            id: 'a',
+            nodeId: 'ghost',
+            isInput: true,
+            localPosition: const Offset(0, 22),
+          ),
         if (gateType != GateType.not)
-          Pin(id: 'b', nodeId: 'ghost', isInput: true, localPosition: const Offset(0, 42)),
+          Pin(
+            id: 'b',
+            nodeId: 'ghost',
+            isInput: true,
+            localPosition: const Offset(0, 42),
+          ),
         if (gateType == GateType.not)
-          Pin(id: 'in', nodeId: 'ghost', isInput: true, localPosition: const Offset(0, 32)),
+          Pin(
+            id: 'in',
+            nodeId: 'ghost',
+            isInput: true,
+            localPosition: const Offset(0, 32),
+          ),
       ];
 
       final outputPins = <Pin>[
-        Pin(id: 'out', nodeId: 'ghost', isInput: false, localPosition: const Offset(110, 32)),
+        Pin(
+          id: 'out',
+          nodeId: 'ghost',
+          isInput: false,
+          localPosition: const Offset(110, 32),
+        ),
       ];
 
       GateNode.paintGate(
@@ -266,21 +324,27 @@ class CircuitPainter extends CustomPainter {
     } else {
       final ghostRect = RRect.fromRectAndRadius(
         Rect.fromLTWH(ghostPos.dx, ghostPos.dy, size.width, size.height),
-        Radius.circular(isDisplay ? 8 : 16),
+        Radius.circular(isDisplay ? 8 : (isCustom ? 12 : 16)),
       );
 
-      canvas.drawRRect(ghostRect, fillPaint);
+      final fillP = isCustom
+          ? (Paint()..color = selectedCustomComponent!.color)
+          : fillPaint;
+
+      canvas.drawRRect(ghostRect, fillP);
       canvas.drawRRect(ghostRect, borderPaint);
 
-      final label = isDisplay ? '7-SEG' : selectedTool.name.toUpperCase();
+      final label = isCustom
+          ? selectedCustomComponent!.name
+          : (isDisplay ? '7-SEG' : selectedTool.name.toUpperCase());
 
       final textPainter = TextPainter(
         text: TextSpan(
           text: label,
-          style: const TextStyle(
-            color: Color(0xfff8fafc),
-            fontSize: 14,
-            fontWeight: FontWeight.w800,
+          style: TextStyle(
+            color: const Color(0xfff8fafc),
+            fontSize: isCustom ? 15 : 14,
+            fontWeight: isCustom ? FontWeight.w900 : FontWeight.w800,
             letterSpacing: 0.5,
           ),
         ),
@@ -290,7 +354,10 @@ class CircuitPainter extends CustomPainter {
       textPainter.paint(
         canvas,
         ghostPos +
-            Offset((size.width - textPainter.width) / 2, isDisplay ? 10 : 22),
+            Offset(
+              (size.width - textPainter.width) / 2,
+              isDisplay || isCustom ? 10 : 22,
+            ),
       );
     }
 

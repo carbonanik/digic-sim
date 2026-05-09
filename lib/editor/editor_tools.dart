@@ -10,5 +10,6 @@ enum EditorTool {
   nor,
   xor,
   segmentDisplay,
-  clock
+  clock,
+  custom,
 }

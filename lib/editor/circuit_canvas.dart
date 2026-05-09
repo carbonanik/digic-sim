@@ -256,6 +256,8 @@ class _CircuitCanvasState extends State<CircuitCanvas> {
                     hoveredPin: widget.controller.hoveredPin,
                     mousePosition: widget.controller.mousePosition,
                     selectedTool: widget.controller.selectedTool,
+                    selectedCustomComponent:
+                        widget.controller.selectedCustomComponent,
                   ),
                 ),
               ),

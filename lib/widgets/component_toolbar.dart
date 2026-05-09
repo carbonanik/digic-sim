@@ -226,12 +226,10 @@ class ComponentToolbar extends StatelessWidget {
                       _ToolButton(
                         icon: Icons.developer_board,
                         label: def.name,
-                        selected: false,
+                        selected: controller.selectedTool == EditorTool.custom &&
+                            controller.selectedCustomComponent == def,
                         margin: EdgeInsets.zero,
-                        onTap: () => controller.addCustomComponent(
-                          def,
-                          const Offset(100, 100),
-                        ),
+                        onTap: () => controller.selectCustomComponent(def),
                       ),
                       const SizedBox(height: 8),
                       Row(
