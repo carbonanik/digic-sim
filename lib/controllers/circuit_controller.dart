@@ -149,12 +149,18 @@ class CircuitController extends ChangeNotifier {
   void _updateClockTimer() {
     final hasClocks = circuit.nodes.any((n) => n is ClockNode);
     if (hasClocks && _clockTimer == null) {
-      _clockTimer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
+      _clockTimer = Timer.periodic(const Duration(milliseconds: 16), (timer) {
         bool changed = false;
+        final now = DateTime.now();
         for (final node in circuit.nodes) {
           if (node is ClockNode) {
-            node.value = !node.value;
-            changed = true;
+            final periodMs = 1000 / (2 * node.frequency);
+            if (now.difference(node.lastToggleTime).inMilliseconds >=
+                periodMs) {
+              node.value = !node.value;
+              node.lastToggleTime = now;
+              changed = true;
+            }
           }
         }
         if (changed) {

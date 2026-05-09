@@ -1,9 +1,12 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../circuit_node.dart';
 
 class ClockNode extends CircuitNode {
   bool value = false;
   double frequency = 1.0; // Hz
+  DateTime lastToggleTime = DateTime.now();
+  static const List<double> frequencies = [0.5, 1.0, 2.0, 5.0, 10.0, 20.0];
 
   ClockNode({
     required super.id,
@@ -18,6 +21,16 @@ class ClockNode extends CircuitNode {
     if (outputPins.isNotEmpty) {
       outputPins.first.value = value;
     }
+  }
+
+  @override
+  bool onAction(Offset localPosition) {
+    int currentIndex = frequencies.indexOf(frequency);
+    if (currentIndex == -1) currentIndex = 0;
+
+    int nextIndex = (currentIndex + 1) % frequencies.length;
+    frequency = frequencies[nextIndex];
+    return true;
   }
 
   @override
@@ -50,6 +63,7 @@ class ClockNode extends CircuitNode {
 
     _drawLabel(canvas);
     _drawPulseIcon(canvas);
+    _drawKnob(canvas);
   }
 
   void _drawLabel(Canvas canvas) {
@@ -85,6 +99,50 @@ class ClockNode extends CircuitNode {
     canvas.drawPath(path, paint);
   }
 
+  void _drawKnob(Canvas canvas) {
+    final center = position + const Offset(80, 40);
+    final paint = Paint()
+      ..color = const Color(0xff334155)
+      ..style = PaintingStyle.fill;
+
+    canvas.drawCircle(center, 14, paint);
+
+    final borderPaint = Paint()
+      ..color = const Color(0xff94a3b8)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
+    canvas.drawCircle(center, 14, borderPaint);
+
+    int index = frequencies.indexOf(frequency);
+    if (index == -1) index = 0;
+    final total = frequencies.length;
+    final double angle =
+        -math.pi * 0.75 + (index / (total - 1)) * (math.pi * 1.5);
+    final indicatorPaint = Paint()
+      ..color = const Color(0xfffacc15)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3
+      ..strokeCap = StrokeCap.round;
+
+    final indicatorStart = center;
+    final indicatorEnd = center + Offset(math.cos(angle), math.sin(angle)) * 9;
+    canvas.drawLine(indicatorStart, indicatorEnd, indicatorPaint);
+
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: '${frequency >= 1.0 ? frequency.toInt() : frequency}Hz',
+        style: const TextStyle(
+          color: Color(0xffe5e7eb),
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    textPainter.layout();
+    textPainter.paint(canvas, center + Offset(-textPainter.width / 2, -28));
+  }
+
   @override
   CircuitNode clone(String newId) {
     return ClockNode(
@@ -98,10 +156,6 @@ class ClockNode extends CircuitNode {
 
   @override
   Map<String, dynamic> toMap() {
-    return {
-      ...super.toMap(),
-      'type': 'clock',
-      'frequency': frequency,
-    };
+    return {...super.toMap(), 'type': 'clock', 'frequency': frequency};
   }
 }
