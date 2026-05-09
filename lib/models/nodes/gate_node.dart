@@ -1,3 +1,4 @@
+import 'package:digital_logic_sim_2/models/pin.dart';
 import 'package:flutter/material.dart';
 import '../circuit_node.dart';
 import '../gate_type.dart';
@@ -44,54 +45,157 @@ class GateNode extends CircuitNode {
     }
   }
 
+  static void paintGate({
+    required Canvas canvas,
+    required Rect rect,
+    required Offset position,
+    required GateType type,
+    required Iterable<Pin> inputPins,
+    required Iterable<Pin> outputPins,
+    required Paint fillPaint,
+    required Paint borderPaint,
+    required Paint extraPaint,
+    Paint? hoverGlow,
+  }) {
+    final double left = rect.left + 24;
+    final double top = rect.top + 8;
+    final double right = rect.right - 24;
+    final double bottom = rect.bottom - 8;
+    final double h = bottom - top;
+    final double w = right - left;
+
+    final path = Path();
+    final extraPaths = Path();
+
+    // Leads for inputs
+    for (final pin in inputPins) {
+      final pinPos = position + pin.localPosition;
+      extraPaths.moveTo(pinPos.dx, pinPos.dy);
+      extraPaths.lineTo(position.dx + rect.width * 0.5, pinPos.dy);
+    }
+
+    // Leads for outputs
+    for (final pin in outputPins) {
+      final pinPos = position + pin.localPosition;
+      extraPaths.moveTo(position.dx + rect.width * 0.5, pinPos.dy);
+      extraPaths.lineTo(pinPos.dx, pinPos.dy);
+    }
+
+    bool hasBubble =
+        type == GateType.not || type == GateType.nand || type == GateType.nor;
+    double shapeRight = right;
+    if (hasBubble) {
+      shapeRight -= 10;
+    }
+
+    switch (type) {
+      case GateType.and:
+      case GateType.nand:
+        final flatRight = shapeRight - h / 2;
+        path.moveTo(left, top);
+        path.lineTo(flatRight, top);
+        path.arcToPoint(
+          Offset(flatRight, bottom),
+          radius: Radius.circular(h / 2),
+          clockwise: true,
+        );
+        path.lineTo(left, bottom);
+        path.close();
+        break;
+
+      case GateType.or:
+      case GateType.nor:
+      case GateType.xor:
+        final backCurveCtrlX = left + w * 0.3;
+        path.moveTo(left, top);
+        path.quadraticBezierTo(left + w * 0.6, top, shapeRight, top + h / 2);
+        path.quadraticBezierTo(left + w * 0.6, bottom, left, bottom);
+        path.quadraticBezierTo(backCurveCtrlX, top + h / 2, left, top);
+        path.close();
+
+        if (type == GateType.xor) {
+          extraPaths.moveTo(left - 8, top);
+          extraPaths.quadraticBezierTo(
+            backCurveCtrlX - 8,
+            top + h / 2,
+            left - 8,
+            bottom,
+          );
+        }
+        break;
+
+      case GateType.not:
+        path.moveTo(left, top + 6);
+        path.lineTo(shapeRight, top + h / 2);
+        path.lineTo(left, bottom - 6);
+        path.close();
+        break;
+
+      default:
+        path.addRRect(RRect.fromRectAndRadius(rect, const Radius.circular(16)));
+        break;
+    }
+
+    if (hasBubble) {
+      path.addOval(
+        Rect.fromCircle(center: Offset(shapeRight + 5, top + h / 2), radius: 5),
+      );
+    }
+
+    // Draw leads (underneath body)
+    canvas.drawPath(extraPaths, extraPaint);
+
+    // Draw filled body
+    canvas.drawPath(path, fillPaint);
+
+    if (hoverGlow != null) {
+      canvas.drawPath(path, hoverGlow);
+    }
+
+    // Draw body outline
+    canvas.drawPath(path, borderPaint);
+  }
+
   @override
   void paint(Canvas canvas, bool isSelected, {bool isHovered = false}) {
-    final rect = RRect.fromRectAndRadius(this.rect, const Radius.circular(16));
-
     final fillPaint = Paint()..color = const Color(0xff111827);
     final borderPaint = Paint()
       ..color = isSelected
           ? const Color(0xfffacc15)
           : (isHovered ? const Color(0xff64748b) : const Color(0xff475569))
       ..strokeWidth = isSelected ? 3 : (isHovered ? 2.5 : 2)
-      ..style = PaintingStyle.stroke;
+      ..style = PaintingStyle.stroke
+      ..strokeJoin = StrokeJoin.round;
 
-    canvas.drawRRect(rect, fillPaint);
+    final extraPaint = Paint()
+      ..color = borderPaint.color
+      ..strokeWidth = borderPaint.strokeWidth
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
 
+    Paint? hoverGlow;
     if (isHovered && !isSelected) {
-      // Draw subtle glow for hover
-      final hoverGlow = Paint()
+      hoverGlow = Paint()
         ..color = const Color(0xff64748b).withOpacity(0.3)
         ..strokeWidth = 6
         ..style = PaintingStyle.stroke
         ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2);
-      canvas.drawRRect(rect, hoverGlow);
     }
 
-    canvas.drawRRect(rect, borderPaint);
-
-    _drawLabel(canvas);
-  }
-
-  void _drawLabel(Canvas canvas) {
-    final textPainter = TextPainter(
-      text: TextSpan(
-        text: type.label,
-        style: const TextStyle(
-          color: Color(0xffe5e7eb),
-          fontSize: 16,
-          fontWeight: FontWeight.w700,
-        ),
-      ),
-      textDirection: TextDirection.ltr,
+    paintGate(
+      canvas: canvas,
+      rect: rect,
+      position: position,
+      type: type,
+      inputPins: inputPins,
+      outputPins: outputPins,
+      fillPaint: fillPaint,
+      borderPaint: borderPaint,
+      extraPaint: extraPaint,
+      hoverGlow: hoverGlow,
     );
-
-    textPainter.layout();
-    canvas.save();
-    canvas.translate(position.dx + 16, position.dy + 14);
-    textPainter.paint(canvas, Offset.zero);
-    canvas.restore();
   }
 
   @override

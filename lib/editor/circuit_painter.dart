@@ -7,6 +7,8 @@ import '../models/circuit.dart';
 import '../models/circuit_node.dart';
 import '../models/pin.dart';
 import '../models/wire.dart';
+import '../models/gate_type.dart';
+import '../models/nodes/gate_node.dart';
 
 class CircuitPainter extends CustomPainter {
   final Circuit circuit;
@@ -198,7 +200,6 @@ class CircuitPainter extends CustomPainter {
     if (selectedTool == EditorTool.select || selectedTool == EditorTool.wire)
       return;
 
-    // Draw a semi-transparent ghost of the selected gate
     final ghostPos = mousePosition!;
     final isDisplay = selectedTool == EditorTool.segmentDisplay;
     final size = isDisplay ? const Size(80, 120) : const Size(110, 64);
@@ -213,40 +214,85 @@ class CircuitPainter extends CustomPainter {
       Paint()..color = Colors.white.withOpacity(0.35),
     );
 
-    final ghostRect = RRect.fromRectAndRadius(
-      Rect.fromLTWH(ghostPos.dx, ghostPos.dy, size.width, size.height),
-      Radius.circular(isDisplay ? 8 : 16),
-    );
+    GateType? gateType;
+    switch (selectedTool) {
+      case EditorTool.and: gateType = GateType.and; break;
+      case EditorTool.or: gateType = GateType.or; break;
+      case EditorTool.not: gateType = GateType.not; break;
+      case EditorTool.nand: gateType = GateType.nand; break;
+      case EditorTool.nor: gateType = GateType.nor; break;
+      case EditorTool.xor: gateType = GateType.xor; break;
+      default: break;
+    }
 
     final fillPaint = Paint()..color = const Color(0xff1e293b);
     final borderPaint = Paint()
       ..color = const Color(0xff94a3b8)
       ..strokeWidth = 2
-      ..style = PaintingStyle.stroke;
+      ..style = PaintingStyle.stroke
+      ..strokeJoin = StrokeJoin.round;
 
-    canvas.drawRRect(ghostRect, fillPaint);
-    canvas.drawRRect(ghostRect, borderPaint);
+    if (gateType != null) {
+      final extraPaint = Paint()
+        ..color = borderPaint.color
+        ..strokeWidth = borderPaint.strokeWidth
+        ..style = PaintingStyle.stroke
+        ..strokeCap = StrokeCap.round;
 
-    final label = isDisplay ? '7-SEG' : selectedTool.name.toUpperCase();
+      final inputPins = <Pin>[
+        if (gateType != GateType.not)
+          Pin(id: 'a', nodeId: 'ghost', isInput: true, localPosition: const Offset(0, 22)),
+        if (gateType != GateType.not)
+          Pin(id: 'b', nodeId: 'ghost', isInput: true, localPosition: const Offset(0, 42)),
+        if (gateType == GateType.not)
+          Pin(id: 'in', nodeId: 'ghost', isInput: true, localPosition: const Offset(0, 32)),
+      ];
 
-    final textPainter = TextPainter(
-      text: TextSpan(
-        text: label,
-        style: const TextStyle(
-          color: Color(0xfff8fafc),
-          fontSize: 14,
-          fontWeight: FontWeight.w800,
-          letterSpacing: 0.5,
+      final outputPins = <Pin>[
+        Pin(id: 'out', nodeId: 'ghost', isInput: false, localPosition: const Offset(110, 32)),
+      ];
+
+      GateNode.paintGate(
+        canvas: canvas,
+        rect: Rect.fromLTWH(ghostPos.dx, ghostPos.dy, size.width, size.height),
+        position: ghostPos,
+        type: gateType,
+        inputPins: inputPins,
+        outputPins: outputPins,
+        fillPaint: fillPaint,
+        borderPaint: borderPaint,
+        extraPaint: extraPaint,
+      );
+    } else {
+      final ghostRect = RRect.fromRectAndRadius(
+        Rect.fromLTWH(ghostPos.dx, ghostPos.dy, size.width, size.height),
+        Radius.circular(isDisplay ? 8 : 16),
+      );
+
+      canvas.drawRRect(ghostRect, fillPaint);
+      canvas.drawRRect(ghostRect, borderPaint);
+
+      final label = isDisplay ? '7-SEG' : selectedTool.name.toUpperCase();
+
+      final textPainter = TextPainter(
+        text: TextSpan(
+          text: label,
+          style: const TextStyle(
+            color: Color(0xfff8fafc),
+            fontSize: 14,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0.5,
+          ),
         ),
-      ),
-      textDirection: TextDirection.ltr,
-    );
-    textPainter.layout(maxWidth: size.width - 20);
-    textPainter.paint(
-      canvas,
-      ghostPos +
-          Offset((size.width - textPainter.width) / 2, isDisplay ? 10 : 22),
-    );
+        textDirection: TextDirection.ltr,
+      );
+      textPainter.layout(maxWidth: size.width - 20);
+      textPainter.paint(
+        canvas,
+        ghostPos +
+            Offset((size.width - textPainter.width) / 2, isDisplay ? 10 : 22),
+      );
+    }
 
     canvas.restore();
   }
