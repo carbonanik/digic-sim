@@ -152,6 +152,7 @@ class _CircuitCanvasState extends State<CircuitCanvas> {
                     : (details) {
                         final controller = widget.controller;
                         final point = details.localPosition;
+                        controller.resetDragAccumulator();
 
                         final pinHit = HitTesting.findPinAt(
                           controller.circuit,

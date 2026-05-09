@@ -62,6 +62,27 @@ class CircuitController extends ChangeNotifier {
   List<CircuitAction> undoStack = [];
   List<CircuitAction> redoStack = [];
 
+  Offset _dragAccumulator = Offset.zero;
+  bool snapToGridEnabled = true;
+
+  void toggleGridSnapping() {
+    snapToGridEnabled = !snapToGridEnabled;
+    notifyListeners();
+  }
+
+  Offset _snapToGrid(Offset point) {
+    if (!snapToGridEnabled) return point;
+    const double gridSize = 32.0;
+    return Offset(
+      (point.dx / gridSize).roundToDouble() * gridSize,
+      (point.dy / gridSize).roundToDouble() * gridSize,
+    );
+  }
+
+  void resetDragAccumulator() {
+    _dragAccumulator = Offset.zero;
+  }
+
   void selectTool(EditorTool tool) {
     selectedTool = tool;
     selectedNodeIds.clear();
@@ -88,8 +109,9 @@ class CircuitController extends ChangeNotifier {
   }
 
   void setMousePosition(Offset? pos) {
-    if (mousePosition != pos) {
-      mousePosition = pos;
+    final snapped = pos != null ? _snapToGrid(pos) : null;
+    if (mousePosition != snapped) {
+      mousePosition = snapped;
       notifyListeners();
     }
   }
@@ -131,6 +153,8 @@ class CircuitController extends ChangeNotifier {
   }
 
   void addGateFromTool(Offset position) {
+    position = _snapToGrid(position);
+
     final GateType? type = switch (selectedTool) {
       EditorTool.input => GateType.input,
       EditorTool.output => GateType.output,
@@ -338,12 +362,30 @@ class CircuitController extends ChangeNotifier {
   void moveSelectedNodes(Offset delta) {
     if (selectedNodeIds.isEmpty) return;
 
-    for (final node in circuit.nodes) {
-      if (selectedNodeIds.contains(node.id)) {
-        node.position += delta;
+    if (!snapToGridEnabled) {
+      for (final node in circuit.nodes) {
+        if (selectedNodeIds.contains(node.id)) {
+          node.position += delta;
+        }
       }
+      notifyListeners();
+      return;
     }
-    notifyListeners();
+
+    _dragAccumulator += delta;
+    final int stepsX = (_dragAccumulator.dx / 32.0).round();
+    final int stepsY = (_dragAccumulator.dy / 32.0).round();
+
+    if (stepsX != 0 || stepsY != 0) {
+      final snappedDelta = Offset(stepsX * 32.0, stepsY * 32.0);
+      for (final node in circuit.nodes) {
+        if (selectedNodeIds.contains(node.id)) {
+          node.position = _snapToGrid(node.position) + snappedDelta;
+        }
+      }
+      _dragAccumulator -= snappedDelta;
+      notifyListeners();
+    }
   }
 
   List<CircuitNode> getSelectedNodes() {
@@ -371,7 +413,7 @@ class CircuitController extends ChangeNotifier {
   }
 
   void updateTemporaryWire(Offset point) {
-    temporaryWireEnd = point;
+    temporaryWireEnd = _snapToGrid(point);
     notifyListeners();
   }
 
@@ -585,6 +627,7 @@ class CircuitController extends ChangeNotifier {
   }
 
   void addCustomComponent(SubCircuitDefinition definition, Offset position) {
+    position = _snapToGrid(position);
     final id = UniqueKey().toString();
 
     // Create external pins based on internal Input/Output nodes
@@ -656,21 +699,23 @@ class CircuitController extends ChangeNotifier {
     // Use a map to track original IDs to new IDs if we were re-generating IDs,
     // but here we can just use the same IDs or clone them properly.
     // Since we are loading it as the MAIN circuit, we can use the original IDs.
-    
+
     for (final node in definition.nodes) {
       circuit.nodes.add(node.clone(node.id));
     }
-    
+
     for (final wire in definition.wires) {
-      circuit.wires.add(Wire(
-        id: wire.id,
-        fromNodeId: wire.fromNodeId,
-        fromPinId: wire.fromPinId,
-        toNodeId: wire.toNodeId,
-        toPinId: wire.toPinId,
-      ));
+      circuit.wires.add(
+        Wire(
+          id: wire.id,
+          fromNodeId: wire.fromNodeId,
+          fromPinId: wire.fromPinId,
+          toNodeId: wire.toNodeId,
+          toPinId: wire.toPinId,
+        ),
+      );
     }
-    
+
     _updateClockTimer();
     LogicSimulator.simulate(circuit);
     notifyListeners();

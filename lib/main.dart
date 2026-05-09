@@ -134,6 +134,21 @@ class _TopBar extends StatelessWidget {
             ),
           const Spacer(),
           FilledButton.icon(
+            onPressed: controller.toggleGridSnapping,
+            icon: Icon(
+              controller.snapToGridEnabled ? Icons.grid_on : Icons.grid_off,
+            ),
+            label: Text(
+              controller.snapToGridEnabled ? 'Snap: ON' : 'Snap: OFF',
+            ),
+            style: FilledButton.styleFrom(
+              backgroundColor: controller.snapToGridEnabled
+                  ? const Color(0xff059669)
+                  : const Color(0xff4b5563),
+            ),
+          ),
+          const SizedBox(width: 8),
+          FilledButton.icon(
             onPressed: () => _showSaveDialog(context),
             icon: const Icon(Icons.save_alt),
             label: const Text('Save as IC'),
