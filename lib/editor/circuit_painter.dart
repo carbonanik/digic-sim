@@ -73,18 +73,20 @@ class CircuitPainter extends CustomPainter {
           ..color = const Color(0xfff43f5e).withOpacity(0.3)
           ..strokeWidth = 8
           ..style = PaintingStyle.stroke
+          ..strokeJoin = StrokeJoin.round
           ..strokeCap = StrokeCap.round
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
-        _drawSmoothWire(canvas, start, end, glowPaint);
+        _drawOrthogonalWire(canvas, start, end, glowPaint);
       }
 
       final paint = Paint()
         ..color = isSelected ? const Color(0xfff43f5e) : const Color(0xff38bdf8)
         ..strokeWidth = 3
         ..style = PaintingStyle.stroke
+        ..strokeJoin = StrokeJoin.round
         ..strokeCap = StrokeCap.round;
 
-      _drawSmoothWire(canvas, start, end, paint);
+      _drawOrthogonalWire(canvas, start, end, paint);
     }
   }
 
@@ -97,25 +99,35 @@ class CircuitPainter extends CustomPainter {
       ..color = const Color(0xfffacc15)
       ..strokeWidth = 3
       ..style = PaintingStyle.stroke
+      ..strokeJoin = StrokeJoin.round
       ..strokeCap = StrokeCap.round;
 
-    _drawSmoothWire(canvas, start, temporaryWireEnd!, paint);
+    _drawOrthogonalWire(canvas, start, temporaryWireEnd!, paint);
   }
 
-  void _drawSmoothWire(Canvas canvas, Offset start, Offset end, Paint paint) {
-    final distance = (end.dx - start.dx).abs();
-    final controlOffset = distance.clamp(50, 140).toDouble();
+  void _drawOrthogonalWire(Canvas canvas, Offset start, Offset end, Paint paint) {
+    final path = Path()..moveTo(start.dx, start.dy);
 
-    final path = Path()
-      ..moveTo(start.dx, start.dy)
-      ..cubicTo(
-        start.dx + controlOffset,
-        start.dy,
-        end.dx - controlOffset,
-        end.dy,
-        end.dx,
-        end.dy,
-      );
+    const minExtension = 16.0;
+
+    if (end.dx > start.dx + 2 * minExtension) {
+      final midX = (start.dx + end.dx) / 2;
+      path
+        ..lineTo(midX, start.dy)
+        ..lineTo(midX, end.dy)
+        ..lineTo(end.dx, end.dy);
+    } else {
+      final midY = (start.dy + end.dy) / 2;
+      final outX = start.dx + minExtension;
+      final inX = end.dx - minExtension;
+      
+      path
+        ..lineTo(outX, start.dy)
+        ..lineTo(outX, midY)
+        ..lineTo(inX, midY)
+        ..lineTo(inX, end.dy)
+        ..lineTo(end.dx, end.dy);
+    }
 
     canvas.drawPath(path, paint);
   }

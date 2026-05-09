@@ -107,10 +107,6 @@ class GateNode extends CircuitNode {
 
   @override
   Map<String, dynamic> toMap() {
-    return {
-      ...super.toMap(),
-      'type': 'gate',
-      'gateType': type.name,
-    };
+    return {...super.toMap(), 'type': 'gate', 'gateType': type.name};
   }
 }
