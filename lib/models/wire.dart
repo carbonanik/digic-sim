@@ -1,4 +1,5 @@
 import 'dart:ui';
+import '../utils/pathfinder.dart';
 
 class Wire {
   final String id;
@@ -50,30 +51,20 @@ class Wire {
     );
   }
 
-  List<Offset> getPathPoints(Offset start, Offset end) {
+  List<Offset> getPathPoints(
+    Offset start,
+    Offset end, {
+    List<Rect> obstacles = const [],
+    Set<dynamic> existingSegments = const {},
+  }) {
     if (waypoints.isNotEmpty) {
       return [start, ...waypoints, end];
     }
 
-    const minExtension = 16.0;
-    final List<Offset> points = [start];
-
-    if (end.dx > start.dx + 2 * minExtension) {
-      final midX = (start.dx + end.dx) / 2;
-      points.add(Offset(midX, start.dy));
-      points.add(Offset(midX, end.dy));
-    } else {
-      final midY = (start.dy + end.dy) / 2;
-      final outX = start.dx + minExtension;
-      final inX = end.dx - minExtension;
-
-      points.add(Offset(outX, start.dy));
-      points.add(Offset(outX, midY));
-      points.add(Offset(inX, midY));
-      points.add(Offset(inX, end.dy));
-    }
-
-    points.add(end);
-    return points;
+    return PathFinder.findPath(
+      start: start,
+      end: end,
+      obstacles: obstacles,
+    );
   }
 }

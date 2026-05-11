@@ -14,6 +14,7 @@ import '../models/nodes/io_nodes.dart';
 import '../models/nodes/display_nodes.dart';
 import '../models/nodes/clock_node.dart';
 import '../models/nodes/composed_node.dart';
+import '../utils/pathfinder.dart';
 import 'dart:async';
 import 'dart:convert';
 
@@ -162,9 +163,15 @@ class CircuitController extends ChangeNotifier {
       final start = fromNode.position + fromPin.localPosition;
       final end = toNode.position + toPin.localPosition;
 
-      final points = wire.getPathPoints(start, end);
+      final points = PathFinder.findPath(
+        start: start,
+        end: end,
+        obstacles: circuit.nodes.map((n) => n.rect).toList(),
+      );
       // Waypoints are everything except start and end
-      _initialWaypoints = points.sublist(1, points.length - 1);
+      _initialWaypoints = points.length <= 2
+          ? []
+          : points.sublist(1, points.length - 1);
     } else {
       _initialWaypoints = List.from(wire.waypoints);
     }
