@@ -7,7 +7,6 @@ import 'nodes/io_nodes.dart';
 import 'nodes/display_nodes.dart';
 import 'nodes/clock_node.dart';
 import 'nodes/composed_node.dart';
-import 'wire.dart';
 
 class NodeFactory {
   static CircuitNode fromMap(Map<String, dynamic> map) {

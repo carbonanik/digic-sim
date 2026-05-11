@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 
 import '../controllers/circuit_controller.dart';
 import '../editor/editor_tools.dart';
-import '../models/nodes/composed_node.dart';
 
 class ComponentToolbar extends StatelessWidget {
   final CircuitController controller;
@@ -226,7 +225,8 @@ class ComponentToolbar extends StatelessWidget {
                       _ToolButton(
                         icon: Icons.developer_board,
                         label: def.name,
-                        selected: controller.selectedTool == EditorTool.custom &&
+                        selected:
+                            controller.selectedTool == EditorTool.custom &&
                             controller.selectedCustomComponent == def,
                         margin: EdgeInsets.zero,
                         onTap: () => controller.selectCustomComponent(def),
