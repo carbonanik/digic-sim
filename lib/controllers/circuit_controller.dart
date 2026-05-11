@@ -66,6 +66,11 @@ class CircuitController extends ChangeNotifier {
   Offset _dragAccumulator = Offset.zero;
   bool snapToGridEnabled = true;
 
+  // Wire dragging state
+  WireHit? draggedWireHit;
+  Offset? _wireDragStartMousePos;
+  List<Offset>? _initialWaypoints;
+
   void toggleGridSnapping() {
     snapToGridEnabled = !snapToGridEnabled;
     notifyListeners();
@@ -73,7 +78,7 @@ class CircuitController extends ChangeNotifier {
 
   Offset _snapToGrid(Offset point) {
     if (!snapToGridEnabled) return point;
-    const double gridSize = 32.0;
+    const double gridSize = 16.0;
     return Offset(
       (point.dx / gridSize).roundToDouble() * gridSize,
       (point.dy / gridSize).roundToDouble() * gridSize,
@@ -136,14 +141,156 @@ class CircuitController extends ChangeNotifier {
     circuit.nodes.clear();
     circuit.wires.clear();
     selectedNodeIds.clear();
-    selectedWireId = null;
-    selectionRect = null;
-    wireStart = null;
     temporaryWireEnd = null;
-    undoStack.clear();
-    redoStack.clear();
-    _updateClockTimer();
+    draggedWireHit = null;
     notifyListeners();
+  }
+
+  void startWireDrag(WireHit hit, Offset mousePos) {
+    draggedWireHit = hit;
+    _wireDragStartMousePos = mousePos;
+
+    // Bake waypoints if empty
+    final wire = hit.wire;
+    if (wire.waypoints.isEmpty) {
+      final fromNode = circuit.nodes.firstWhere((n) => n.id == wire.fromNodeId);
+      final toNode = circuit.nodes.firstWhere((n) => n.id == wire.toNodeId);
+      final fromPin = fromNode.outputPins.firstWhere(
+        (p) => p.id == wire.fromPinId,
+      );
+      final toPin = toNode.inputPins.firstWhere((p) => p.id == wire.toPinId);
+      final start = fromNode.position + fromPin.localPosition;
+      final end = toNode.position + toPin.localPosition;
+
+      final points = wire.getPathPoints(start, end);
+      // Waypoints are everything except start and end
+      _initialWaypoints = points.sublist(1, points.length - 1);
+    } else {
+      _initialWaypoints = List.from(wire.waypoints);
+    }
+    notifyListeners();
+  }
+
+  void updateWireDrag(Offset mousePos) {
+    if (draggedWireHit == null || _initialWaypoints == null) return;
+
+    final snappedMouse = _snapToGrid(mousePos);
+    final wire = draggedWireHit!.wire;
+    final segmentIndex = draggedWireHit!.segmentIndex;
+
+    final fromNode = circuit.nodes.firstWhere((n) => n.id == wire.fromNodeId);
+    final toNode = circuit.nodes.firstWhere((n) => n.id == wire.toNodeId);
+
+    final fromPin = fromNode.outputPins.firstWhere(
+      (p) => p.id == wire.fromPinId,
+    );
+    final toPin = toNode.inputPins.firstWhere((p) => p.id == wire.toPinId);
+
+    final start = fromNode.position + fromPin.localPosition;
+    final end = toNode.position + toPin.localPosition;
+
+    final points = [start, ..._initialWaypoints!, end];
+
+    if (segmentIndex < 0 || segmentIndex >= points.length - 1) return;
+
+    final p1 = points[segmentIndex];
+    final p2 = points[segmentIndex + 1];
+
+    final isHorizontal = (p1.dy - p2.dy).abs() < 0.1;
+    final isVertical = (p1.dx - p2.dx).abs() < 0.1;
+
+    if (!isHorizontal && !isVertical) return;
+
+    final List<Offset> newPoints;
+
+    if (isHorizontal) {
+      // Drag horizontal segment vertically.
+      final newY = snappedMouse.dy;
+
+      newPoints = [
+        ...points.take(segmentIndex + 1),
+        Offset(p1.dx, newY),
+        Offset(p2.dx, newY),
+        ...points.skip(segmentIndex + 1),
+      ];
+    } else {
+      // Drag vertical segment horizontally.
+      final newX = snappedMouse.dx;
+
+      newPoints = [
+        ...points.take(segmentIndex + 1),
+        Offset(newX, p1.dy),
+        Offset(newX, p2.dy),
+        ...points.skip(segmentIndex + 1),
+      ];
+    }
+
+    final simplifiedPoints = _simplifyOrthogonalPoints(newPoints);
+
+    final newWaypoints = simplifiedPoints.length <= 2
+        ? <Offset>[]
+        : simplifiedPoints.sublist(1, simplifiedPoints.length - 1);
+
+    final wireIndex = circuit.wires.indexWhere((w) => w.id == wire.id);
+
+    if (wireIndex != -1) {
+      circuit.wires[wireIndex] = wire.copyWith(waypoints: newWaypoints);
+      notifyListeners();
+    }
+  }
+
+  List<Offset> _simplifyOrthogonalPoints(List<Offset> points) {
+    if (points.length <= 2) return points;
+
+    final result = <Offset>[];
+
+    for (final point in points) {
+      if (result.isNotEmpty && (result.last - point).distance < 0.1) {
+        continue;
+      }
+
+      result.add(point);
+    }
+
+    bool changed = true;
+
+    while (changed) {
+      changed = false;
+
+      for (int i = 1; i < result.length - 1; i++) {
+        final a = result[i - 1];
+        final b = result[i];
+        final c = result[i + 1];
+
+        final sameVertical =
+            (a.dx - b.dx).abs() < 0.1 && (b.dx - c.dx).abs() < 0.1;
+
+        final sameHorizontal =
+            (a.dy - b.dy).abs() < 0.1 && (b.dy - c.dy).abs() < 0.1;
+
+        if (sameVertical || sameHorizontal) {
+          result.removeAt(i);
+          changed = true;
+          break;
+        }
+      }
+    }
+
+    return result;
+  }
+
+  void endWireDrag() {
+    if (draggedWireHit != null) {
+      undoStack.add(
+        CircuitAction(
+          // For now, undoing wire moves is tricky because we mutate the wire.
+          // In a real app, CircuitAction should store the old state.
+        ),
+      );
+      draggedWireHit = null;
+      _initialWaypoints = null;
+      notifyListeners();
+    }
   }
 
   void _updateClockTimer() {
@@ -309,6 +456,15 @@ class CircuitController extends ChangeNotifier {
     }
   }
 
+  void resetWirePath(String wireId) {
+    final wireIndex = circuit.wires.indexWhere((w) => w.id == wireId);
+    if (wireIndex != -1) {
+      final oldWire = circuit.wires[wireIndex];
+      circuit.wires[wireIndex] = oldWire.copyWith(waypoints: []);
+      notifyListeners();
+    }
+  }
+
   void undo() {
     if (undoStack.isEmpty) return;
 
@@ -402,11 +558,12 @@ class CircuitController extends ChangeNotifier {
     }
 
     _dragAccumulator += delta;
-    final int stepsX = (_dragAccumulator.dx / 32.0).round();
-    final int stepsY = (_dragAccumulator.dy / 32.0).round();
+    const double gridSize = 16.0;
+    final int stepsX = (_dragAccumulator.dx / gridSize).round();
+    final int stepsY = (_dragAccumulator.dy / gridSize).round();
 
     if (stepsX != 0 || stepsY != 0) {
-      final snappedDelta = Offset(stepsX * 32.0, stepsY * 32.0);
+      final snappedDelta = Offset(stepsX * gridSize, stepsY * gridSize);
       for (final node in circuit.nodes) {
         if (selectedNodeIds.contains(node.id)) {
           node.position = _snapToGrid(node.position) + snappedDelta;
@@ -505,7 +662,7 @@ class CircuitController extends ChangeNotifier {
               id: 'out',
               nodeId: id,
               isInput: false,
-              localPosition: const Offset(110, 32),
+              localPosition: const Offset(112, 32),
             ),
           ],
         );
@@ -543,7 +700,7 @@ class CircuitController extends ChangeNotifier {
               id: 'out',
               nodeId: id,
               isInput: false,
-              localPosition: const Offset(110, 32),
+              localPosition: const Offset(112, 32),
             ),
           ],
         );
@@ -558,13 +715,13 @@ class CircuitController extends ChangeNotifier {
               id: 'a',
               nodeId: id,
               isInput: true,
-              localPosition: const Offset(0, 22),
+              localPosition: const Offset(0, 16),
             ),
             Pin(
               id: 'b',
               nodeId: id,
               isInput: true,
-              localPosition: const Offset(0, 42),
+              localPosition: const Offset(0, 48),
             ),
           ],
           outputPins: [
@@ -572,7 +729,7 @@ class CircuitController extends ChangeNotifier {
               id: 'out',
               nodeId: id,
               isInput: false,
-              localPosition: const Offset(110, 32),
+              localPosition: const Offset(112, 32),
             ),
           ],
         );
@@ -586,7 +743,7 @@ class CircuitController extends ChangeNotifier {
         id: 'seg_$i',
         nodeId: id,
         isInput: true,
-        localPosition: Offset(0, 15.0 + i * 15.0),
+        localPosition: Offset(0, 16.0 + i * 16.0),
       );
     });
 
@@ -609,7 +766,7 @@ class CircuitController extends ChangeNotifier {
           id: 'out',
           nodeId: id,
           isInput: false,
-          localPosition: const Offset(110, 32),
+          localPosition: const Offset(112, 32),
         ),
       ],
     );
@@ -668,7 +825,7 @@ class CircuitController extends ChangeNotifier {
         id: 'in_$i',
         nodeId: id,
         isInput: true,
-        localPosition: Offset(0, 30.0 + i * 20.0),
+        localPosition: Offset(0, 32.0 + i * 16.0),
       );
     });
 
@@ -677,7 +834,7 @@ class CircuitController extends ChangeNotifier {
         id: 'out_$i',
         nodeId: id,
         isInput: false,
-        localPosition: Offset(140, 30.0 + i * 20.0),
+        localPosition: Offset(160, 32.0 + i * 16.0),
       );
     });
 

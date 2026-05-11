@@ -41,6 +41,10 @@ class HitTesting {
   }
 
   static Wire? findWireAt(Circuit circuit, Offset point) {
+    return findWireHitAt(circuit, point)?.wire;
+  }
+
+  static WireHit? findWireHitAt(Circuit circuit, Offset point) {
     const hitThreshold = 10.0;
 
     for (final wire in circuit.wires) {
@@ -55,29 +59,11 @@ class HitTesting {
       final start = fromNode.position + fromPin.localPosition;
       final end = toNode.position + toPin.localPosition;
 
-      // Logic from CircuitPainter._drawOrthogonalWire
-      final List<Offset> points = [start];
-      const minExtension = 16.0;
-
-      if (end.dx > start.dx + 2 * minExtension) {
-        final midX = (start.dx + end.dx) / 2;
-        points.add(Offset(midX, start.dy));
-        points.add(Offset(midX, end.dy));
-      } else {
-        final midY = (start.dy + end.dy) / 2;
-        final outX = start.dx + minExtension;
-        final inX = end.dx - minExtension;
-
-        points.add(Offset(outX, start.dy));
-        points.add(Offset(outX, midY));
-        points.add(Offset(inX, midY));
-        points.add(Offset(inX, end.dy));
-      }
-      points.add(end);
+      final points = wire.getPathPoints(start, end);
 
       for (int i = 0; i < points.length - 1; i++) {
         if (_distToSegment(point, points[i], points[i + 1]) <= hitThreshold) {
-          return wire;
+          return WireHit(wire: wire, segmentIndex: i);
         }
       }
     }
@@ -102,4 +88,11 @@ class PinHit {
   final Pin pin;
 
   PinHit({required this.node, required this.pin});
+}
+
+class WireHit {
+  final Wire wire;
+  final int segmentIndex;
+
+  WireHit({required this.wire, required this.segmentIndex});
 }

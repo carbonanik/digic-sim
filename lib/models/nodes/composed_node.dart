@@ -97,7 +97,7 @@ class ComposedNode extends CircuitNode {
     final maxPins = (inputPins.length > outputPins.length)
         ? inputPins.length
         : outputPins.length;
-    final height = (maxPins * 24.0 + 40.0).clamp(80.0, 600.0);
+    final height = (maxPins * 16.0 + 32.0).clamp(80.0, 640.0);
     return Size(160, height);
   }
 

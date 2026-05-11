@@ -15,7 +15,7 @@ abstract class CircuitNode {
     required this.outputPins,
   });
 
-  Size get size => const Size(110, 64);
+  Size get size => const Size(112, 64);
   Rect get rect => position & size;
 
   void paint(Canvas canvas, bool isSelected, {bool isHovered = false});

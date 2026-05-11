@@ -53,7 +53,7 @@ class CircuitPainter extends CustomPainter {
       ..color = const Color(0xff1e293b)
       ..strokeWidth = 1;
 
-    const gridSize = 32.0;
+    const gridSize = 16.0;
 
     for (double x = 0; x < size.width; x += gridSize) {
       canvas.drawLine(Offset(x, 0), Offset(x, size.height), gridPaint);
@@ -82,7 +82,7 @@ class CircuitPainter extends CustomPainter {
           ..strokeJoin = StrokeJoin.round
           ..strokeCap = StrokeCap.round
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
-        _drawOrthogonalWire(canvas, start, end, glowPaint);
+        _drawOrthogonalWire(canvas, start, end, wire.waypoints, glowPaint);
       }
 
       final paint = Paint()
@@ -92,7 +92,23 @@ class CircuitPainter extends CustomPainter {
         ..strokeJoin = StrokeJoin.round
         ..strokeCap = StrokeCap.round;
 
-      _drawOrthogonalWire(canvas, start, end, paint);
+      _drawOrthogonalWire(canvas, start, end, wire.waypoints, paint);
+
+      // Draw waypoint handles if selected
+      if (isSelected && wire.waypoints.isNotEmpty) {
+        final handlePaint = Paint()
+          ..color = const Color(0xfff43f5e)
+          ..style = PaintingStyle.fill;
+        final handleBorder = Paint()
+          ..color = Colors.white
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.5;
+
+        for (final wp in wire.waypoints) {
+          canvas.drawCircle(wp, 5, handlePaint);
+          canvas.drawCircle(wp, 5, handleBorder);
+        }
+      }
     }
   }
 
@@ -108,36 +124,30 @@ class CircuitPainter extends CustomPainter {
       ..strokeJoin = StrokeJoin.round
       ..strokeCap = StrokeCap.round;
 
-    _drawOrthogonalWire(canvas, start, temporaryWireEnd!, paint);
+    _drawOrthogonalWire(canvas, start, temporaryWireEnd!, [], paint);
   }
 
   void _drawOrthogonalWire(
     Canvas canvas,
     Offset start,
     Offset end,
+    List<Offset> waypoints,
     Paint paint,
   ) {
-    final path = Path()..moveTo(start.dx, start.dy);
+    // We use a dummy Wire object to reuse the path calculation logic
+    final dummyWire = Wire(
+      id: '',
+      fromNodeId: '',
+      fromPinId: '',
+      toNodeId: '',
+      toPinId: '',
+      waypoints: waypoints,
+    );
+    final points = dummyWire.getPathPoints(start, end);
 
-    const minExtension = 16.0;
-
-    if (end.dx > start.dx + 2 * minExtension) {
-      final midX = (start.dx + end.dx) / 2;
-      path
-        ..lineTo(midX, start.dy)
-        ..lineTo(midX, end.dy)
-        ..lineTo(end.dx, end.dy);
-    } else {
-      final midY = (start.dy + end.dy) / 2;
-      final outX = start.dx + minExtension;
-      final inX = end.dx - minExtension;
-
-      path
-        ..lineTo(outX, start.dy)
-        ..lineTo(outX, midY)
-        ..lineTo(inX, midY)
-        ..lineTo(inX, end.dy)
-        ..lineTo(end.dx, end.dy);
+    final path = Path()..moveTo(points.first.dx, points.first.dy);
+    for (int i = 1; i < points.length; i++) {
+      path.lineTo(points[i].dx, points[i].dy);
     }
 
     canvas.drawPath(path, paint);
@@ -223,10 +233,10 @@ class CircuitPainter extends CustomPainter {
           .whereType<OutputNode>()
           .length;
       final maxPins = (inputCount > outputCount) ? inputCount : outputCount;
-      final height = (maxPins * 24.0 + 40.0).clamp(80.0, 600.0);
+      final height = (maxPins * 16.0 + 32.0).clamp(80.0, 640.0);
       size = Size(160, height);
     } else {
-      size = isDisplay ? const Size(80, 120) : const Size(110, 64);
+      size = isDisplay ? const Size(80, 128) : const Size(112, 64);
     }
 
     canvas.saveLayer(
@@ -283,14 +293,14 @@ class CircuitPainter extends CustomPainter {
             id: 'a',
             nodeId: 'ghost',
             isInput: true,
-            localPosition: const Offset(0, 22),
+            localPosition: const Offset(0, 16),
           ),
         if (gateType != GateType.not)
           Pin(
             id: 'b',
             nodeId: 'ghost',
             isInput: true,
-            localPosition: const Offset(0, 42),
+            localPosition: const Offset(0, 48),
           ),
         if (gateType == GateType.not)
           Pin(
@@ -306,7 +316,7 @@ class CircuitPainter extends CustomPainter {
           id: 'out',
           nodeId: 'ghost',
           isInput: false,
-          localPosition: const Offset(110, 32),
+          localPosition: const Offset(112, 32),
         ),
       ];
 

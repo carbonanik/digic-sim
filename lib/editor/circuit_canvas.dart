@@ -123,12 +123,12 @@ class _CircuitCanvasState extends State<CircuitCanvas> {
                         }
 
                         if (controller.selectedTool == EditorTool.select) {
-                          final wireHit = HitTesting.findWireAt(
+                          final wireHit = HitTesting.findWireHitAt(
                             controller.circuit,
                             point,
                           );
                           if (wireHit != null) {
-                            controller.selectWire(wireHit.id);
+                            controller.selectWire(wireHit.wire.id);
                             return;
                           }
                           controller.selectNode(null);
@@ -137,13 +137,24 @@ class _CircuitCanvasState extends State<CircuitCanvas> {
                         }
                       },
                 onDoubleTap: () {
-                  if (widget.controller.mousePosition != null) {
+                  final pos = widget.controller.mousePosition;
+                  if (pos != null) {
                     final nodeHit = HitTesting.findNodeAt(
                       widget.controller.circuit,
-                      widget.controller.mousePosition!,
+                      pos,
                     );
                     if (nodeHit is ComposedNode) {
                       widget.controller.loadDefinition(nodeHit.definition);
+                      return;
+                    }
+
+                    final wireHit = HitTesting.findWireHitAt(
+                      widget.controller.circuit,
+                      pos,
+                    );
+                    if (wireHit != null) {
+                      widget.controller.resetWirePath(wireHit.wire.id);
+                      return;
                     }
                   }
                 },
@@ -180,8 +191,16 @@ class _CircuitCanvasState extends State<CircuitCanvas> {
                             }
                             // We'll move all selected nodes
                           } else {
-                            // Clicked empty space
-                            controller.startMarqueeSelection(point);
+                            final wireHit = HitTesting.findWireHitAt(
+                              controller.circuit,
+                              point,
+                            );
+                            if (wireHit != null) {
+                              controller.startWireDrag(wireHit, point);
+                            } else {
+                              // Clicked empty space
+                              controller.startMarqueeSelection(point);
+                            }
                           }
                         }
                       },
@@ -207,6 +226,11 @@ class _CircuitCanvasState extends State<CircuitCanvas> {
                           controller.updateMarqueeSelection(
                             details.localPosition,
                           );
+                          return;
+                        }
+
+                        if (controller.draggedWireHit != null) {
+                          controller.updateWireDrag(details.localPosition);
                           return;
                         }
 
@@ -241,6 +265,12 @@ class _CircuitCanvasState extends State<CircuitCanvas> {
                           } else {
                             controller.cancelWire();
                           }
+                          return;
+                        }
+
+                        if (controller.draggedWireHit != null) {
+                          controller.endWireDrag();
+                          return;
                         }
                       },
                 child: CustomPaint(

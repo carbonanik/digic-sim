@@ -12,7 +12,7 @@ class SegmentDisplayNode extends CircuitNode {
   });
 
   @override
-  Size get size => const Size(80, 120); // Larger vertical size for display
+  Size get size => const Size(80, 128); // Larger vertical size for display
 
   @override
   void evaluate(List<bool> inputs) {
