@@ -12,297 +12,171 @@ class ComponentToolbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 230,
-      padding: const EdgeInsets.all(16),
-      decoration: const BoxDecoration(
-        color: Color(0xff0b1120),
-        border: Border(right: BorderSide(color: Color(0xff1f2937))),
+      width: 250,
+      decoration: BoxDecoration(
+        color: const Color(0xff0b1120).withOpacity(0.95),
+        border: const Border(right: BorderSide(color: Color(0xff1f2937))),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            blurRadius: 20,
+            offset: const Offset(5, 0),
+          ),
+        ],
       ),
-      child: SingleChildScrollView(
-        // Wrap the Column with SingleChildScrollView
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const _AppLogo(),
-            const SizedBox(height: 24),
-            const Text(
-              'Components',
-              style: TextStyle(
-                color: Color(0xff94a3b8),
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 12),
-            _ToolButton(
-              icon: Icons.mouse,
-              label: 'Select / Move',
-              selected: controller.selectedTool == EditorTool.select,
-              onTap: () => controller.selectTool(EditorTool.select),
-            ),
-            _ToolButton(
-              icon: Icons.delete_forever,
-              label: 'Delete Selected',
-              selected: false,
-              onTap: () => controller.deleteSelected(),
-            ),
-            _ToolButton(
-              icon: Icons.layers_clear,
-              label: 'Clear Canvas',
-              selected: false,
-              onTap: () {
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    backgroundColor: const Color(0xff0b1120),
-                    title: const Text(
-                      'Clear Canvas?',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                    content: const Text(
-                      'This will delete everything on the canvas. Continue?',
-                      style: TextStyle(color: Color(0xff94a3b8)),
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('Cancel'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          controller.clear();
-                          Navigator.pop(context);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red.shade900,
-                        ),
-                        child: const Text('Clear Everything'),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Inputs / Outputs',
-              style: TextStyle(
-                color: Color(0xff94a3b8),
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 12),
-            _ToolButton(
-              icon: Icons.input,
-              label: 'Input',
-              selected: controller.selectedTool == EditorTool.input,
-              onTap: () => controller.selectTool(EditorTool.input),
-            ),
-            _ToolButton(
-              icon: Icons.output,
-              label: 'Output',
-              selected: controller.selectedTool == EditorTool.output,
-              onTap: () => controller.selectTool(EditorTool.output),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Logic Gates',
-              style: TextStyle(
-                color: Color(0xff94a3b8),
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 12),
-            _ToolButton(
-              icon: Icons.join_inner,
-              label: 'AND Gate',
-              selected: controller.selectedTool == EditorTool.and,
-              onTap: () => controller.selectTool(EditorTool.and),
-            ),
-            _ToolButton(
-              icon: Icons.call_split,
-              label: 'OR Gate',
-              selected: controller.selectedTool == EditorTool.or,
-              onTap: () => controller.selectTool(EditorTool.or),
-            ),
-            _ToolButton(
-              icon: Icons.change_circle_outlined,
-              label: 'NOT Gate',
-              selected: controller.selectedTool == EditorTool.not,
-              onTap: () => controller.selectTool(EditorTool.not),
-            ),
-            _ToolButton(
-              icon: Icons.join_full,
-              label: 'NAND Gate',
-              selected: controller.selectedTool == EditorTool.nand,
-              onTap: () => controller.selectTool(EditorTool.nand),
-            ),
-            _ToolButton(
-              icon: Icons.device_hub,
-              label: 'NOR Gate',
-              selected: controller.selectedTool == EditorTool.nor,
-              onTap: () => controller.selectTool(EditorTool.nor),
-            ),
-            _ToolButton(
-              icon: Icons.merge,
-              label: 'XOR Gate',
-              selected: controller.selectedTool == EditorTool.xor,
-              onTap: () => controller.selectTool(EditorTool.xor),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Complex Components',
-              style: TextStyle(
-                color: Color(0xff94a3b8),
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 12),
-            _ToolButton(
-              icon: Icons.display_settings,
-              label: '7-Segment Display',
-              selected: controller.selectedTool == EditorTool.segmentDisplay,
-              onTap: () => controller.selectTool(EditorTool.segmentDisplay),
-            ),
-            _ToolButton(
-              icon: Icons.timer,
-              label: 'Clock (1Hz)',
-              selected: controller.selectedTool == EditorTool.clock,
-              onTap: () => controller.selectTool(EditorTool.clock),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
+        children: [
+          const Padding(
+            padding: EdgeInsets.fromLTRB(20, 24, 20, 16),
+            child: _AppLogo(),
+          ),
+          const Divider(color: Color(0xff1f2937), height: 1),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
               children: [
-                const Text(
-                  'Saved ICs',
-                  style: TextStyle(
-                    color: Color(0xff94a3b8),
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                  ),
+                _SectionHeader(
+                  title: 'EDITOR TOOLS',
+                  icon: Icons.edit_note,
+                  onAction: () => controller.selectTool(EditorTool.select),
+                  actionLabel: 'Reset',
                 ),
-                TextButton.icon(
-                  onPressed: () => _showImportDialog(context),
-                  icon: const Icon(Icons.upload, size: 14),
-                  label: const Text('Import', style: TextStyle(fontSize: 12)),
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
+                _ToolButton(
+                  icon: Icons.mouse_outlined,
+                  label: 'Selection Mode',
+                  shortcut: 'V',
+                  selected: controller.selectedTool == EditorTool.select,
+                  onTap: () => controller.selectTool(EditorTool.select),
                 ),
+                _ToolButton(
+                  icon: Icons.delete_outline,
+                  label: 'Delete Selected',
+                  shortcut: 'Del',
+                  selected: false,
+                  onTap: () => controller.deleteSelected(),
+                  activeColor: Colors.redAccent.withOpacity(0.2),
+                ),
+                const SizedBox(height: 20),
+                const _SectionHeader(
+                  title: 'IO COMPONENTS',
+                  icon: Icons.settings_input_component,
+                ),
+                _ToolButton(
+                  icon: Icons.login_outlined,
+                  label: 'Input Switch',
+                  selected: controller.selectedTool == EditorTool.input,
+                  onTap: () => controller.selectTool(EditorTool.input),
+                ),
+                _ToolButton(
+                  icon: Icons.logout_outlined,
+                  label: 'Output Bulb',
+                  selected: controller.selectedTool == EditorTool.output,
+                  onTap: () => controller.selectTool(EditorTool.output),
+                ),
+                _ToolButton(
+                  icon: Icons.timer_outlined,
+                  label: 'Clock Generator',
+                  selected: controller.selectedTool == EditorTool.clock,
+                  onTap: () => controller.selectTool(EditorTool.clock),
+                ),
+                const SizedBox(height: 20),
+                const _SectionHeader(
+                  title: 'LOGIC GATES',
+                  icon: Icons.hub_outlined,
+                ),
+                _ToolButton(
+                  icon: Icons.join_inner_outlined,
+                  label: 'AND Gate',
+                  selected: controller.selectedTool == EditorTool.and,
+                  onTap: () => controller.selectTool(EditorTool.and),
+                ),
+                _ToolButton(
+                  icon: Icons.call_split_outlined,
+                  label: 'OR Gate',
+                  selected: controller.selectedTool == EditorTool.or,
+                  onTap: () => controller.selectTool(EditorTool.or),
+                ),
+                _ToolButton(
+                  icon: Icons.change_circle_outlined,
+                  label: 'NOT Gate',
+                  selected: controller.selectedTool == EditorTool.not,
+                  onTap: () => controller.selectTool(EditorTool.not),
+                ),
+                _ToolButton(
+                  icon: Icons.join_full_outlined,
+                  label: 'NAND Gate',
+                  selected: controller.selectedTool == EditorTool.nand,
+                  onTap: () => controller.selectTool(EditorTool.nand),
+                ),
+                _ToolButton(
+                  icon: Icons.device_hub_outlined,
+                  label: 'NOR Gate',
+                  selected: controller.selectedTool == EditorTool.nor,
+                  onTap: () => controller.selectTool(EditorTool.nor),
+                ),
+                _ToolButton(
+                  icon: Icons.merge_outlined,
+                  label: 'XOR Gate',
+                  selected: controller.selectedTool == EditorTool.xor,
+                  onTap: () => controller.selectTool(EditorTool.xor),
+                ),
+                const SizedBox(height: 20),
+                const _SectionHeader(
+                  title: 'ADVANCED',
+                  icon: Icons.biotech_outlined,
+                ),
+                _ToolButton(
+                  icon: Icons.seven_mp_outlined,
+                  label: '7-Seg Display',
+                  selected:
+                      controller.selectedTool == EditorTool.segmentDisplay,
+                  onTap: () => controller.selectTool(EditorTool.segmentDisplay),
+                ),
+                const SizedBox(height: 20),
+                _SectionHeader(
+                  title: 'SAVED ICs',
+                  icon: Icons.memory_outlined,
+                  onAction: () => _showImportDialog(context),
+                  actionLabel: 'Import',
+                ),
+                if (controller.customDefinitions.isEmpty)
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xff111827).withOpacity(0.5),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: const Color(0xff1f2937),
+                        style: BorderStyle.none,
+                      ),
+                    ),
+                    child: const Text(
+                      'No custom components yet.',
+                      style: TextStyle(
+                        color: Color(0xff4b5563),
+                        fontSize: 12,
+                        fontStyle: FontStyle.italic,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  )
+                else
+                  ...controller.customDefinitions.map(
+                    (def) => _ICCard(
+                      def: def,
+                      controller: controller,
+                      selected:
+                          controller.selectedTool == EditorTool.custom &&
+                          controller.selectedCustomComponent == def,
+                    ),
+                  ),
+                const SizedBox(height: 24),
+                const _HintCard(),
+                const SizedBox(height: 40),
               ],
             ),
-            const SizedBox(height: 12),
-            if (controller.customDefinitions.isEmpty)
-              const Padding(
-                padding: EdgeInsets.only(bottom: 16, left: 4),
-                child: Text(
-                  'Import a JSON to see it here',
-                  style: TextStyle(
-                    color: Color(0xff4b5563),
-                    fontSize: 12,
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-              ),
-            ...controller.customDefinitions.map(
-              (def) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: const Color(0xff111827),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: const Color(0xff1f2937)),
-                  ),
-                  child: Column(
-                    children: [
-                      _ToolButton(
-                        icon: Icons.developer_board,
-                        label: def.name,
-                        selected:
-                            controller.selectedTool == EditorTool.custom &&
-                            controller.selectedCustomComponent == def,
-                        margin: EdgeInsets.zero,
-                        onTap: () => controller.selectCustomComponent(def),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          _SmallIconButton(
-                            icon: Icons.visibility,
-                            tooltip: 'Open in Canvas',
-                            onTap: () => controller.loadDefinition(def),
-                          ),
-                          _SmallIconButton(
-                            icon: Icons.copy_all,
-                            tooltip: 'Copy JSON',
-                            onTap: () {
-                              final json = controller.exportIC(def);
-                              Clipboard.setData(ClipboardData(text: json));
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('${def.name} JSON copied!'),
-                                  behavior: SnackBarBehavior.floating,
-                                  width: 200,
-                                ),
-                              );
-                            },
-                          ),
-                          _SmallIconButton(
-                            icon: Icons.delete_outline,
-                            tooltip: 'Delete IC',
-                            onTap: () {
-                              showDialog(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  backgroundColor: const Color(0xff0b1120),
-                                  title: const Text(
-                                    'Delete IC?',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                  content: Text(
-                                    'Are you sure you want to delete "${def.name}"?',
-                                    style: const TextStyle(
-                                      color: Color(0xff94a3b8),
-                                    ),
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.pop(context),
-                                      child: const Text('Cancel'),
-                                    ),
-                                    ElevatedButton(
-                                      onPressed: () {
-                                        controller.removeCustomDefinition(def);
-                                        Navigator.pop(context);
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.red.shade900,
-                                      ),
-                                      child: const Text('Delete'),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            const _HintCard(),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -313,44 +187,69 @@ class ComponentToolbar extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xff0b1120),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text(
-          'Import Custom IC',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+          side: const BorderSide(color: Color(0xff1f2937)),
+        ),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xff38bdf8).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(
+                Icons.file_download_outlined,
+                color: Color(0xff38bdf8),
+              ),
+            ),
+            const SizedBox(width: 16),
+            const Text(
+              'Import Component',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Paste the JSON definition of your custom component below:',
+              'Paste the IC JSON definition below to add it to your library.',
               style: TextStyle(color: Color(0xff94a3b8), fontSize: 13),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: textController,
-              maxLines: 6,
+              maxLines: 8,
               style: const TextStyle(
                 color: Colors.white,
                 fontFamily: 'monospace',
                 fontSize: 12,
               ),
               decoration: InputDecoration(
-                hintText: '{"name": "My IC", ...}',
+                hintText: '{\n  "name": "My Component",\n  ...\n}',
                 hintStyle: const TextStyle(color: Color(0xff4b5563)),
                 fillColor: const Color(0xff020617),
                 filled: true,
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                   borderSide: const BorderSide(color: Color(0xff1f2937)),
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                   borderSide: const BorderSide(color: Color(0xff1f2937)),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Color(0xff38bdf8)),
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: const BorderSide(
+                    color: Color(0xff38bdf8),
+                    width: 2,
+                  ),
                 ),
               ),
             ),
@@ -364,21 +263,309 @@ class ComponentToolbar extends StatelessWidget {
               style: TextStyle(color: Color(0xff94a3b8)),
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.only(left: 8.0),
+            child: ElevatedButton(
+              onPressed: () {
+                if (textController.text.trim().isNotEmpty) {
+                  controller.importIC(textController.text.trim());
+                }
+                Navigator.pop(context);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xff38bdf8),
+                foregroundColor: const Color(0xff020617),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 0,
+              ),
+              child: const Text(
+                'Import Now',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  final VoidCallback? onAction;
+  final String? actionLabel;
+
+  const _SectionHeader({
+    required this.title,
+    required this.icon,
+    this.onAction,
+    this.actionLabel,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12, left: 4, right: 4),
+      child: Row(
+        children: [
+          Icon(icon, size: 14, color: const Color(0xff4b5563)),
+          const SizedBox(width: 8),
+          Text(
+            title,
+            style: const TextStyle(
+              color: Color(0xff64748b),
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.2,
+            ),
+          ),
+          const Spacer(),
+          if (onAction != null)
+            InkWell(
+              onTap: onAction,
+              borderRadius: BorderRadius.circular(6),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                child: Text(
+                  actionLabel ?? 'Action',
+                  style: const TextStyle(
+                    color: Color(0xff38bdf8),
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ToolButton extends StatefulWidget {
+  final IconData icon;
+  final String label;
+  final String? shortcut;
+  final bool selected;
+  final VoidCallback onTap;
+  final Color? activeColor;
+
+  const _ToolButton({
+    required this.icon,
+    required this.label,
+    this.shortcut,
+    required this.selected,
+    required this.onTap,
+    this.activeColor,
+  });
+
+  @override
+  State<_ToolButton> createState() => _ToolButtonState();
+}
+
+class _ToolButtonState extends State<_ToolButton> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isSelected = widget.selected;
+    final Color primaryColor = widget.activeColor ?? const Color(0xff38bdf8);
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _isHovered = true),
+        onExit: (_) => setState(() => _isHovered = false),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeInOut,
+          decoration: BoxDecoration(
+            color: isSelected
+                ? primaryColor.withOpacity(0.15)
+                : (_isHovered ? const Color(0xff1f2937) : Colors.transparent),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isSelected
+                  ? primaryColor.withOpacity(0.5)
+                  : (_isHovered ? const Color(0xff374151) : Colors.transparent),
+              width: 1.5,
+            ),
+          ),
+          child: InkWell(
+            onTap: widget.onTap,
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              height: 46,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Row(
+                children: [
+                  AnimatedScale(
+                    scale: isSelected || _isHovered ? 1.1 : 1.0,
+                    duration: const Duration(milliseconds: 200),
+                    child: Icon(
+                      widget.icon,
+                      size: 20,
+                      color: isSelected
+                          ? primaryColor
+                          : (_isHovered
+                                ? Colors.white
+                                : const Color(0xff94a3b8)),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      widget.label,
+                      style: TextStyle(
+                        color: isSelected
+                            ? Colors.white
+                            : (_isHovered
+                                  ? Colors.white
+                                  : const Color(0xffcbd5e1)),
+                        fontSize: 13,
+                        fontWeight: isSelected
+                            ? FontWeight.w700
+                            : FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  if (widget.shortcut != null)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xff020617),
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(color: const Color(0xff1f2937)),
+                      ),
+                      child: Text(
+                        widget.shortcut!,
+                        style: const TextStyle(
+                          color: Color(0xff4b5563),
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ICCard extends StatelessWidget {
+  final dynamic def;
+  final CircuitController controller;
+  final bool selected;
+
+  const _ICCard({
+    required this.def,
+    required this.controller,
+    required this.selected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: const Color(0xff111827),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: selected
+              ? const Color(0xff38bdf8).withOpacity(0.5)
+              : const Color(0xff1f2937),
+          width: selected ? 2 : 1,
+        ),
+      ),
+      child: Column(
+        children: [
+          _ToolButton(
+            icon: Icons.developer_board,
+            label: def.name,
+            selected: selected,
+            onTap: () => controller.selectCustomComponent(def),
+          ),
+          const Divider(color: Color(0xff1f2937), height: 1),
+          Padding(
+            padding: const EdgeInsets.all(8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _SmallIconButton(
+                  icon: Icons.edit_outlined,
+                  tooltip: 'Open in Editor',
+                  onTap: () => controller.loadDefinition(def),
+                ),
+                _SmallIconButton(
+                  icon: Icons.content_copy_outlined,
+                  tooltip: 'Copy JSON',
+                  onTap: () {
+                    final json = controller.exportIC(def);
+                    Clipboard.setData(ClipboardData(text: json));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('${def.name} copied to clipboard'),
+                        behavior: SnackBarBehavior.floating,
+                        backgroundColor: const Color(0xff1e293b),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                _SmallIconButton(
+                  icon: Icons.delete_outline_rounded,
+                  tooltip: 'Remove',
+                  onTap: () => _confirmDelete(context),
+                  color: Colors.redAccent.withOpacity(0.1),
+                  iconColor: Colors.redAccent.shade100,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _confirmDelete(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xff0b1120),
+        title: const Text('Delete IC?'),
+        content: Text(
+          'Remove "${def.name}" from your library? This cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
           ElevatedButton(
             onPressed: () {
-              if (textController.text.trim().isNotEmpty) {
-                controller.importIC(textController.text.trim());
-              }
+              controller.removeCustomDefinition(def);
               Navigator.pop(context);
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xff2563eb),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
+              backgroundColor: Colors.red.shade900,
             ),
-            child: const Text('Import Component'),
+            child: const Text('Delete'),
           ),
         ],
       ),
@@ -390,11 +577,15 @@ class _SmallIconButton extends StatelessWidget {
   final IconData icon;
   final String tooltip;
   final VoidCallback onTap;
+  final Color? color;
+  final Color? iconColor;
 
   const _SmallIconButton({
     required this.icon,
     required this.tooltip,
     required this.onTap,
+    this.color,
+    this.iconColor,
   });
 
   @override
@@ -405,12 +596,16 @@ class _SmallIconButton extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(8),
         child: Container(
-          padding: const EdgeInsets.all(6),
+          padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: const Color(0xff1f2937),
+            color: color ?? const Color(0xff1f2937),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(icon, size: 16, color: const Color(0xff94a3b8)),
+          child: Icon(
+            icon,
+            size: 16,
+            color: iconColor ?? const Color(0xff94a3b8),
+          ),
         ),
       ),
     );
@@ -425,88 +620,36 @@ class _AppLogo extends StatelessWidget {
     return Row(
       children: [
         Container(
-          height: 42,
-          width: 42,
+          height: 38,
+          width: 38,
           decoration: BoxDecoration(
-            color: const Color(0xff38bdf8),
-            borderRadius: BorderRadius.circular(14),
+            gradient: const LinearGradient(
+              colors: [Color(0xff38bdf8), Color(0xff2563eb)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xff38bdf8).withOpacity(0.3),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-          child: const Icon(Icons.schema, color: Color(0xff020617)),
+          child: const Icon(Icons.bolt, color: Colors.white, size: 22),
         ),
-        const SizedBox(width: 12),
-        const Expanded(
-          child: Text(
-            'Logic Lab',
-            style: TextStyle(fontSize: 21, fontWeight: FontWeight.w800),
+        const SizedBox(width: 14),
+        const Text(
+          'LOGIC LAB',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 0.5,
+            color: Colors.white,
           ),
         ),
       ],
-    );
-  }
-}
-
-class _ToolButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-  final EdgeInsets? margin;
-
-  const _ToolButton({
-    required this.icon,
-    required this.label,
-    required this.selected,
-    required this.onTap,
-    this.margin,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: margin ?? const EdgeInsets.only(bottom: 8),
-      child: Material(
-        color: selected ? const Color(0xff1e40af) : const Color(0xff111827),
-        borderRadius: BorderRadius.circular(14),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(14),
-          child: Container(
-            height: 44,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: selected
-                    ? const Color(0xff60a5fa)
-                    : const Color(0xff1f2937),
-              ),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  icon,
-                  size: 20,
-                  color: selected
-                      ? const Color(0xffdbeafe)
-                      : const Color(0xff94a3b8),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    label,
-                    style: TextStyle(
-                      color: selected
-                          ? const Color(0xffffffff)
-                          : const Color(0xffcbd5e1),
-                      fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
     );
   }
 }
@@ -517,15 +660,39 @@ class _HintCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xff111827),
+        color: const Color(0xff1e293b).withOpacity(0.5),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xff1f2937)),
+        border: Border.all(color: const Color(0xff334155)),
       ),
-      child: const Text(
-        'Tip: Select a component, tap canvas to place it. Drag from any Pin to create a wire instantly! Select and press Delete/Backspace to remove items.',
-        style: TextStyle(color: Color(0xff94a3b8), height: 1.4, fontSize: 13),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Icon(Icons.lightbulb_outline, size: 16, color: Color(0xfff59e0b)),
+              SizedBox(width: 8),
+              Text(
+                'QUICK TIP',
+                style: TextStyle(
+                  color: Color(0xfff59e0b),
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Drag from any Pin to create a wire instantly. Use Ctrl+Z to undo.',
+            style: TextStyle(
+              color: Color(0xff94a3b8),
+              height: 1.5,
+              fontSize: 12,
+            ),
+          ),
+        ],
       ),
     );
   }
