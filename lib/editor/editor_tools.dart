@@ -11,5 +11,8 @@ enum EditorTool {
   xor,
   segmentDisplay,
   clock,
+  waveform,
+  rgbLed,
+  logicProbe,
   custom,
 }

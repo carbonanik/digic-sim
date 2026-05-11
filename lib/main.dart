@@ -55,23 +55,31 @@ class _LogicDesignerScreenState extends State<LogicDesignerScreen> {
       child: Focus(
         autofocus: true,
         child: Scaffold(
-          body: AnimatedBuilder(
-            animation: controller,
-            builder: (context, _) {
-              return Row(
-                children: [
-                  ComponentToolbar(controller: controller),
-                  Expanded(
-                    child: Column(
-                      children: [
-                        _TopBar(controller: controller),
-                        Expanded(child: CircuitCanvas(controller: controller)),
-                      ],
+          body: Row(
+            children: [
+              AnimatedBuilder(
+                animation: controller,
+                builder: (context, _) =>
+                    ComponentToolbar(controller: controller),
+              ),
+              Expanded(
+                child: Column(
+                  children: [
+                    AnimatedBuilder(
+                      animation: controller,
+                      builder: (context, _) => _TopBar(controller: controller),
                     ),
-                  ),
-                ],
-              );
-            },
+                    Expanded(
+                      child: AnimatedBuilder(
+                        animation: controller,
+                        builder: (context, _) =>
+                            CircuitCanvas(controller: controller),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -86,7 +94,9 @@ class _TopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasSelection = controller.selectedNodeIds.isNotEmpty || controller.selectedWireId != null;
+    final hasSelection =
+        controller.selectedNodeIds.isNotEmpty ||
+        controller.selectedWireId != null;
 
     return Container(
       height: 64,
@@ -120,7 +130,11 @@ class _TopBar extends StatelessWidget {
               ),
               Text(
                 'Main Workspace',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.white),
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
               ),
             ],
           ),
@@ -167,7 +181,9 @@ class _TopBar extends StatelessWidget {
           _TopBarGroup(
             children: [
               _ToggleAction(
-                icon: controller.snapToGridEnabled ? Icons.grid_on_rounded : Icons.grid_off_rounded,
+                icon: controller.snapToGridEnabled
+                    ? Icons.grid_on_rounded
+                    : Icons.grid_off_rounded,
                 label: 'Snap',
                 active: controller.snapToGridEnabled,
                 onTap: controller.toggleGridSnapping,
@@ -210,9 +226,14 @@ class _TopBar extends StatelessWidget {
           side: const BorderSide(color: Color(0xff1f2937)),
         ),
         title: const Text('Clear Workspace?'),
-        content: const Text('This will delete all components and wires. This action is permanent.'),
+        content: const Text(
+          'This will delete all components and wires. This action is permanent.',
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
           ElevatedButton(
             onPressed: () {
               controller.clear();
@@ -221,7 +242,9 @@ class _TopBar extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red.shade900,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
             child: const Text('Clear All'),
           ),
@@ -430,7 +453,11 @@ class _IconButton extends StatelessWidget {
             color: color ?? Colors.transparent,
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(icon, size: 20, color: iconColor ?? const Color(0xff94a3b8)),
+          child: Icon(
+            icon,
+            size: 20,
+            color: iconColor ?? const Color(0xff94a3b8),
+          ),
         ),
       ),
     );
@@ -504,7 +531,9 @@ class _ToggleAction extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: active ? const Color(0xff38bdf8).withOpacity(0.1) : Colors.transparent,
+          color: active
+              ? const Color(0xff38bdf8).withOpacity(0.1)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Row(

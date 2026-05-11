@@ -14,6 +14,9 @@ import '../models/nodes/io_nodes.dart';
 import '../models/nodes/display_nodes.dart';
 import '../models/nodes/clock_node.dart';
 import '../models/nodes/composed_node.dart';
+import '../models/nodes/waveform_node.dart';
+import '../models/nodes/rgb_led_node.dart';
+import '../models/nodes/logic_probe_node.dart';
 import '../utils/pathfinder.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -302,8 +305,10 @@ class CircuitController extends ChangeNotifier {
 
   void _updateClockTimer() {
     final hasClocks = circuit.nodes.any((n) => n is ClockNode);
-    if (hasClocks && _clockTimer == null) {
-      _clockTimer = Timer.periodic(const Duration(milliseconds: 16), (timer) {
+    final hasWaveforms = circuit.nodes.any((n) => n is WaveformNode);
+
+    if ((hasClocks || hasWaveforms) && _clockTimer == null) {
+      _clockTimer = Timer.periodic(const Duration(milliseconds: 20), (timer) {
         bool changed = false;
         final now = DateTime.now();
         for (final node in circuit.nodes) {
@@ -317,12 +322,15 @@ class CircuitController extends ChangeNotifier {
             }
           }
         }
-        if (changed) {
+
+        // Always simulate if we have waveforms to keep them scrolling,
+        // or if a clock toggled.
+        if (changed || hasWaveforms) {
           LogicSimulator.simulate(circuit);
           notifyListeners();
         }
       });
-    } else if (!hasClocks && _clockTimer != null) {
+    } else if (!hasClocks && !hasWaveforms && _clockTimer != null) {
       _clockTimer?.cancel();
       _clockTimer = null;
     }
@@ -342,12 +350,18 @@ class CircuitController extends ChangeNotifier {
       EditorTool.xor => GateType.xor,
       EditorTool.segmentDisplay => null,
       EditorTool.clock => null,
+      EditorTool.waveform => null,
+      EditorTool.rgbLed => null,
+      EditorTool.logicProbe => null,
       _ => null,
     };
 
     if (type == null &&
         selectedTool != EditorTool.segmentDisplay &&
         selectedTool != EditorTool.clock &&
+        selectedTool != EditorTool.waveform &&
+        selectedTool != EditorTool.rgbLed &&
+        selectedTool != EditorTool.logicProbe &&
         selectedTool != EditorTool.custom) {
       return;
     }
@@ -360,6 +374,9 @@ class CircuitController extends ChangeNotifier {
     final node = switch (selectedTool) {
       EditorTool.segmentDisplay => _createSegmentDisplay(position),
       EditorTool.clock => _createClock(position),
+      EditorTool.waveform => _createWaveform(position),
+      EditorTool.rgbLed => _createRGBLED(position),
+      EditorTool.logicProbe => _createLogicProbe(position),
       _ => _createNode(type!, position),
     };
     circuit.nodes.add(node);
@@ -776,6 +793,52 @@ class CircuitController extends ChangeNotifier {
           localPosition: const Offset(112, 32),
         ),
       ],
+    );
+  }
+
+  CircuitNode _createWaveform(Offset position) {
+    final id = UniqueKey().toString();
+    final inputPins = List.generate(4, (i) {
+      return Pin(
+        id: 'in_$i',
+        nodeId: id,
+        isInput: true,
+        localPosition: Offset(0, 45.0 + i * 30.0),
+      );
+    });
+
+    return WaveformNode(
+      id: id,
+      position: position,
+      inputPins: inputPins,
+      outputPins: const [],
+    );
+  }
+
+  CircuitNode _createRGBLED(Offset position) {
+    final id = UniqueKey().toString();
+    final inputPins = [
+      Pin(id: 'r', nodeId: id, isInput: true, localPosition: const Offset(0, 16)),
+      Pin(id: 'g', nodeId: id, isInput: true, localPosition: const Offset(0, 40)),
+      Pin(id: 'b', nodeId: id, isInput: true, localPosition: const Offset(0, 64)),
+    ];
+    return RGBLEDNode(
+      id: id,
+      position: position,
+      inputPins: inputPins,
+      outputPins: const [],
+    );
+  }
+
+  CircuitNode _createLogicProbe(Offset position) {
+    final id = UniqueKey().toString();
+    return LogicProbeNode(
+      id: id,
+      position: position,
+      inputPins: [
+        Pin(id: 'in', nodeId: id, isInput: true, localPosition: const Offset(0, 24)),
+      ],
+      outputPins: const [],
     );
   }
 

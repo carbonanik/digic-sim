@@ -1,8 +1,10 @@
+import 'package:digital_logic_sim_2/models/nodes/composed_node.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../controllers/circuit_controller.dart';
 import '../editor/editor_tools.dart';
+import '../utils/preset_library.dart';
 
 class ComponentToolbar extends StatelessWidget {
   final CircuitController controller;
@@ -131,6 +133,39 @@ class ComponentToolbar extends StatelessWidget {
                   selected:
                       controller.selectedTool == EditorTool.segmentDisplay,
                   onTap: () => controller.selectTool(EditorTool.segmentDisplay),
+                ),
+                _ToolButton(
+                  icon: Icons.analytics_outlined,
+                  label: 'Waveform Monitor',
+                  selected: controller.selectedTool == EditorTool.waveform,
+                  onTap: () => controller.selectTool(EditorTool.waveform),
+                ),
+                _ToolButton(
+                  icon: Icons.light_outlined,
+                  label: 'RGB LED',
+                  selected: controller.selectedTool == EditorTool.rgbLed,
+                  onTap: () => controller.selectTool(EditorTool.rgbLed),
+                ),
+                _ToolButton(
+                  icon: Icons.biotech_outlined,
+                  label: 'Logic Probe',
+                  selected: controller.selectedTool == EditorTool.logicProbe,
+                  onTap: () => controller.selectTool(EditorTool.logicProbe),
+                ),
+                const SizedBox(height: 20),
+                const _SectionHeader(
+                  title: 'PRESET ICs',
+                  icon: Icons.library_books_outlined,
+                ),
+                ...PresetLibrary.presets.map(
+                  (def) => _ICCard(
+                    def: def,
+                    controller: controller,
+                    selected:
+                        controller.selectedTool == EditorTool.custom &&
+                        controller.selectedCustomComponent == def,
+                    isPreset: true,
+                  ),
                 ),
                 const SizedBox(height: 20),
                 _SectionHeader(
@@ -467,14 +502,16 @@ class _ToolButtonState extends State<_ToolButton> {
 }
 
 class _ICCard extends StatelessWidget {
-  final dynamic def;
+  final SubCircuitDefinition def;
   final CircuitController controller;
   final bool selected;
+  final bool isPreset;
 
   const _ICCard({
     required this.def,
     required this.controller,
     required this.selected,
+    this.isPreset = false,
   });
 
   @override
@@ -528,13 +565,14 @@ class _ICCard extends StatelessWidget {
                     );
                   },
                 ),
-                _SmallIconButton(
-                  icon: Icons.delete_outline_rounded,
-                  tooltip: 'Remove',
-                  onTap: () => _confirmDelete(context),
-                  color: Colors.redAccent.withOpacity(0.1),
-                  iconColor: Colors.redAccent.shade100,
-                ),
+                if (!isPreset)
+                  _SmallIconButton(
+                    icon: Icons.delete_outline_rounded,
+                    tooltip: 'Remove',
+                    onTap: () => _confirmDelete(context),
+                    color: Colors.redAccent.withOpacity(0.1),
+                    iconColor: Colors.redAccent.shade100,
+                  ),
               ],
             ),
           ),

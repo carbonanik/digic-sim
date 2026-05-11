@@ -7,18 +7,23 @@ import 'nodes/io_nodes.dart';
 import 'nodes/display_nodes.dart';
 import 'nodes/clock_node.dart';
 import 'nodes/composed_node.dart';
+import 'nodes/waveform_node.dart';
+import 'nodes/rgb_led_node.dart';
+import 'nodes/logic_probe_node.dart';
 
 class NodeFactory {
   static CircuitNode fromMap(Map<String, dynamic> map) {
     final String id = map['id'];
-    final Offset position = Offset(
-      (map['position']['dx'] as num).toDouble(),
-      (map['position']['dy'] as num).toDouble(),
-    );
-    final List<Pin> inputPins = (map['inputPins'] as List)
+    final Offset position = map['position'] != null 
+      ? Offset(
+          (map['position']['dx'] as num).toDouble(),
+          (map['position']['dy'] as num).toDouble(),
+        )
+      : Offset.zero;
+    final List<Pin> inputPins = ((map['inputPins'] ?? []) as List)
         .map((p) => Pin.fromMap(p as Map<String, dynamic>))
         .toList();
-    final List<Pin> outputPins = (map['outputPins'] as List)
+    final List<Pin> outputPins = ((map['outputPins'] ?? []) as List)
         .map((p) => Pin.fromMap(p as Map<String, dynamic>))
         .toList();
 
@@ -70,6 +75,27 @@ class NodeFactory {
           inputPins: inputPins,
           outputPins: outputPins,
           definition: SubCircuitDefinition.fromMap(map['definition']),
+        );
+      case 'waveform':
+        return WaveformNode(
+          id: id,
+          position: position,
+          inputPins: inputPins,
+          outputPins: outputPins,
+        );
+      case 'rgb_led':
+        return RGBLEDNode(
+          id: id,
+          position: position,
+          inputPins: inputPins,
+          outputPins: outputPins,
+        );
+      case 'logic_probe':
+        return LogicProbeNode(
+          id: id,
+          position: position,
+          inputPins: inputPins,
+          outputPins: outputPins,
         );
       default:
         throw Exception('Unknown node type: $type');

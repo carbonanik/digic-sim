@@ -36,14 +36,14 @@ class SubCircuitDefinition {
 
   static SubCircuitDefinition fromMap(Map<String, dynamic> map) {
     return SubCircuitDefinition(
-      name: map['name'],
-      nodes: (map['nodes'] as List)
+      name: map['name'] ?? 'Unknown IC',
+      nodes: (map['nodes'] as List? ?? [])
           .map((n) => NodeFactory.fromMap(n as Map<String, dynamic>))
           .toList(),
-      wires: (map['wires'] as List)
+      wires: (map['wires'] as List? ?? [])
           .map((w) => Wire.fromMap(w as Map<String, dynamic>))
           .toList(),
-      color: Color(map['color']),
+      color: Color(map['color'] ?? 0xff334155),
       inputLabels: List<String>.from(map['inputLabels'] ?? []),
       outputLabels: List<String>.from(map['outputLabels'] ?? []),
     );
