@@ -277,22 +277,44 @@ class _CircuitCanvasState extends State<CircuitCanvas> {
                           controller.endNodeMove();
                         }
                       },
-                child: CustomPaint(
-                  size: const Size(3000, 2200),
-                  painter: CircuitPainter(
-                    circuit: widget.controller.circuit,
-                    selectedNodeIds: widget.controller.selectedNodeIds,
-                    selectedWireId: widget.controller.selectedWireId,
-                    wireStart: widget.controller.wireStart,
-                    temporaryWireEnd: widget.controller.temporaryWireEnd,
-                    selectionRect: widget.controller.selectionRect,
-                    hoveredNodeId: widget.controller.hoveredNodeId,
-                    hoveredPin: widget.controller.hoveredPin,
-                    mousePosition: widget.controller.mousePosition,
-                    selectedTool: widget.controller.selectedTool,
-                    selectedCustomComponent:
-                        widget.controller.selectedCustomComponent,
-                  ),
+                child: Stack(
+                  children: [
+                    RepaintBoundary(
+                      child: CustomPaint(
+                        size: const Size(3000, 2200),
+                        painter: GridPainter(),
+                      ),
+                    ),
+                    RepaintBoundary(
+                      child: CustomPaint(
+                        size: const Size(3000, 2200),
+                        painter: CircuitPainter(
+                          circuit: widget.controller.circuit,
+                          selectedNodeIds: widget.controller.selectedNodeIds,
+                          selectedWireId: widget.controller.selectedWireId,
+                          repaintCounter: widget.controller.repaintCounter,
+                        ),
+                      ),
+                    ),
+                    RepaintBoundary(
+                      child: CustomPaint(
+                        size: const Size(3000, 2200),
+                        painter: OverlayPainter(
+                          circuit: widget.controller.circuit,
+                          wireStart: widget.controller.wireStart,
+                          temporaryWireEnd: widget.controller.temporaryWireEnd,
+                          selectionRect: widget.controller.selectionRect,
+                          hoveredNodeId: widget.controller.hoveredNodeId,
+                          hoveredPin: widget.controller.hoveredPin,
+                          mousePosition: widget.controller.mousePosition,
+                          selectedTool: widget.controller.selectedTool,
+                          selectedCustomComponent:
+                              widget.controller.selectedCustomComponent,
+                          repaintCounter: widget.controller.repaintCounter,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),

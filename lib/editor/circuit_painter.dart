@@ -1,8 +1,5 @@
-import 'package:digital_logic_sim_2/editor/editor_tools.dart';
-import 'package:digital_logic_sim_2/editor/hit_test.dart';
+import 'package:digital_logic_sim_2/controllers/circuit_controller.dart';
 import 'package:flutter/material.dart';
-
-import '../controllers/circuit_controller.dart';
 import '../models/circuit.dart';
 import '../models/circuit_node.dart';
 import '../models/pin.dart';
@@ -12,44 +9,12 @@ import '../models/nodes/gate_node.dart';
 import '../models/nodes/composed_node.dart';
 import '../models/nodes/io_nodes.dart';
 import '../utils/pathfinder.dart';
+import 'editor_tools.dart';
+import 'hit_test.dart';
 
-class CircuitPainter extends CustomPainter {
-  final Circuit circuit;
-  final Set<String> selectedNodeIds;
-  final String? selectedWireId;
-  final PinSelection? wireStart;
-  final Offset? temporaryWireEnd;
-  final Rect? selectionRect;
-  final String? hoveredNodeId;
-  final PinHit? hoveredPin;
-  final Offset? mousePosition;
-  final EditorTool selectedTool;
-  final SubCircuitDefinition? selectedCustomComponent;
-
-  CircuitPainter({
-    required this.circuit,
-    required this.selectedNodeIds,
-    this.selectedWireId,
-    this.wireStart,
-    this.temporaryWireEnd,
-    this.selectionRect,
-    this.hoveredNodeId,
-    this.hoveredPin,
-    this.mousePosition,
-    required this.selectedTool,
-    this.selectedCustomComponent,
-  });
-
+class GridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    _drawGrid(canvas, size);
-    _drawWires(canvas);
-    _drawTemporaryWire(canvas);
-    _drawNodes(canvas);
-    _drawGhost(canvas);
-  }
-
-  void _drawGrid(Canvas canvas, Size size) {
     final gridPaint = Paint()
       ..color = const Color(0xff1e293b)
       ..strokeWidth = 1;
@@ -63,6 +28,29 @@ class CircuitPainter extends CustomPainter {
     for (double y = 0; y < size.height; y += gridSize) {
       canvas.drawLine(Offset(0, y), Offset(size.width, y), gridPaint);
     }
+  }
+
+  @override
+  bool shouldRepaint(covariant GridPainter oldDelegate) => false;
+}
+
+class CircuitPainter extends CustomPainter {
+  final Circuit circuit;
+  final Set<String> selectedNodeIds;
+  final String? selectedWireId;
+  final int repaintCounter;
+
+  CircuitPainter({
+    required this.circuit,
+    required this.selectedNodeIds,
+    this.selectedWireId,
+    required this.repaintCounter,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    _drawWires(canvas);
+    _drawNodes(canvas);
   }
 
   void _drawWires(Canvas canvas) {
@@ -105,12 +93,10 @@ class CircuitPainter extends CustomPainter {
         allSegments,
       );
 
-      // Add this wire's segments to allSegments for subsequent wires to avoid
       for (int i = 0; i < points.length - 1; i++) {
         _addSegments(allSegments, points[i], points[i + 1]);
       }
 
-      // Draw waypoint handles if selected
       if (isSelected && wire.waypoints.isNotEmpty) {
         final handlePaint = Paint()
           ..color = const Color(0xfff43f5e)
@@ -126,34 +112,6 @@ class CircuitPainter extends CustomPainter {
         }
       }
     }
-  }
-
-  void _drawTemporaryWire(Canvas canvas) {
-    if (wireStart == null || temporaryWireEnd == null) return;
-
-    final start = wireStart!.node.position + wireStart!.pin.localPosition;
-
-    final paint = Paint()
-      ..color = const Color(0xfffacc15)
-      ..strokeWidth = 3
-      ..style = PaintingStyle.stroke
-      ..strokeJoin = StrokeJoin.round
-      ..strokeCap = StrokeCap.round;
-
-    final obstacles = circuit.nodes.map((n) => n.rect).toList();
-    final points = PathFinder.findPath(
-      start: start,
-      end: temporaryWireEnd!,
-      obstacles: obstacles,
-    );
-
-    if (points.isEmpty) return;
-
-    final path = Path()..moveTo(points.first.dx, points.first.dy);
-    for (int i = 1; i < points.length; i++) {
-      path.lineTo(points[i].dx, points[i].dy);
-    }
-    canvas.drawPath(path, paint);
   }
 
   List<Offset> _drawWire(
@@ -201,22 +159,8 @@ class CircuitPainter extends CustomPainter {
   void _drawNodes(Canvas canvas) {
     for (final node in circuit.nodes) {
       final isSelected = selectedNodeIds.contains(node.id);
-      final isHovered = node.id == hoveredNodeId;
-      node.paint(canvas, isSelected, isHovered: isHovered);
+      node.paint(canvas, isSelected);
       _drawPins(canvas, node);
-    }
-
-    if (selectionRect != null) {
-      final paint = Paint()
-        ..color = Colors.blue.withOpacity(0.3)
-        ..style = PaintingStyle.fill;
-      canvas.drawRect(selectionRect!, paint);
-
-      final borderPaint = Paint()
-        ..color = Colors.blue
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.0;
-      canvas.drawRect(selectionRect!, borderPaint);
     }
   }
 
@@ -224,7 +168,6 @@ class CircuitPainter extends CustomPainter {
     for (final pin in node.inputPins) {
       _drawPin(canvas, node, pin);
     }
-
     for (final pin in node.outputPins) {
       _drawPin(canvas, node, pin);
     }
@@ -232,31 +175,159 @@ class CircuitPainter extends CustomPainter {
 
   void _drawPin(Canvas canvas, CircuitNode node, Pin pin) {
     final position = node.position + pin.localPosition;
-    final isHovered =
-        hoveredPin?.pin.id == pin.id && hoveredPin?.node.id == node.id;
-
-    final radius = isHovered ? 9.0 : 7.0;
+    final radius = 7.0;
 
     final paint = Paint()
       ..color = pin.isInput ? const Color(0xfff97316) : const Color(0xff22c55e)
       ..style = PaintingStyle.fill;
 
     final border = Paint()
-      ..color = isHovered ? Colors.white : const Color(0xffe5e7eb)
+      ..color = const Color(0xffe5e7eb)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = isHovered ? 2.5 : 2;
+      ..strokeWidth = 2;
 
-    if (isHovered) {
+    canvas.drawCircle(position, radius, paint);
+    canvas.drawCircle(position, radius, border);
+  }
+
+  Offset? _getWireStart(Wire wire) {
+    final node = _findNode(wire.fromNodeId);
+    if (node == null) return null;
+    final pin = node.outputPins
+        .where((p) => p.id == wire.fromPinId)
+        .firstOrNull;
+    if (pin == null) return null;
+    return node.position + pin.localPosition;
+  }
+
+  Offset? _getWireEnd(Wire wire) {
+    final node = _findNode(wire.toNodeId);
+    if (node == null) return null;
+    final pin = node.inputPins.where((p) => p.id == wire.toPinId).firstOrNull;
+    if (pin == null) return null;
+    return node.position + pin.localPosition;
+  }
+
+  CircuitNode? _findNode(String id) {
+    for (final node in circuit.nodes) {
+      if (node.id == id) return node;
+    }
+    return null;
+  }
+
+  @override
+  bool shouldRepaint(covariant CircuitPainter oldDelegate) {
+    return oldDelegate.repaintCounter != repaintCounter;
+  }
+}
+
+class OverlayPainter extends CustomPainter {
+  final Circuit circuit;
+  final PinSelection? wireStart;
+  final Offset? temporaryWireEnd;
+  final Rect? selectionRect;
+  final String? hoveredNodeId;
+  final PinHit? hoveredPin;
+  final Offset? mousePosition;
+  final EditorTool selectedTool;
+  final SubCircuitDefinition? selectedCustomComponent;
+  final int repaintCounter;
+
+  OverlayPainter({
+    required this.circuit,
+    this.wireStart,
+    this.temporaryWireEnd,
+    this.selectionRect,
+    this.hoveredNodeId,
+    this.hoveredPin,
+    this.mousePosition,
+    required this.selectedTool,
+    this.selectedCustomComponent,
+    required this.repaintCounter,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    _drawHoverEffects(canvas);
+    _drawTemporaryWire(canvas);
+    _drawSelectionRect(canvas);
+    _drawGhost(canvas);
+  }
+
+  void _drawHoverEffects(Canvas canvas) {
+    if (hoveredNodeId != null) {
+      final node = circuit.nodes
+          .where((n) => n.id == hoveredNodeId)
+          .firstOrNull;
+      if (node != null) {
+        node.paint(canvas, false, isHovered: true);
+      }
+    }
+
+    if (hoveredPin != null) {
+      final node = hoveredPin!.node;
+      final pin = hoveredPin!.pin;
+      final position = node.position + pin.localPosition;
+      const radius = 9.0;
+
+      final paint = Paint()
+        ..color = pin.isInput
+            ? const Color(0xfff97316)
+            : const Color(0xff22c55e)
+        ..style = PaintingStyle.fill;
+
+      final border = Paint()
+        ..color = Colors.white
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.5;
+
       final glow = Paint()
         ..color =
             (pin.isInput ? const Color(0xfff97316) : const Color(0xff22c55e))
                 .withOpacity(0.4)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
-      canvas.drawCircle(position, radius + 2, glow);
-    }
 
-    canvas.drawCircle(position, radius, paint);
-    canvas.drawCircle(position, radius, border);
+      canvas.drawCircle(position, radius + 2, glow);
+      canvas.drawCircle(position, radius, paint);
+      canvas.drawCircle(position, radius, border);
+    }
+  }
+
+  void _drawTemporaryWire(Canvas canvas) {
+    if (wireStart == null || temporaryWireEnd == null) return;
+    final start = wireStart!.node.position + wireStart!.pin.localPosition;
+    final paint = Paint()
+      ..color = const Color(0xfffacc15)
+      ..strokeWidth = 3
+      ..style = PaintingStyle.stroke
+      ..strokeJoin = StrokeJoin.round
+      ..strokeCap = StrokeCap.round;
+
+    final obstacles = circuit.nodes.map((n) => n.rect).toList();
+    final points = PathFinder.findPath(
+      start: start,
+      end: temporaryWireEnd!,
+      obstacles: obstacles,
+    );
+    if (points.isEmpty) return;
+    final path = Path()..moveTo(points.first.dx, points.first.dy);
+    for (int i = 1; i < points.length; i++) {
+      path.lineTo(points[i].dx, points[i].dy);
+    }
+    canvas.drawPath(path, paint);
+  }
+
+  void _drawSelectionRect(Canvas canvas) {
+    if (selectionRect == null) return;
+    final paint = Paint()
+      ..color = Colors.blue.withOpacity(0.3)
+      ..style = PaintingStyle.fill;
+    canvas.drawRect(selectionRect!, paint);
+    final borderPaint = Paint()
+      ..color = Colors.blue
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0;
+    canvas.drawRect(selectionRect!, borderPaint);
   }
 
   void _drawGhost(Canvas canvas) {
@@ -284,15 +355,11 @@ class CircuitPainter extends CustomPainter {
       size = isDisplay ? const Size(80, 128) : const Size(112, 64);
     }
 
-    canvas.saveLayer(
-      Rect.fromLTWH(
-        ghostPos.dx,
-        ghostPos.dy,
-        size.width + 10,
-        size.height + 10,
-      ),
-      Paint()..color = Colors.white.withOpacity(0.35),
-    );
+    final ghostPaint = Paint()..color = Colors.white.withOpacity(0.35);
+
+    // Avoid saveLayer by using opacity in the child components or drawing with opacity paint
+    // For simplicity, we wrap the drawing in a layer-like logic but without saveLayer if possible
+    // Here we can just pass the opacity paint to GateNode.paintGate or equivalent
 
     GateType? gateType;
     switch (selectedTool) {
@@ -318,9 +385,10 @@ class CircuitPainter extends CustomPainter {
         break;
     }
 
-    final fillPaint = Paint()..color = const Color(0xff1e293b);
+    final fillPaint = Paint()
+      ..color = const Color(0xff1e293b).withOpacity(0.35);
     final borderPaint = Paint()
-      ..color = const Color(0xff94a3b8)
+      ..color = const Color(0xff94a3b8).withOpacity(0.35)
       ..strokeWidth = 2
       ..style = PaintingStyle.stroke
       ..strokeJoin = StrokeJoin.round;
@@ -355,7 +423,6 @@ class CircuitPainter extends CustomPainter {
             localPosition: const Offset(0, 32),
           ),
       ];
-
       final outputPins = <Pin>[
         Pin(
           id: 'out',
@@ -381,23 +448,20 @@ class CircuitPainter extends CustomPainter {
         Rect.fromLTWH(ghostPos.dx, ghostPos.dy, size.width, size.height),
         Radius.circular(isDisplay ? 8 : (isCustom ? 12 : 16)),
       );
-
       final fillP = isCustom
-          ? (Paint()..color = selectedCustomComponent!.color)
+          ? (Paint()..color = selectedCustomComponent!.color.withOpacity(0.35))
           : fillPaint;
-
       canvas.drawRRect(ghostRect, fillP);
       canvas.drawRRect(ghostRect, borderPaint);
 
       final label = isCustom
           ? selectedCustomComponent!.name
           : (isDisplay ? '7-SEG' : selectedTool.name.toUpperCase());
-
       final textPainter = TextPainter(
         text: TextSpan(
           text: label,
           style: TextStyle(
-            color: const Color(0xfff8fafc),
+            color: const Color(0xfff8fafc).withOpacity(0.35),
             fontSize: isCustom ? 15 : 14,
             fontWeight: isCustom ? FontWeight.w900 : FontWeight.w800,
             letterSpacing: 0.5,
@@ -415,42 +479,10 @@ class CircuitPainter extends CustomPainter {
             ),
       );
     }
-
-    canvas.restore();
-  }
-
-  Offset? _getWireStart(Wire wire) {
-    final node = _findNode(wire.fromNodeId);
-    if (node == null) return null;
-
-    final pin = node.outputPins
-        .where((p) => p.id == wire.fromPinId)
-        .firstOrNull;
-    if (pin == null) return null;
-
-    return node.position + pin.localPosition;
-  }
-
-  Offset? _getWireEnd(Wire wire) {
-    final node = _findNode(wire.toNodeId);
-    if (node == null) return null;
-
-    final pin = node.inputPins.where((p) => p.id == wire.toPinId).firstOrNull;
-    if (pin == null) return null;
-
-    return node.position + pin.localPosition;
-  }
-
-  CircuitNode? _findNode(String id) {
-    for (final node in circuit.nodes) {
-      if (node.id == id) return node;
-    }
-
-    return null;
   }
 
   @override
-  bool shouldRepaint(covariant CircuitPainter oldDelegate) {
-    return true;
+  bool shouldRepaint(covariant OverlayPainter oldDelegate) {
+    return oldDelegate.repaintCounter != repaintCounter;
   }
 }

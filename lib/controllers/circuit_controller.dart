@@ -67,6 +67,8 @@ class CircuitController extends ChangeNotifier {
   List<CircuitAction> undoStack = [];
   List<CircuitAction> redoStack = [];
 
+  int repaintCounter = 0;
+
   Offset _dragAccumulator = Offset.zero;
   bool snapToGridEnabled = true;
 
@@ -141,6 +143,12 @@ class CircuitController extends ChangeNotifier {
       mousePosition = snapped;
       notifyListeners();
     }
+  }
+
+  @override
+  void notifyListeners() {
+    repaintCounter++;
+    super.notifyListeners();
   }
 
   void clear() {
