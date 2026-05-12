@@ -5,7 +5,7 @@ import '../models/wire.dart';
 
 class LogicSimulator {
   /// Simulates the circuit until it reaches a stable state or [maxSteps] is reached.
-  /// 
+  ///
   /// This implementation improves performance by:
   /// 1. Using lookup maps for O(1) access to nodes and pins.
   /// 2. Using an event-driven approach (dirty-node tracking) to only evaluate
@@ -28,7 +28,7 @@ class LogicSimulator {
     final Map<String, Wire> wireLookup = {};
     // Map nodes to their outgoing wires for event propagation
     final Map<String, List<Wire>> outgoingWires = {};
-    
+
     for (final wire in circuit.wires) {
       wireLookup['${wire.toNodeId}:${wire.toPinId}'] = wire;
       outgoingWires.putIfAbsent(wire.fromNodeId, () => []).add(wire);
@@ -37,14 +37,14 @@ class LogicSimulator {
     // 2. Event-driven simulation
     // Initially, all nodes are considered "dirty" to ensure a full initial state.
     Set<String> dirtyNodeIds = nodeMap.keys.toSet();
-    
+
     // Safety limit to prevent infinite loops (e.g. unstable oscillators)
     final int maxSteps = circuit.nodes.length + 10;
     int stepCount = 0;
 
     while (dirtyNodeIds.isNotEmpty && stepCount < maxSteps) {
       stepCount++;
-      
+
       // Step A: Propagate values to input pins for all currently dirty nodes.
       // We do this in a separate pass to maintain synchronous simulation semantics.
       for (final nodeId in dirtyNodeIds) {
@@ -56,7 +56,8 @@ class LogicSimulator {
           if (wire == null) {
             inputPin.value = false;
           } else {
-            final fromPin = outputPinMap['${wire.fromNodeId}:${wire.fromPinId}'];
+            final fromPin =
+                outputPinMap['${wire.fromNodeId}:${wire.fromPinId}'];
             inputPin.value = fromPin?.value ?? false;
           }
         }

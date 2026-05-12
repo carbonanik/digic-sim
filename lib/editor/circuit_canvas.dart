@@ -272,6 +272,10 @@ class _CircuitCanvasState extends State<CircuitCanvas> {
                           controller.endWireDrag();
                           return;
                         }
+
+                        if (controller.selectedNodeIds.isNotEmpty) {
+                          controller.endNodeMove();
+                        }
                       },
                 child: CustomPaint(
                   size: const Size(3000, 2200),

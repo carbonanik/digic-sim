@@ -85,15 +85,7 @@ class CircuitPainter extends CustomPainter {
           ..strokeJoin = StrokeJoin.round
           ..strokeCap = StrokeCap.round
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
-        _drawOrthogonalWire(
-          canvas,
-          start,
-          end,
-          wire.waypoints,
-          glowPaint,
-          obstacles: obstacles,
-          existingSegments: allSegments,
-        );
+        _drawWire(canvas, wire, start, end, glowPaint, obstacles, allSegments);
       }
 
       final paint = Paint()
@@ -103,28 +95,14 @@ class CircuitPainter extends CustomPainter {
         ..strokeJoin = StrokeJoin.round
         ..strokeCap = StrokeCap.round;
 
-      // Calculate path points for the actual wire and segments
-      final List<Offset> points;
-      if (wire.waypoints.isNotEmpty) {
-        points = [start, ...wire.waypoints, end];
-      } else {
-        points = PathFinder.findPath(
-          start: start,
-          end: end,
-          obstacles: obstacles,
-          existingSegments: allSegments,
-        );
-      }
-
-      // Draw the wire
-      _drawOrthogonalWire(
+      final points = _drawWire(
         canvas,
+        wire,
         start,
         end,
-        wire.waypoints,
         paint,
-        obstacles: obstacles,
-        existingSegments: allSegments,
+        obstacles,
+        allSegments,
       );
 
       // Add this wire's segments to allSegments for subsequent wires to avoid
@@ -162,18 +140,51 @@ class CircuitPainter extends CustomPainter {
       ..strokeJoin = StrokeJoin.round
       ..strokeCap = StrokeCap.round;
 
-    _drawOrthogonalWire(
-      canvas,
-      start,
-      temporaryWireEnd!,
-      [],
-      paint,
-      obstacles: circuit.nodes.map((n) => n.rect).toList(),
+    final obstacles = circuit.nodes.map((n) => n.rect).toList();
+    final points = PathFinder.findPath(
+      start: start,
+      end: temporaryWireEnd!,
+      obstacles: obstacles,
     );
+
+    if (points.isEmpty) return;
+
+    final path = Path()..moveTo(points.first.dx, points.first.dy);
+    for (int i = 1; i < points.length; i++) {
+      path.lineTo(points[i].dx, points[i].dy);
+    }
+    canvas.drawPath(path, paint);
+  }
+
+  List<Offset> _drawWire(
+    Canvas canvas,
+    Wire wire,
+    Offset start,
+    Offset end,
+    Paint paint,
+    List<Rect> obstacles,
+    Set<WireSegment> existingSegments,
+  ) {
+    final points = wire.getPathPoints(
+      start,
+      end,
+      obstacles: obstacles,
+      existingSegments: existingSegments,
+    );
+
+    if (points.isEmpty) return [];
+
+    final path = Path()..moveTo(points.first.dx, points.first.dy);
+    for (int i = 1; i < points.length; i++) {
+      path.lineTo(points[i].dx, points[i].dy);
+    }
+
+    canvas.drawPath(path, paint);
+    return points;
   }
 
   void _addSegments(Set<WireSegment> segments, Offset p1, Offset p2) {
-    const gridSize = 32.0;
+    const gridSize = 16.0;
     final dist = (p1 - p2).distance;
     if (dist < 0.1) return;
 
@@ -185,37 +196,6 @@ class CircuitPainter extends CustomPainter {
       final s2 = p1 + dir * ((i + 1) * gridSize);
       segments.add(WireSegment(s1, s2));
     }
-  }
-
-  void _drawOrthogonalWire(
-    Canvas canvas,
-    Offset start,
-    Offset end,
-    List<Offset> waypoints,
-    Paint paint, {
-    List<Rect> obstacles = const [],
-    Set<WireSegment> existingSegments = const {},
-  }) {
-    final List<Offset> points;
-    if (waypoints.isNotEmpty) {
-      points = [start, ...waypoints, end];
-    } else {
-      points = PathFinder.findPath(
-        start: start,
-        end: end,
-        obstacles: obstacles,
-        existingSegments: existingSegments,
-      );
-    }
-
-    if (points.isEmpty) return;
-
-    final path = Path()..moveTo(points.first.dx, points.first.dy);
-    for (int i = 1; i < points.length; i++) {
-      path.lineTo(points[i].dx, points[i].dy);
-    }
-
-    canvas.drawPath(path, paint);
   }
 
   void _drawNodes(Canvas canvas) {

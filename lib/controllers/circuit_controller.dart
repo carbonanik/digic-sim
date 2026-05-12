@@ -70,6 +70,8 @@ class CircuitController extends ChangeNotifier {
   Offset _dragAccumulator = Offset.zero;
   bool snapToGridEnabled = true;
 
+  bool _pathsDirty = true;
+
   // Wire dragging state
   WireHit? draggedWireHit;
   Offset? _wireDragStartMousePos;
@@ -147,6 +149,7 @@ class CircuitController extends ChangeNotifier {
     selectedNodeIds.clear();
     temporaryWireEnd = null;
     draggedWireHit = null;
+    _pathsDirty = true;
     notifyListeners();
   }
 
@@ -245,6 +248,8 @@ class CircuitController extends ChangeNotifier {
 
     if (wireIndex != -1) {
       circuit.wires[wireIndex] = wire.copyWith(waypoints: newWaypoints);
+      _pathsDirty = true;
+      _recalculatePaths();
       notifyListeners();
     }
   }
@@ -299,6 +304,16 @@ class CircuitController extends ChangeNotifier {
       );
       draggedWireHit = null;
       _initialWaypoints = null;
+      _pathsDirty = true;
+      _recalculatePaths();
+      notifyListeners();
+    }
+  }
+
+  void endNodeMove() {
+    if (selectedNodeIds.isNotEmpty) {
+      _pathsDirty = true;
+      _recalculatePaths();
       notifyListeners();
     }
   }
@@ -387,6 +402,8 @@ class CircuitController extends ChangeNotifier {
     redoStack.clear(); // Clear redo stack after new action
 
     LogicSimulator.simulate(circuit);
+    _pathsDirty = true;
+    _recalculatePaths();
     notifyListeners();
   }
 
@@ -414,6 +431,8 @@ class CircuitController extends ChangeNotifier {
     redoStack.clear();
 
     LogicSimulator.simulate(circuit);
+    _pathsDirty = true;
+    _recalculatePaths();
     notifyListeners();
   }
 
@@ -428,6 +447,8 @@ class CircuitController extends ChangeNotifier {
     redoStack.clear();
 
     LogicSimulator.simulate(circuit);
+    _pathsDirty = true;
+    _recalculatePaths();
     notifyListeners();
   }
 
@@ -469,6 +490,8 @@ class CircuitController extends ChangeNotifier {
       redoStack.clear();
 
       LogicSimulator.simulate(circuit);
+      _pathsDirty = true;
+      _recalculatePaths();
       notifyListeners();
     } else if (selectedWireId != null) {
       final wire = circuit.wires
@@ -485,6 +508,8 @@ class CircuitController extends ChangeNotifier {
     if (wireIndex != -1) {
       final oldWire = circuit.wires[wireIndex];
       circuit.wires[wireIndex] = oldWire.copyWith(waypoints: []);
+      _pathsDirty = true;
+      _recalculatePaths();
       notifyListeners();
     }
   }
@@ -497,6 +522,8 @@ class CircuitController extends ChangeNotifier {
     redoStack.add(action);
 
     LogicSimulator.simulate(circuit);
+    _pathsDirty = true;
+    _recalculatePaths();
     notifyListeners();
   }
 
@@ -508,6 +535,8 @@ class CircuitController extends ChangeNotifier {
     undoStack.add(action);
 
     LogicSimulator.simulate(circuit);
+    _pathsDirty = true;
+    _recalculatePaths();
     notifyListeners();
   }
 
@@ -577,6 +606,8 @@ class CircuitController extends ChangeNotifier {
           node.position += delta;
         }
       }
+      _pathsDirty = true;
+      _recalculatePaths();
       notifyListeners();
       return;
     }
@@ -587,13 +618,25 @@ class CircuitController extends ChangeNotifier {
     final int stepsY = (_dragAccumulator.dy / gridSize).round();
 
     if (stepsX != 0 || stepsY != 0) {
-      final snappedDelta = Offset(stepsX * gridSize, stepsY * gridSize);
+      final snappedDelta = Offset(stepsX * gridSize, gridSize * stepsY);
       for (final node in circuit.nodes) {
         if (selectedNodeIds.contains(node.id)) {
           node.position = _snapToGrid(node.position) + snappedDelta;
         }
       }
       _dragAccumulator -= snappedDelta;
+
+      // Only recalculate wires connected to selected nodes during drag
+      final affectedWireIds = circuit.wires
+          .where(
+            (w) =>
+                selectedNodeIds.contains(w.fromNodeId) ||
+                selectedNodeIds.contains(w.toNodeId),
+          )
+          .map((w) => w.id)
+          .toList();
+
+      _recalculatePaths(onlyWireIds: affectedWireIds);
       notifyListeners();
     }
   }
@@ -663,6 +706,8 @@ class CircuitController extends ChangeNotifier {
     temporaryWireEnd = null;
 
     LogicSimulator.simulate(circuit);
+    _pathsDirty = true;
+    _recalculatePaths();
     notifyListeners();
   }
 
@@ -864,6 +909,7 @@ class CircuitController extends ChangeNotifier {
             fromPinId: w.fromPinId,
             toNodeId: w.toNodeId,
             toPinId: w.toPinId,
+            waypoints: List.from(w.waypoints),
           ),
         )
         .toList();
@@ -921,6 +967,8 @@ class CircuitController extends ChangeNotifier {
     redoStack.clear();
 
     LogicSimulator.simulate(circuit);
+    _pathsDirty = true;
+    _recalculatePaths();
     notifyListeners();
   }
 
@@ -968,13 +1016,104 @@ class CircuitController extends ChangeNotifier {
           fromPinId: wire.fromPinId,
           toNodeId: wire.toNodeId,
           toPinId: wire.toPinId,
+          waypoints: List.from(wire.waypoints),
         ),
       );
     }
 
     _updateClockTimer();
     LogicSimulator.simulate(circuit);
+    _pathsDirty = true;
+    _recalculatePaths();
     notifyListeners();
+  }
+
+  void _recalculatePaths({List<String>? onlyWireIds}) {
+    if (!_pathsDirty && onlyWireIds == null) return;
+
+    final obstacles = circuit.nodes.map((n) => n.rect).toList();
+    final allSegments = <WireSegment>{};
+
+    for (int i = 0; i < circuit.wires.length; i++) {
+      final wire = circuit.wires[i];
+      final start = _getWireStart(wire);
+      final end = _getWireEnd(wire);
+
+      if (start == null || end == null) continue;
+
+      if (wire.waypoints.isNotEmpty) {
+        final points = [start, ...wire.waypoints, end];
+        for (int j = 0; j < points.length - 1; j++) {
+          _addSegments(allSegments, points[j], points[j + 1]);
+        }
+        continue;
+      }
+
+      final shouldRecalculate = onlyWireIds == null ||
+          onlyWireIds.contains(wire.id) ||
+          wire.cachedPath == null;
+
+      if (shouldRecalculate) {
+        final points = PathFinder.findPath(
+          start: start,
+          end: end,
+          obstacles: obstacles,
+          existingSegments: allSegments,
+        );
+        circuit.wires[i] = wire.copyWith(cachedPath: points);
+      }
+
+      final points = circuit.wires[i].cachedPath ?? [];
+      for (int j = 0; j < points.length - 1; j++) {
+        _addSegments(allSegments, points[j], points[j + 1]);
+      }
+    }
+    if (onlyWireIds == null) {
+      _pathsDirty = false;
+    }
+  }
+
+  void _addSegments(Set<WireSegment> segments, Offset p1, Offset p2) {
+    const gridSize = 16.0;
+    final dist = (p1 - p2).distance;
+    if (dist < 0.1) return;
+
+    final dir = (p2 - p1) / dist;
+    final steps = (dist / gridSize).round();
+
+    for (int i = 0; i < steps; i++) {
+      final s1 = p1 + dir * (i * gridSize);
+      final s2 = p1 + dir * ((i + 1) * gridSize);
+      segments.add(WireSegment(s1, s2));
+    }
+  }
+
+  Offset? _getWireStart(Wire wire) {
+    final node = _findNode(wire.fromNodeId);
+    if (node == null) return null;
+
+    final pin =
+        node.outputPins.where((p) => p.id == wire.fromPinId).firstOrNull;
+    if (pin == null) return null;
+
+    return node.position + pin.localPosition;
+  }
+
+  Offset? _getWireEnd(Wire wire) {
+    final node = _findNode(wire.toNodeId);
+    if (node == null) return null;
+
+    final pin = node.inputPins.where((p) => p.id == wire.toPinId).firstOrNull;
+    if (pin == null) return null;
+
+    return node.position + pin.localPosition;
+  }
+
+  CircuitNode? _findNode(String id) {
+    for (final node in circuit.nodes) {
+      if (node.id == id) return node;
+    }
+    return null;
   }
 }
 
