@@ -1,0 +1,1282 @@
+{
+    "name": "4-to-1 Multiplexer",
+    "nodes": [
+        {
+            "id": "in_d0",
+            "type": "input",
+            "position": {
+                "dx": 50,
+                "dy": 60
+            },
+            "inputPins": [],
+            "outputPins": [
+                {
+                    "id": "out",
+                    "nodeId": "in_d0",
+                    "isInput": false,
+                    "localPosition": {
+                        "dx": 110,
+                        "dy": 32
+                    }
+                }
+            ]
+        },
+        {
+            "id": "in_d1",
+            "type": "input",
+            "position": {
+                "dx": 50,
+                "dy": 150
+            },
+            "inputPins": [],
+            "outputPins": [
+                {
+                    "id": "out",
+                    "nodeId": "in_d1",
+                    "isInput": false,
+                    "localPosition": {
+                        "dx": 110,
+                        "dy": 32
+                    }
+                }
+            ]
+        },
+        {
+            "id": "in_d2",
+            "type": "input",
+            "position": {
+                "dx": 50,
+                "dy": 240
+            },
+            "inputPins": [],
+            "outputPins": [
+                {
+                    "id": "out",
+                    "nodeId": "in_d2",
+                    "isInput": false,
+                    "localPosition": {
+                        "dx": 110,
+                        "dy": 32
+                    }
+                }
+            ]
+        },
+        {
+            "id": "in_d3",
+            "type": "input",
+            "position": {
+                "dx": 50,
+                "dy": 330
+            },
+            "inputPins": [],
+            "outputPins": [
+                {
+                    "id": "out",
+                    "nodeId": "in_d3",
+                    "isInput": false,
+                    "localPosition": {
+                        "dx": 110,
+                        "dy": 32
+                    }
+                }
+            ]
+        },
+        {
+            "id": "in_s0",
+            "type": "input",
+            "position": {
+                "dx": 50,
+                "dy": 470
+            },
+            "inputPins": [],
+            "outputPins": [
+                {
+                    "id": "out",
+                    "nodeId": "in_s0",
+                    "isInput": false,
+                    "localPosition": {
+                        "dx": 110,
+                        "dy": 32
+                    }
+                }
+            ]
+        },
+        {
+            "id": "in_s1",
+            "type": "input",
+            "position": {
+                "dx": 50,
+                "dy": 570
+            },
+            "inputPins": [],
+            "outputPins": [
+                {
+                    "id": "out",
+                    "nodeId": "in_s1",
+                    "isInput": false,
+                    "localPosition": {
+                        "dx": 110,
+                        "dy": 32
+                    }
+                }
+            ]
+        },
+        {
+            "id": "mux_low",
+            "type": "composed",
+            "position": {
+                "dx": 300,
+                "dy": 80
+            },
+            "inputPins": [
+                {
+                    "id": "in_0",
+                    "nodeId": "mux_low",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 30
+                    }
+                },
+                {
+                    "id": "in_1",
+                    "nodeId": "mux_low",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 52
+                    }
+                },
+                {
+                    "id": "in_2",
+                    "nodeId": "mux_low",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 74
+                    }
+                }
+            ],
+            "outputPins": [
+                {
+                    "id": "out_0",
+                    "nodeId": "mux_low",
+                    "isInput": false,
+                    "localPosition": {
+                        "dx": 150,
+                        "dy": 30
+                    }
+                }
+            ],
+            "definition": {
+                "name": "2-to-1 Multiplexer",
+                "nodes": [
+                    {
+                        "id": "in_a",
+                        "type": "input",
+                        "position": {
+                            "dx": 50,
+                            "dy": 70
+                        },
+                        "inputPins": [],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "in_a",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "in_b",
+                        "type": "input",
+                        "position": {
+                            "dx": 50,
+                            "dy": 170
+                        },
+                        "inputPins": [],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "in_b",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "in_sel",
+                        "type": "input",
+                        "position": {
+                            "dx": 50,
+                            "dy": 290
+                        },
+                        "inputPins": [],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "in_sel",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "not_sel",
+                        "type": "gate",
+                        "gateType": "not",
+                        "position": {
+                            "dx": 240,
+                            "dy": 290
+                        },
+                        "inputPins": [
+                            {
+                                "id": "in",
+                                "nodeId": "not_sel",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 32
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "not_sel",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "and_a",
+                        "type": "gate",
+                        "gateType": "and",
+                        "position": {
+                            "dx": 430,
+                            "dy": 80
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "and_a",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "and_a",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "and_a",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "and_b",
+                        "type": "gate",
+                        "gateType": "and",
+                        "position": {
+                            "dx": 430,
+                            "dy": 180
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "and_b",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "and_b",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "and_b",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "or_y",
+                        "type": "gate",
+                        "gateType": "or",
+                        "position": {
+                            "dx": 620,
+                            "dy": 130
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "or_y",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "or_y",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "or_y",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "out_y",
+                        "type": "output",
+                        "position": {
+                            "dx": 820,
+                            "dy": 130
+                        },
+                        "inputPins": [
+                            {
+                                "id": "in",
+                                "nodeId": "out_y",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 32
+                                }
+                            }
+                        ],
+                        "outputPins": []
+                    }
+                ],
+                "wires": [
+                    {
+                        "id": "w_sel_not",
+                        "fromNodeId": "in_sel",
+                        "fromPinId": "out",
+                        "toNodeId": "not_sel",
+                        "toPinId": "in"
+                    },
+                    {
+                        "id": "w_a_and",
+                        "fromNodeId": "in_a",
+                        "fromPinId": "out",
+                        "toNodeId": "and_a",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w_nsel_and",
+                        "fromNodeId": "not_sel",
+                        "fromPinId": "out",
+                        "toNodeId": "and_a",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w_b_and",
+                        "fromNodeId": "in_b",
+                        "fromPinId": "out",
+                        "toNodeId": "and_b",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w_sel_and",
+                        "fromNodeId": "in_sel",
+                        "fromPinId": "out",
+                        "toNodeId": "and_b",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w_a_or",
+                        "fromNodeId": "and_a",
+                        "fromPinId": "out",
+                        "toNodeId": "or_y",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w_b_or",
+                        "fromNodeId": "and_b",
+                        "fromPinId": "out",
+                        "toNodeId": "or_y",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w_y_out",
+                        "fromNodeId": "or_y",
+                        "fromPinId": "out",
+                        "toNodeId": "out_y",
+                        "toPinId": "in"
+                    }
+                ],
+                "color": 4280166715,
+                "inputLabels": [
+                    "A",
+                    "B",
+                    "SEL"
+                ],
+                "outputLabels": [
+                    "Y"
+                ]
+            }
+        },
+        {
+            "id": "mux_high",
+            "type": "composed",
+            "position": {
+                "dx": 300,
+                "dy": 280
+            },
+            "inputPins": [
+                {
+                    "id": "in_0",
+                    "nodeId": "mux_high",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 30
+                    }
+                },
+                {
+                    "id": "in_1",
+                    "nodeId": "mux_high",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 52
+                    }
+                },
+                {
+                    "id": "in_2",
+                    "nodeId": "mux_high",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 74
+                    }
+                }
+            ],
+            "outputPins": [
+                {
+                    "id": "out_0",
+                    "nodeId": "mux_high",
+                    "isInput": false,
+                    "localPosition": {
+                        "dx": 150,
+                        "dy": 30
+                    }
+                }
+            ],
+            "definition": {
+                "name": "2-to-1 Multiplexer",
+                "nodes": [
+                    {
+                        "id": "in_a",
+                        "type": "input",
+                        "position": {
+                            "dx": 50,
+                            "dy": 70
+                        },
+                        "inputPins": [],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "in_a",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "in_b",
+                        "type": "input",
+                        "position": {
+                            "dx": 50,
+                            "dy": 170
+                        },
+                        "inputPins": [],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "in_b",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "in_sel",
+                        "type": "input",
+                        "position": {
+                            "dx": 50,
+                            "dy": 290
+                        },
+                        "inputPins": [],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "in_sel",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "not_sel",
+                        "type": "gate",
+                        "gateType": "not",
+                        "position": {
+                            "dx": 240,
+                            "dy": 290
+                        },
+                        "inputPins": [
+                            {
+                                "id": "in",
+                                "nodeId": "not_sel",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 32
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "not_sel",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "and_a",
+                        "type": "gate",
+                        "gateType": "and",
+                        "position": {
+                            "dx": 430,
+                            "dy": 80
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "and_a",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "and_a",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "and_a",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "and_b",
+                        "type": "gate",
+                        "gateType": "and",
+                        "position": {
+                            "dx": 430,
+                            "dy": 180
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "and_b",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "and_b",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "and_b",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "or_y",
+                        "type": "gate",
+                        "gateType": "or",
+                        "position": {
+                            "dx": 620,
+                            "dy": 130
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "or_y",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "or_y",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "or_y",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "out_y",
+                        "type": "output",
+                        "position": {
+                            "dx": 820,
+                            "dy": 130
+                        },
+                        "inputPins": [
+                            {
+                                "id": "in",
+                                "nodeId": "out_y",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 32
+                                }
+                            }
+                        ],
+                        "outputPins": []
+                    }
+                ],
+                "wires": [
+                    {
+                        "id": "w_sel_not",
+                        "fromNodeId": "in_sel",
+                        "fromPinId": "out",
+                        "toNodeId": "not_sel",
+                        "toPinId": "in"
+                    },
+                    {
+                        "id": "w_a_and",
+                        "fromNodeId": "in_a",
+                        "fromPinId": "out",
+                        "toNodeId": "and_a",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w_nsel_and",
+                        "fromNodeId": "not_sel",
+                        "fromPinId": "out",
+                        "toNodeId": "and_a",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w_b_and",
+                        "fromNodeId": "in_b",
+                        "fromPinId": "out",
+                        "toNodeId": "and_b",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w_sel_and",
+                        "fromNodeId": "in_sel",
+                        "fromPinId": "out",
+                        "toNodeId": "and_b",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w_a_or",
+                        "fromNodeId": "and_a",
+                        "fromPinId": "out",
+                        "toNodeId": "or_y",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w_b_or",
+                        "fromNodeId": "and_b",
+                        "fromPinId": "out",
+                        "toNodeId": "or_y",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w_y_out",
+                        "fromNodeId": "or_y",
+                        "fromPinId": "out",
+                        "toNodeId": "out_y",
+                        "toPinId": "in"
+                    }
+                ],
+                "color": 4280166715,
+                "inputLabels": [
+                    "A",
+                    "B",
+                    "SEL"
+                ],
+                "outputLabels": [
+                    "Y"
+                ]
+            }
+        },
+        {
+            "id": "mux_final",
+            "type": "composed",
+            "position": {
+                "dx": 600,
+                "dy": 180
+            },
+            "inputPins": [
+                {
+                    "id": "in_0",
+                    "nodeId": "mux_final",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 30
+                    }
+                },
+                {
+                    "id": "in_1",
+                    "nodeId": "mux_final",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 52
+                    }
+                },
+                {
+                    "id": "in_2",
+                    "nodeId": "mux_final",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 74
+                    }
+                }
+            ],
+            "outputPins": [
+                {
+                    "id": "out_0",
+                    "nodeId": "mux_final",
+                    "isInput": false,
+                    "localPosition": {
+                        "dx": 150,
+                        "dy": 30
+                    }
+                }
+            ],
+            "definition": {
+                "name": "2-to-1 Multiplexer",
+                "nodes": [
+                    {
+                        "id": "in_a",
+                        "type": "input",
+                        "position": {
+                            "dx": 50,
+                            "dy": 70
+                        },
+                        "inputPins": [],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "in_a",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "in_b",
+                        "type": "input",
+                        "position": {
+                            "dx": 50,
+                            "dy": 170
+                        },
+                        "inputPins": [],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "in_b",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "in_sel",
+                        "type": "input",
+                        "position": {
+                            "dx": 50,
+                            "dy": 290
+                        },
+                        "inputPins": [],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "in_sel",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "not_sel",
+                        "type": "gate",
+                        "gateType": "not",
+                        "position": {
+                            "dx": 240,
+                            "dy": 290
+                        },
+                        "inputPins": [
+                            {
+                                "id": "in",
+                                "nodeId": "not_sel",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 32
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "not_sel",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "and_a",
+                        "type": "gate",
+                        "gateType": "and",
+                        "position": {
+                            "dx": 430,
+                            "dy": 80
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "and_a",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "and_a",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "and_a",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "and_b",
+                        "type": "gate",
+                        "gateType": "and",
+                        "position": {
+                            "dx": 430,
+                            "dy": 180
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "and_b",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "and_b",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "and_b",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "or_y",
+                        "type": "gate",
+                        "gateType": "or",
+                        "position": {
+                            "dx": 620,
+                            "dy": 130
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "or_y",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "or_y",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "or_y",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "out_y",
+                        "type": "output",
+                        "position": {
+                            "dx": 820,
+                            "dy": 130
+                        },
+                        "inputPins": [
+                            {
+                                "id": "in",
+                                "nodeId": "out_y",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 32
+                                }
+                            }
+                        ],
+                        "outputPins": []
+                    }
+                ],
+                "wires": [
+                    {
+                        "id": "w_sel_not",
+                        "fromNodeId": "in_sel",
+                        "fromPinId": "out",
+                        "toNodeId": "not_sel",
+                        "toPinId": "in"
+                    },
+                    {
+                        "id": "w_a_and",
+                        "fromNodeId": "in_a",
+                        "fromPinId": "out",
+                        "toNodeId": "and_a",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w_nsel_and",
+                        "fromNodeId": "not_sel",
+                        "fromPinId": "out",
+                        "toNodeId": "and_a",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w_b_and",
+                        "fromNodeId": "in_b",
+                        "fromPinId": "out",
+                        "toNodeId": "and_b",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w_sel_and",
+                        "fromNodeId": "in_sel",
+                        "fromPinId": "out",
+                        "toNodeId": "and_b",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w_a_or",
+                        "fromNodeId": "and_a",
+                        "fromPinId": "out",
+                        "toNodeId": "or_y",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w_b_or",
+                        "fromNodeId": "and_b",
+                        "fromPinId": "out",
+                        "toNodeId": "or_y",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w_y_out",
+                        "fromNodeId": "or_y",
+                        "fromPinId": "out",
+                        "toNodeId": "out_y",
+                        "toPinId": "in"
+                    }
+                ],
+                "color": 4280166715,
+                "inputLabels": [
+                    "A",
+                    "B",
+                    "SEL"
+                ],
+                "outputLabels": [
+                    "Y"
+                ]
+            }
+        },
+        {
+            "id": "out_y",
+            "type": "output",
+            "position": {
+                "dx": 880,
+                "dy": 210
+            },
+            "inputPins": [
+                {
+                    "id": "in",
+                    "nodeId": "out_y",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 32
+                    }
+                }
+            ],
+            "outputPins": []
+        }
+    ],
+    "wires": [
+        {
+            "id": "w_d0",
+            "fromNodeId": "in_d0",
+            "fromPinId": "out",
+            "toNodeId": "mux_low",
+            "toPinId": "in_0"
+        },
+        {
+            "id": "w_d1",
+            "fromNodeId": "in_d1",
+            "fromPinId": "out",
+            "toNodeId": "mux_low",
+            "toPinId": "in_1"
+        },
+        {
+            "id": "w_s0_low",
+            "fromNodeId": "in_s0",
+            "fromPinId": "out",
+            "toNodeId": "mux_low",
+            "toPinId": "in_2"
+        },
+        {
+            "id": "w_d2",
+            "fromNodeId": "in_d2",
+            "fromPinId": "out",
+            "toNodeId": "mux_high",
+            "toPinId": "in_0"
+        },
+        {
+            "id": "w_d3",
+            "fromNodeId": "in_d3",
+            "fromPinId": "out",
+            "toNodeId": "mux_high",
+            "toPinId": "in_1"
+        },
+        {
+            "id": "w_s0_high",
+            "fromNodeId": "in_s0",
+            "fromPinId": "out",
+            "toNodeId": "mux_high",
+            "toPinId": "in_2"
+        },
+        {
+            "id": "w_low_final",
+            "fromNodeId": "mux_low",
+            "fromPinId": "out_0",
+            "toNodeId": "mux_final",
+            "toPinId": "in_0"
+        },
+        {
+            "id": "w_high_final",
+            "fromNodeId": "mux_high",
+            "fromPinId": "out_0",
+            "toNodeId": "mux_final",
+            "toPinId": "in_1"
+        },
+        {
+            "id": "w_s1_final",
+            "fromNodeId": "in_s1",
+            "fromPinId": "out",
+            "toNodeId": "mux_final",
+            "toPinId": "in_2"
+        },
+        {
+            "id": "w_y",
+            "fromNodeId": "mux_final",
+            "fromPinId": "out_0",
+            "toNodeId": "out_y",
+            "toPinId": "in"
+        }
+    ],
+    "color": 4280166715,
+    "inputLabels": [
+        "D0",
+        "D1",
+        "D2",
+        "D3",
+        "S0",
+        "S1"
+    ],
+    "outputLabels": [
+        "Y"
+    ]
+}

@@ -1,0 +1,218 @@
+{
+    "name": "SR Latch",
+    "nodes": [
+        {
+            "id": "in_s",
+            "type": "input",
+            "position": {
+                "dx": 50,
+                "dy": 80
+            },
+            "inputPins": [],
+            "outputPins": [
+                {
+                    "id": "out",
+                    "nodeId": "in_s",
+                    "isInput": false,
+                    "localPosition": {
+                        "dx": 110,
+                        "dy": 32
+                    }
+                }
+            ]
+        },
+        {
+            "id": "in_r",
+            "type": "input",
+            "position": {
+                "dx": 50,
+                "dy": 210
+            },
+            "inputPins": [],
+            "outputPins": [
+                {
+                    "id": "out",
+                    "nodeId": "in_r",
+                    "isInput": false,
+                    "localPosition": {
+                        "dx": 110,
+                        "dy": 32
+                    }
+                }
+            ]
+        },
+        {
+            "id": "nor_q",
+            "type": "gate",
+            "gateType": "nor",
+            "position": {
+                "dx": 320,
+                "dy": 80
+            },
+            "inputPins": [
+                {
+                    "id": "p0",
+                    "nodeId": "nor_q",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 22
+                    }
+                },
+                {
+                    "id": "p1",
+                    "nodeId": "nor_q",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 42
+                    }
+                }
+            ],
+            "outputPins": [
+                {
+                    "id": "out",
+                    "nodeId": "nor_q",
+                    "isInput": false,
+                    "localPosition": {
+                        "dx": 110,
+                        "dy": 32
+                    }
+                }
+            ]
+        },
+        {
+            "id": "nor_nq",
+            "type": "gate",
+            "gateType": "nor",
+            "position": {
+                "dx": 320,
+                "dy": 210
+            },
+            "inputPins": [
+                {
+                    "id": "p0",
+                    "nodeId": "nor_nq",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 22
+                    }
+                },
+                {
+                    "id": "p1",
+                    "nodeId": "nor_nq",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 42
+                    }
+                }
+            ],
+            "outputPins": [
+                {
+                    "id": "out",
+                    "nodeId": "nor_nq",
+                    "isInput": false,
+                    "localPosition": {
+                        "dx": 110,
+                        "dy": 32
+                    }
+                }
+            ]
+        },
+        {
+            "id": "out_q",
+            "type": "output",
+            "position": {
+                "dx": 540,
+                "dy": 80
+            },
+            "inputPins": [
+                {
+                    "id": "in",
+                    "nodeId": "out_q",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 32
+                    }
+                }
+            ],
+            "outputPins": []
+        },
+        {
+            "id": "out_nq",
+            "type": "output",
+            "position": {
+                "dx": 540,
+                "dy": 210
+            },
+            "inputPins": [
+                {
+                    "id": "in",
+                    "nodeId": "out_nq",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 32
+                    }
+                }
+            ],
+            "outputPins": []
+        }
+    ],
+    "wires": [
+        {
+            "id": "w_s_to_nq",
+            "fromNodeId": "in_s",
+            "fromPinId": "out",
+            "toNodeId": "nor_nq",
+            "toPinId": "p0"
+        },
+        {
+            "id": "w_r_to_q",
+            "fromNodeId": "in_r",
+            "fromPinId": "out",
+            "toNodeId": "nor_q",
+            "toPinId": "p0"
+        },
+        {
+            "id": "w_q_feedback",
+            "fromNodeId": "nor_q",
+            "fromPinId": "out",
+            "toNodeId": "nor_nq",
+            "toPinId": "p1"
+        },
+        {
+            "id": "w_nq_feedback",
+            "fromNodeId": "nor_nq",
+            "fromPinId": "out",
+            "toNodeId": "nor_q",
+            "toPinId": "p1"
+        },
+        {
+            "id": "w_q_out",
+            "fromNodeId": "nor_q",
+            "fromPinId": "out",
+            "toNodeId": "out_q",
+            "toPinId": "in"
+        },
+        {
+            "id": "w_nq_out",
+            "fromNodeId": "nor_nq",
+            "fromPinId": "out",
+            "toNodeId": "out_nq",
+            "toPinId": "in"
+        }
+    ],
+    "color": 4280166715,
+    "inputLabels": [
+        "S",
+        "R"
+    ],
+    "outputLabels": [
+        "Q",
+        "NOT Q"
+    ]
+}

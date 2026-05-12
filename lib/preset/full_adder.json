@@ -1,0 +1,401 @@
+{
+    "name": "Full Adder",
+    "nodes": [
+        {
+            "id": "in_a",
+            "type": "input",
+            "position": {
+                "dx": 50,
+                "dy": 70
+            },
+            "inputPins": [],
+            "outputPins": [
+                {
+                    "id": "out",
+                    "nodeId": "in_a",
+                    "isInput": false,
+                    "localPosition": {
+                        "dx": 110,
+                        "dy": 32
+                    }
+                }
+            ]
+        },
+        {
+            "id": "in_b",
+            "type": "input",
+            "position": {
+                "dx": 50,
+                "dy": 180
+            },
+            "inputPins": [],
+            "outputPins": [
+                {
+                    "id": "out",
+                    "nodeId": "in_b",
+                    "isInput": false,
+                    "localPosition": {
+                        "dx": 110,
+                        "dy": 32
+                    }
+                }
+            ]
+        },
+        {
+            "id": "in_cin",
+            "type": "input",
+            "position": {
+                "dx": 50,
+                "dy": 290
+            },
+            "inputPins": [],
+            "outputPins": [
+                {
+                    "id": "out",
+                    "nodeId": "in_cin",
+                    "isInput": false,
+                    "localPosition": {
+                        "dx": 110,
+                        "dy": 32
+                    }
+                }
+            ]
+        },
+        {
+            "id": "xor_ab",
+            "type": "gate",
+            "gateType": "xor",
+            "position": {
+                "dx": 300,
+                "dy": 120
+            },
+            "inputPins": [
+                {
+                    "id": "p0",
+                    "nodeId": "xor_ab",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 22
+                    }
+                },
+                {
+                    "id": "p1",
+                    "nodeId": "xor_ab",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 42
+                    }
+                }
+            ],
+            "outputPins": [
+                {
+                    "id": "out",
+                    "nodeId": "xor_ab",
+                    "isInput": false,
+                    "localPosition": {
+                        "dx": 110,
+                        "dy": 32
+                    }
+                }
+            ]
+        },
+        {
+            "id": "sum_xor",
+            "type": "gate",
+            "gateType": "xor",
+            "position": {
+                "dx": 520,
+                "dy": 180
+            },
+            "inputPins": [
+                {
+                    "id": "p0",
+                    "nodeId": "sum_xor",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 22
+                    }
+                },
+                {
+                    "id": "p1",
+                    "nodeId": "sum_xor",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 42
+                    }
+                }
+            ],
+            "outputPins": [
+                {
+                    "id": "out",
+                    "nodeId": "sum_xor",
+                    "isInput": false,
+                    "localPosition": {
+                        "dx": 110,
+                        "dy": 32
+                    }
+                }
+            ]
+        },
+        {
+            "id": "and_ab",
+            "type": "gate",
+            "gateType": "and",
+            "position": {
+                "dx": 300,
+                "dy": 330
+            },
+            "inputPins": [
+                {
+                    "id": "p0",
+                    "nodeId": "and_ab",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 22
+                    }
+                },
+                {
+                    "id": "p1",
+                    "nodeId": "and_ab",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 42
+                    }
+                }
+            ],
+            "outputPins": [
+                {
+                    "id": "out",
+                    "nodeId": "and_ab",
+                    "isInput": false,
+                    "localPosition": {
+                        "dx": 110,
+                        "dy": 32
+                    }
+                }
+            ]
+        },
+        {
+            "id": "and_carry",
+            "type": "gate",
+            "gateType": "and",
+            "position": {
+                "dx": 520,
+                "dy": 330
+            },
+            "inputPins": [
+                {
+                    "id": "p0",
+                    "nodeId": "and_carry",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 22
+                    }
+                },
+                {
+                    "id": "p1",
+                    "nodeId": "and_carry",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 42
+                    }
+                }
+            ],
+            "outputPins": [
+                {
+                    "id": "out",
+                    "nodeId": "and_carry",
+                    "isInput": false,
+                    "localPosition": {
+                        "dx": 110,
+                        "dy": 32
+                    }
+                }
+            ]
+        },
+        {
+            "id": "or_cout",
+            "type": "gate",
+            "gateType": "or",
+            "position": {
+                "dx": 740,
+                "dy": 300
+            },
+            "inputPins": [
+                {
+                    "id": "p0",
+                    "nodeId": "or_cout",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 22
+                    }
+                },
+                {
+                    "id": "p1",
+                    "nodeId": "or_cout",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 42
+                    }
+                }
+            ],
+            "outputPins": [
+                {
+                    "id": "out",
+                    "nodeId": "or_cout",
+                    "isInput": false,
+                    "localPosition": {
+                        "dx": 110,
+                        "dy": 32
+                    }
+                }
+            ]
+        },
+        {
+            "id": "out_sum",
+            "type": "output",
+            "position": {
+                "dx": 960,
+                "dy": 180
+            },
+            "inputPins": [
+                {
+                    "id": "in",
+                    "nodeId": "out_sum",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 32
+                    }
+                }
+            ],
+            "outputPins": []
+        },
+        {
+            "id": "out_cout",
+            "type": "output",
+            "position": {
+                "dx": 960,
+                "dy": 300
+            },
+            "inputPins": [
+                {
+                    "id": "in",
+                    "nodeId": "out_cout",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 32
+                    }
+                }
+            ],
+            "outputPins": []
+        }
+    ],
+    "wires": [
+        {
+            "id": "w_a_xor",
+            "fromNodeId": "in_a",
+            "fromPinId": "out",
+            "toNodeId": "xor_ab",
+            "toPinId": "p0"
+        },
+        {
+            "id": "w_b_xor",
+            "fromNodeId": "in_b",
+            "fromPinId": "out",
+            "toNodeId": "xor_ab",
+            "toPinId": "p1"
+        },
+        {
+            "id": "w_xor_sum",
+            "fromNodeId": "xor_ab",
+            "fromPinId": "out",
+            "toNodeId": "sum_xor",
+            "toPinId": "p0"
+        },
+        {
+            "id": "w_cin_sum",
+            "fromNodeId": "in_cin",
+            "fromPinId": "out",
+            "toNodeId": "sum_xor",
+            "toPinId": "p1"
+        },
+        {
+            "id": "w_a_and",
+            "fromNodeId": "in_a",
+            "fromPinId": "out",
+            "toNodeId": "and_ab",
+            "toPinId": "p0"
+        },
+        {
+            "id": "w_b_and",
+            "fromNodeId": "in_b",
+            "fromPinId": "out",
+            "toNodeId": "and_ab",
+            "toPinId": "p1"
+        },
+        {
+            "id": "w_xor_carry",
+            "fromNodeId": "xor_ab",
+            "fromPinId": "out",
+            "toNodeId": "and_carry",
+            "toPinId": "p0"
+        },
+        {
+            "id": "w_cin_carry",
+            "fromNodeId": "in_cin",
+            "fromPinId": "out",
+            "toNodeId": "and_carry",
+            "toPinId": "p1"
+        },
+        {
+            "id": "w_ab_or",
+            "fromNodeId": "and_ab",
+            "fromPinId": "out",
+            "toNodeId": "or_cout",
+            "toPinId": "p0"
+        },
+        {
+            "id": "w_carry_or",
+            "fromNodeId": "and_carry",
+            "fromPinId": "out",
+            "toNodeId": "or_cout",
+            "toPinId": "p1"
+        },
+        {
+            "id": "w_sum_out",
+            "fromNodeId": "sum_xor",
+            "fromPinId": "out",
+            "toNodeId": "out_sum",
+            "toPinId": "in"
+        },
+        {
+            "id": "w_cout_out",
+            "fromNodeId": "or_cout",
+            "fromPinId": "out",
+            "toNodeId": "out_cout",
+            "toPinId": "in"
+        }
+    ],
+    "color": 4280166715,
+    "inputLabels": [
+        "A",
+        "B",
+        "Cin"
+    ],
+    "outputLabels": [
+        "SUM",
+        "Cout"
+    ]
+}

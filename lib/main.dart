@@ -1,13 +1,16 @@
 import 'package:digital_logic_sim_2/models/nodes/io_nodes.dart';
+import 'package:digital_logic_sim_2/widgets/component_toolbar.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter/services.dart';
 import 'controllers/circuit_controller.dart';
 import 'editor/circuit_canvas.dart';
 import 'editor/editor_tools.dart';
-import 'widgets/component_toolbar.dart';
+import 'utils/preset_library.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await PresetLibrary.initialize();
   runApp(const LogicDesignerApp());
 }
 

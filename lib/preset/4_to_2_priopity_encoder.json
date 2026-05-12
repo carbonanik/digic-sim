@@ -1,0 +1,542 @@
+{
+    "name": "4-to-2 Priority Encoder",
+    "nodes": [
+        {
+            "id": "in_i0",
+            "type": "input",
+            "position": {
+                "dx": 50,
+                "dy": 60
+            },
+            "inputPins": [],
+            "outputPins": [
+                {
+                    "id": "out",
+                    "nodeId": "in_i0",
+                    "isInput": false,
+                    "localPosition": {
+                        "dx": 110,
+                        "dy": 32
+                    }
+                }
+            ]
+        },
+        {
+            "id": "in_i1",
+            "type": "input",
+            "position": {
+                "dx": 50,
+                "dy": 160
+            },
+            "inputPins": [],
+            "outputPins": [
+                {
+                    "id": "out",
+                    "nodeId": "in_i1",
+                    "isInput": false,
+                    "localPosition": {
+                        "dx": 110,
+                        "dy": 32
+                    }
+                }
+            ]
+        },
+        {
+            "id": "in_i2",
+            "type": "input",
+            "position": {
+                "dx": 50,
+                "dy": 260
+            },
+            "inputPins": [],
+            "outputPins": [
+                {
+                    "id": "out",
+                    "nodeId": "in_i2",
+                    "isInput": false,
+                    "localPosition": {
+                        "dx": 110,
+                        "dy": 32
+                    }
+                }
+            ]
+        },
+        {
+            "id": "in_i3",
+            "type": "input",
+            "position": {
+                "dx": 50,
+                "dy": 360
+            },
+            "inputPins": [],
+            "outputPins": [
+                {
+                    "id": "out",
+                    "nodeId": "in_i3",
+                    "isInput": false,
+                    "localPosition": {
+                        "dx": 110,
+                        "dy": 32
+                    }
+                }
+            ]
+        },
+        {
+            "id": "not_i2",
+            "type": "gate",
+            "gateType": "not",
+            "position": {
+                "dx": 240,
+                "dy": 260
+            },
+            "inputPins": [
+                {
+                    "id": "in",
+                    "nodeId": "not_i2",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 32
+                    }
+                }
+            ],
+            "outputPins": [
+                {
+                    "id": "out",
+                    "nodeId": "not_i2",
+                    "isInput": false,
+                    "localPosition": {
+                        "dx": 110,
+                        "dy": 32
+                    }
+                }
+            ]
+        },
+        {
+            "id": "and_i1",
+            "type": "gate",
+            "gateType": "and",
+            "position": {
+                "dx": 430,
+                "dy": 160
+            },
+            "inputPins": [
+                {
+                    "id": "p0",
+                    "nodeId": "and_i1",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 22
+                    }
+                },
+                {
+                    "id": "p1",
+                    "nodeId": "and_i1",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 42
+                    }
+                }
+            ],
+            "outputPins": [
+                {
+                    "id": "out",
+                    "nodeId": "and_i1",
+                    "isInput": false,
+                    "localPosition": {
+                        "dx": 110,
+                        "dy": 32
+                    }
+                }
+            ]
+        },
+        {
+            "id": "or_y1",
+            "type": "gate",
+            "gateType": "or",
+            "position": {
+                "dx": 430,
+                "dy": 300
+            },
+            "inputPins": [
+                {
+                    "id": "p0",
+                    "nodeId": "or_y1",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 22
+                    }
+                },
+                {
+                    "id": "p1",
+                    "nodeId": "or_y1",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 42
+                    }
+                }
+            ],
+            "outputPins": [
+                {
+                    "id": "out",
+                    "nodeId": "or_y1",
+                    "isInput": false,
+                    "localPosition": {
+                        "dx": 110,
+                        "dy": 32
+                    }
+                }
+            ]
+        },
+        {
+            "id": "or_y0",
+            "type": "gate",
+            "gateType": "or",
+            "position": {
+                "dx": 640,
+                "dy": 160
+            },
+            "inputPins": [
+                {
+                    "id": "p0",
+                    "nodeId": "or_y0",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 22
+                    }
+                },
+                {
+                    "id": "p1",
+                    "nodeId": "or_y0",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 42
+                    }
+                }
+            ],
+            "outputPins": [
+                {
+                    "id": "out",
+                    "nodeId": "or_y0",
+                    "isInput": false,
+                    "localPosition": {
+                        "dx": 110,
+                        "dy": 32
+                    }
+                }
+            ]
+        },
+        {
+            "id": "or_valid_a",
+            "type": "gate",
+            "gateType": "or",
+            "position": {
+                "dx": 430,
+                "dy": 430
+            },
+            "inputPins": [
+                {
+                    "id": "p0",
+                    "nodeId": "or_valid_a",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 22
+                    }
+                },
+                {
+                    "id": "p1",
+                    "nodeId": "or_valid_a",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 42
+                    }
+                }
+            ],
+            "outputPins": [
+                {
+                    "id": "out",
+                    "nodeId": "or_valid_a",
+                    "isInput": false,
+                    "localPosition": {
+                        "dx": 110,
+                        "dy": 32
+                    }
+                }
+            ]
+        },
+        {
+            "id": "or_valid_b",
+            "type": "gate",
+            "gateType": "or",
+            "position": {
+                "dx": 430,
+                "dy": 530
+            },
+            "inputPins": [
+                {
+                    "id": "p0",
+                    "nodeId": "or_valid_b",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 22
+                    }
+                },
+                {
+                    "id": "p1",
+                    "nodeId": "or_valid_b",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 42
+                    }
+                }
+            ],
+            "outputPins": [
+                {
+                    "id": "out",
+                    "nodeId": "or_valid_b",
+                    "isInput": false,
+                    "localPosition": {
+                        "dx": 110,
+                        "dy": 32
+                    }
+                }
+            ]
+        },
+        {
+            "id": "or_valid",
+            "type": "gate",
+            "gateType": "or",
+            "position": {
+                "dx": 640,
+                "dy": 480
+            },
+            "inputPins": [
+                {
+                    "id": "p0",
+                    "nodeId": "or_valid",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 22
+                    }
+                },
+                {
+                    "id": "p1",
+                    "nodeId": "or_valid",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 42
+                    }
+                }
+            ],
+            "outputPins": [
+                {
+                    "id": "out",
+                    "nodeId": "or_valid",
+                    "isInput": false,
+                    "localPosition": {
+                        "dx": 110,
+                        "dy": 32
+                    }
+                }
+            ]
+        },
+        {
+            "id": "out_y1",
+            "type": "output",
+            "position": {
+                "dx": 850,
+                "dy": 290
+            },
+            "inputPins": [
+                {
+                    "id": "in",
+                    "nodeId": "out_y1",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 32
+                    }
+                }
+            ],
+            "outputPins": []
+        },
+        {
+            "id": "out_y0",
+            "type": "output",
+            "position": {
+                "dx": 850,
+                "dy": 160
+            },
+            "inputPins": [
+                {
+                    "id": "in",
+                    "nodeId": "out_y0",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 32
+                    }
+                }
+            ],
+            "outputPins": []
+        },
+        {
+            "id": "out_valid",
+            "type": "output",
+            "position": {
+                "dx": 850,
+                "dy": 480
+            },
+            "inputPins": [
+                {
+                    "id": "in",
+                    "nodeId": "out_valid",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 32
+                    }
+                }
+            ],
+            "outputPins": []
+        }
+    ],
+    "wires": [
+        {
+            "id": "w_i2_not",
+            "fromNodeId": "in_i2",
+            "fromPinId": "out",
+            "toNodeId": "not_i2",
+            "toPinId": "in"
+        },
+        {
+            "id": "w_i1_and",
+            "fromNodeId": "in_i1",
+            "fromPinId": "out",
+            "toNodeId": "and_i1",
+            "toPinId": "p0"
+        },
+        {
+            "id": "w_ni2_and",
+            "fromNodeId": "not_i2",
+            "fromPinId": "out",
+            "toNodeId": "and_i1",
+            "toPinId": "p1"
+        },
+        {
+            "id": "w_i3_y1",
+            "fromNodeId": "in_i3",
+            "fromPinId": "out",
+            "toNodeId": "or_y1",
+            "toPinId": "p0"
+        },
+        {
+            "id": "w_i2_y1",
+            "fromNodeId": "in_i2",
+            "fromPinId": "out",
+            "toNodeId": "or_y1",
+            "toPinId": "p1"
+        },
+        {
+            "id": "w_i3_y0",
+            "fromNodeId": "in_i3",
+            "fromPinId": "out",
+            "toNodeId": "or_y0",
+            "toPinId": "p0"
+        },
+        {
+            "id": "w_and_y0",
+            "fromNodeId": "and_i1",
+            "fromPinId": "out",
+            "toNodeId": "or_y0",
+            "toPinId": "p1"
+        },
+        {
+            "id": "w_i0_va",
+            "fromNodeId": "in_i0",
+            "fromPinId": "out",
+            "toNodeId": "or_valid_a",
+            "toPinId": "p0"
+        },
+        {
+            "id": "w_i1_va",
+            "fromNodeId": "in_i1",
+            "fromPinId": "out",
+            "toNodeId": "or_valid_a",
+            "toPinId": "p1"
+        },
+        {
+            "id": "w_i2_vb",
+            "fromNodeId": "in_i2",
+            "fromPinId": "out",
+            "toNodeId": "or_valid_b",
+            "toPinId": "p0"
+        },
+        {
+            "id": "w_i3_vb",
+            "fromNodeId": "in_i3",
+            "fromPinId": "out",
+            "toNodeId": "or_valid_b",
+            "toPinId": "p1"
+        },
+        {
+            "id": "w_va_v",
+            "fromNodeId": "or_valid_a",
+            "fromPinId": "out",
+            "toNodeId": "or_valid",
+            "toPinId": "p0"
+        },
+        {
+            "id": "w_vb_v",
+            "fromNodeId": "or_valid_b",
+            "fromPinId": "out",
+            "toNodeId": "or_valid",
+            "toPinId": "p1"
+        },
+        {
+            "id": "w_y1_out",
+            "fromNodeId": "or_y1",
+            "fromPinId": "out",
+            "toNodeId": "out_y1",
+            "toPinId": "in"
+        },
+        {
+            "id": "w_y0_out",
+            "fromNodeId": "or_y0",
+            "fromPinId": "out",
+            "toNodeId": "out_y0",
+            "toPinId": "in"
+        },
+        {
+            "id": "w_valid_out",
+            "fromNodeId": "or_valid",
+            "fromPinId": "out",
+            "toNodeId": "out_valid",
+            "toPinId": "in"
+        }
+    ],
+    "color": 4280166715,
+    "inputLabels": [
+        "I0",
+        "I1",
+        "I2",
+        "I3"
+    ],
+    "outputLabels": [
+        "Y1",
+        "Y0",
+        "VALID"
+    ]
+}
