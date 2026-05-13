@@ -856,7 +856,7 @@ class CircuitController extends ChangeNotifier {
         id: 'in_$i',
         nodeId: id,
         isInput: true,
-        localPosition: Offset(0, 45.0 + i * 30.0),
+        localPosition: Offset(0, 48.0 + i * 32.0),
       );
     });
 
@@ -872,8 +872,8 @@ class CircuitController extends ChangeNotifier {
     final id = UniqueKey().toString();
     final inputPins = [
       Pin(id: 'r', nodeId: id, isInput: true, localPosition: const Offset(0, 16)),
-      Pin(id: 'g', nodeId: id, isInput: true, localPosition: const Offset(0, 40)),
-      Pin(id: 'b', nodeId: id, isInput: true, localPosition: const Offset(0, 64)),
+      Pin(id: 'g', nodeId: id, isInput: true, localPosition: const Offset(0, 48)),
+      Pin(id: 'b', nodeId: id, isInput: true, localPosition: const Offset(0, 80)),
     ];
     return RGBLEDNode(
       id: id,
@@ -889,7 +889,7 @@ class CircuitController extends ChangeNotifier {
       id: id,
       position: position,
       inputPins: [
-        Pin(id: 'in', nodeId: id, isInput: true, localPosition: const Offset(0, 24)),
+        Pin(id: 'in', nodeId: id, isInput: true, localPosition: const Offset(0, 32)),
       ],
       outputPins: const [],
     );

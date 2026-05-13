@@ -14,7 +14,7 @@ class RGBLEDNode extends CircuitNode {
   });
 
   @override
-  Size get size => const Size(80, 80);
+  Size get size => const Size(80, 96);
 
   @override
   void evaluate(List<bool> inputs) {
@@ -39,7 +39,7 @@ class RGBLEDNode extends CircuitNode {
     canvas.drawRRect(rect, borderPaint);
 
     // Draw LED
-    final ledCenter = position + Offset(size.width / 2 + 10, size.height / 2);
+    final ledCenter = position + Offset(size.width / 2 + 10, 48);
     final ledRadius = 24.0;
     
     final ledColor = Color.fromARGB(

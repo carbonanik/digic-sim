@@ -25,7 +25,7 @@ class WaveformNode extends CircuitNode {
   }
 
   @override
-  Size get size => Size(200, 40.0 + inputPins.length * 30.0);
+  Size get size => Size(200, 32.0 + inputPins.length * 32.0);
 
   @override
   void evaluate(List<bool> inputs) {
@@ -76,10 +76,10 @@ class WaveformNode extends CircuitNode {
 
   void _drawWaveform(Canvas canvas, int index) {
     final history = histories[index];
-    final startY = position.dy + 35 + index * 30;
+    final startY = position.dy + 38 + index * 32;
     final startX = position.dx + 40;
     final width = size.width - 52;
-    final height = 20.0;
+    final height = 24.0;
     final step = width / (maxHistory - 1);
 
     final bgPaint = Paint()
