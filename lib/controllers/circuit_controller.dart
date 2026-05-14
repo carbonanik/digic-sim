@@ -264,7 +264,7 @@ class CircuitController extends ChangeNotifier {
       circuit.wires[wireIndex] = wire.copyWith(waypoints: newWaypoints);
       _pathsDirty = true;
       _recalculatePaths();
-      notifyListeners();
+      notifyCircuitChanged();
     }
   }
 
@@ -320,7 +320,7 @@ class CircuitController extends ChangeNotifier {
       _initialWaypoints = null;
       _pathsDirty = true;
       _recalculatePaths();
-      notifyListeners();
+      notifyCircuitChanged();
     }
   }
 
@@ -328,7 +328,7 @@ class CircuitController extends ChangeNotifier {
     if (selectedNodeIds.isNotEmpty) {
       _pathsDirty = true;
       _recalculatePaths();
-      notifyListeners();
+      notifyCircuitChanged();
     }
   }
 
@@ -602,13 +602,13 @@ class CircuitController extends ChangeNotifier {
       }
     }
     selectedWireId = null;
-    notifyListeners();
+    notifyCircuitChanged();
   }
 
   void selectWire(String? wireId) {
     selectedWireId = wireId;
     selectedNodeIds.clear();
-    notifyListeners();
+    notifyCircuitChanged();
   }
 
   void moveSelectedNodes(Offset delta) {
@@ -651,7 +651,7 @@ class CircuitController extends ChangeNotifier {
           .toList();
 
       _recalculatePaths(onlyWireIds: affectedWireIds);
-      notifyListeners();
+      notifyCircuitChanged();
     }
   }
 
@@ -1087,12 +1087,12 @@ class CircuitController extends ChangeNotifier {
           obstacles: obstacles,
           existingSegments: allSegments,
         );
-        
+
         // Bake waypoints: everything except start and end
         final newWaypoints = points.length <= 2
             ? <Offset>[]
             : points.sublist(1, points.length - 1);
-            
+
         circuit.wires[i] = wire.copyWith(waypoints: newWaypoints);
       }
 
