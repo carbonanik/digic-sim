@@ -8,7 +8,6 @@ class Wire {
   final String toNodeId;
   final String toPinId;
   final List<Offset> waypoints;
-  final List<Offset>? cachedPath;
 
   const Wire({
     required this.id,
@@ -17,7 +16,6 @@ class Wire {
     required this.toNodeId,
     required this.toPinId,
     this.waypoints = const [],
-    this.cachedPath,
   });
 
   Map<String, dynamic> toMap() => {
@@ -42,8 +40,6 @@ class Wire {
 
   Wire copyWith({
     List<Offset>? waypoints,
-    List<Offset>? cachedPath,
-    bool clearCache = false,
   }) {
     return Wire(
       id: id,
@@ -52,29 +48,13 @@ class Wire {
       toNodeId: toNodeId,
       toPinId: toPinId,
       waypoints: waypoints ?? this.waypoints,
-      cachedPath: clearCache ? null : (cachedPath ?? this.cachedPath),
     );
   }
 
   List<Offset> getPathPoints(
     Offset start,
-    Offset end, {
-    List<Rect> obstacles = const [],
-    Set<WireSegment> existingSegments = const {},
-  }) {
-    if (waypoints.isNotEmpty) {
-      return [start, ...waypoints, end];
-    }
-
-    if (cachedPath != null) {
-      return cachedPath!;
-    }
-
-    return PathFinder.findPath(
-      start: start,
-      end: end,
-      obstacles: obstacles,
-      existingSegments: existingSegments,
-    );
+    Offset end,
+  ) {
+    return [start, ...waypoints, end];
   }
 }

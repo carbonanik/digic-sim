@@ -54,9 +54,6 @@ class CircuitPainter extends CustomPainter {
   }
 
   void _drawWires(Canvas canvas) {
-    final obstacles = circuit.nodes.map((n) => n.rect).toList();
-    final allSegments = <WireSegment>{};
-
     for (final wire in circuit.wires) {
       final start = _getWireStart(wire);
       final end = _getWireEnd(wire);
@@ -73,7 +70,7 @@ class CircuitPainter extends CustomPainter {
           ..strokeJoin = StrokeJoin.round
           ..strokeCap = StrokeCap.round
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
-        _drawWire(canvas, wire, start, end, glowPaint, obstacles, allSegments);
+        _drawWire(canvas, wire, start, end, glowPaint);
       }
 
       final paint = Paint()
@@ -83,32 +80,22 @@ class CircuitPainter extends CustomPainter {
         ..strokeJoin = StrokeJoin.round
         ..strokeCap = StrokeCap.round;
 
-      final points = _drawWire(
-        canvas,
-        wire,
-        start,
-        end,
-        paint,
-        obstacles,
-        allSegments,
-      );
-
-      for (int i = 0; i < points.length - 1; i++) {
-        _addSegments(allSegments, points[i], points[i + 1]);
-      }
+      _drawWire(canvas, wire, start, end, paint);
 
       if (isSelected && wire.waypoints.isNotEmpty) {
-        final handlePaint = Paint()
-          ..color = const Color(0xfff43f5e)
-          ..style = PaintingStyle.fill;
-        final handleBorder = Paint()
-          ..color = Colors.white
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.5;
+        if (isSelected && wire.waypoints.isNotEmpty) {
+          final handlePaint = Paint()
+            ..color = const Color(0xfff43f5e)
+            ..style = PaintingStyle.fill;
+          final handleBorder = Paint()
+            ..color = Colors.white
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 1.5;
 
-        for (final wp in wire.waypoints) {
-          canvas.drawCircle(wp, 5, handlePaint);
-          canvas.drawCircle(wp, 5, handleBorder);
+          for (final wp in wire.waypoints) {
+            canvas.drawCircle(wp, 5, handlePaint);
+            canvas.drawCircle(wp, 5, handleBorder);
+          }
         }
       }
     }
@@ -120,15 +107,8 @@ class CircuitPainter extends CustomPainter {
     Offset start,
     Offset end,
     Paint paint,
-    List<Rect> obstacles,
-    Set<WireSegment> existingSegments,
   ) {
-    final points = wire.getPathPoints(
-      start,
-      end,
-      obstacles: obstacles,
-      existingSegments: existingSegments,
-    );
+    final points = wire.getPathPoints(start, end);
 
     if (points.isEmpty) return [];
 
@@ -139,21 +119,6 @@ class CircuitPainter extends CustomPainter {
 
     canvas.drawPath(path, paint);
     return points;
-  }
-
-  void _addSegments(Set<WireSegment> segments, Offset p1, Offset p2) {
-    const gridSize = 16.0;
-    final dist = (p1 - p2).distance;
-    if (dist < 0.1) return;
-
-    final dir = (p2 - p1) / dist;
-    final steps = (dist / gridSize).round();
-
-    for (int i = 0; i < steps; i++) {
-      final s1 = p1 + dir * (i * gridSize);
-      final s2 = p1 + dir * ((i + 1) * gridSize);
-      segments.add(WireSegment(s1, s2));
-    }
   }
 
   void _drawNodes(Canvas canvas) {

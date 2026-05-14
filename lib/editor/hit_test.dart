@@ -59,12 +59,7 @@ class HitTesting {
       final start = fromNode.position + fromPin.localPosition;
       final end = toNode.position + toPin.localPosition;
 
-      final List<Offset> points;
-      if (wire.waypoints.isNotEmpty) {
-        points = [start, ...wire.waypoints, end];
-      } else {
-        points = wire.cachedPath ?? [start, end];
-      }
+      final points = wire.getPathPoints(start, end);
 
       for (int i = 0; i < points.length - 1; i++) {
         if (_distToSegment(point, points[i], points[i + 1]) <= hitThreshold) {

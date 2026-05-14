@@ -67,7 +67,8 @@ class CircuitController extends ChangeNotifier {
   List<CircuitAction> undoStack = [];
   List<CircuitAction> redoStack = [];
 
-  int repaintCounter = 0;
+  int circuitRepaintCounter = 0;
+  int overlayRepaintCounter = 0;
 
   Offset _dragAccumulator = Offset.zero;
   bool snapToGridEnabled = true;
@@ -123,31 +124,36 @@ class CircuitController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setHoveredPin(PinHit? pinHit) {
-    if (hoveredPin != pinHit) {
-      hoveredPin = pinHit;
-      notifyListeners();
-    }
+  void updateHoverState({
+    required Offset? position,
+    required PinHit? pinHit,
+    required String? nodeId,
+  }) {
+    final snapped = position != null ? _snapToGrid(position) : null;
+
+    final changed =
+        mousePosition != snapped ||
+        hoveredPin?.node.id != pinHit?.node.id ||
+        hoveredPin?.pin.id != pinHit?.pin.id ||
+        hoveredNodeId != nodeId;
+
+    if (!changed) return;
+
+    mousePosition = snapped;
+    hoveredPin = pinHit;
+    hoveredNodeId = nodeId;
+
+    notifyOverlayChanged();
   }
 
-  void setHoveredNode(String? nodeId) {
-    if (hoveredNodeId != nodeId) {
-      hoveredNodeId = nodeId;
-      notifyListeners();
-    }
+  void notifyCircuitChanged() {
+    circuitRepaintCounter++;
+    overlayRepaintCounter++;
+    super.notifyListeners();
   }
 
-  void setMousePosition(Offset? pos) {
-    final snapped = pos != null ? _snapToGrid(pos) : null;
-    if (mousePosition != snapped) {
-      mousePosition = snapped;
-      notifyListeners();
-    }
-  }
-
-  @override
-  void notifyListeners() {
-    repaintCounter++;
+  void notifyOverlayChanged() {
+    overlayRepaintCounter++;
     super.notifyListeners();
   }
 
@@ -158,7 +164,7 @@ class CircuitController extends ChangeNotifier {
     temporaryWireEnd = null;
     draggedWireHit = null;
     _pathsDirty = true;
-    notifyListeners();
+    notifyCircuitChanged();
   }
 
   void startWireDrag(WireHit hit, Offset mousePos) {
@@ -412,7 +418,7 @@ class CircuitController extends ChangeNotifier {
     LogicSimulator.simulate(circuit);
     _pathsDirty = true;
     _recalculatePaths();
-    notifyListeners();
+    notifyCircuitChanged();
   }
 
   void removeNode(CircuitNode node) {
@@ -441,7 +447,7 @@ class CircuitController extends ChangeNotifier {
     LogicSimulator.simulate(circuit);
     _pathsDirty = true;
     _recalculatePaths();
-    notifyListeners();
+    notifyCircuitChanged();
   }
 
   void removeWire(Wire wire) {
@@ -457,7 +463,7 @@ class CircuitController extends ChangeNotifier {
     LogicSimulator.simulate(circuit);
     _pathsDirty = true;
     _recalculatePaths();
-    notifyListeners();
+    notifyCircuitChanged();
   }
 
   void deleteSelected() {
@@ -500,7 +506,7 @@ class CircuitController extends ChangeNotifier {
       LogicSimulator.simulate(circuit);
       _pathsDirty = true;
       _recalculatePaths();
-      notifyListeners();
+      notifyCircuitChanged();
     } else if (selectedWireId != null) {
       final wire = circuit.wires
           .where((w) => w.id == selectedWireId)
@@ -532,7 +538,7 @@ class CircuitController extends ChangeNotifier {
     LogicSimulator.simulate(circuit);
     _pathsDirty = true;
     _recalculatePaths();
-    notifyListeners();
+    notifyCircuitChanged();
   }
 
   void redo() {
@@ -545,7 +551,7 @@ class CircuitController extends ChangeNotifier {
     LogicSimulator.simulate(circuit);
     _pathsDirty = true;
     _recalculatePaths();
-    notifyListeners();
+    notifyCircuitChanged();
   }
 
   void _applyAction(CircuitAction action, {required bool undo}) {
@@ -616,7 +622,7 @@ class CircuitController extends ChangeNotifier {
       }
       _pathsDirty = true;
       _recalculatePaths();
-      notifyListeners();
+      notifyCircuitChanged();
       return;
     }
 
@@ -661,7 +667,7 @@ class CircuitController extends ChangeNotifier {
 
     if (node.onAction(localPosition)) {
       LogicSimulator.simulate(circuit);
-      notifyListeners();
+      notifyCircuitChanged();
     }
   }
 
@@ -670,12 +676,12 @@ class CircuitController extends ChangeNotifier {
 
     wireStart = PinSelection(node: node, pin: pin);
     temporaryWireEnd = node.position + pin.localPosition;
-    notifyListeners();
+    notifyOverlayChanged();
   }
 
   void updateTemporaryWire(Offset point) {
     temporaryWireEnd = _snapToGrid(point);
-    notifyListeners();
+    notifyOverlayChanged();
   }
 
   void finishWire(CircuitNode node, Pin pin) {
@@ -716,13 +722,13 @@ class CircuitController extends ChangeNotifier {
     LogicSimulator.simulate(circuit);
     _pathsDirty = true;
     _recalculatePaths();
-    notifyListeners();
+    notifyCircuitChanged();
   }
 
   void cancelWire() {
     wireStart = null;
     temporaryWireEnd = null;
-    notifyListeners();
+    notifyOverlayChanged();
   }
 
   CircuitNode _createNode(GateType type, Offset position) {
@@ -871,9 +877,24 @@ class CircuitController extends ChangeNotifier {
   CircuitNode _createRGBLED(Offset position) {
     final id = UniqueKey().toString();
     final inputPins = [
-      Pin(id: 'r', nodeId: id, isInput: true, localPosition: const Offset(0, 16)),
-      Pin(id: 'g', nodeId: id, isInput: true, localPosition: const Offset(0, 48)),
-      Pin(id: 'b', nodeId: id, isInput: true, localPosition: const Offset(0, 80)),
+      Pin(
+        id: 'r',
+        nodeId: id,
+        isInput: true,
+        localPosition: const Offset(0, 16),
+      ),
+      Pin(
+        id: 'g',
+        nodeId: id,
+        isInput: true,
+        localPosition: const Offset(0, 48),
+      ),
+      Pin(
+        id: 'b',
+        nodeId: id,
+        isInput: true,
+        localPosition: const Offset(0, 80),
+      ),
     ];
     return RGBLEDNode(
       id: id,
@@ -889,7 +910,12 @@ class CircuitController extends ChangeNotifier {
       id: id,
       position: position,
       inputPins: [
-        Pin(id: 'in', nodeId: id, isInput: true, localPosition: const Offset(0, 32)),
+        Pin(
+          id: 'in',
+          nodeId: id,
+          isInput: true,
+          localPosition: const Offset(0, 32),
+        ),
       ],
       outputPins: const [],
     );
@@ -983,7 +1009,7 @@ class CircuitController extends ChangeNotifier {
   void startMarqueeSelection(Offset position) {
     _selectionStart = position;
     selectionRect = Rect.fromPoints(position, position);
-    notifyListeners();
+    notifyOverlayChanged();
   }
 
   void updateMarqueeSelection(Offset position) {
@@ -997,13 +1023,15 @@ class CircuitController extends ChangeNotifier {
       selectedNodeIds.add(node.id);
     }
 
-    notifyListeners();
+    notifyOverlayChanged();
+    notifyCircuitChanged();
   }
 
   void endMarqueeSelection() {
     selectionRect = null;
     _selectionStart = null;
-    notifyListeners();
+    notifyOverlayChanged();
+    notifyCircuitChanged();
   }
 
   void loadDefinition(SubCircuitDefinition definition) {
@@ -1033,7 +1061,7 @@ class CircuitController extends ChangeNotifier {
     LogicSimulator.simulate(circuit);
     _pathsDirty = true;
     _recalculatePaths();
-    notifyListeners();
+    notifyCircuitChanged();
   }
 
   void _recalculatePaths({List<String>? onlyWireIds}) {
@@ -1049,29 +1077,26 @@ class CircuitController extends ChangeNotifier {
 
       if (start == null || end == null) continue;
 
-      if (wire.waypoints.isNotEmpty) {
-        final points = [start, ...wire.waypoints, end];
-        for (int j = 0; j < points.length - 1; j++) {
-          _addSegments(allSegments, points[j], points[j + 1]);
-        }
-        continue;
-      }
+      final shouldRecalculate =
+          onlyWireIds != null && onlyWireIds.contains(wire.id);
 
-      final shouldRecalculate = onlyWireIds == null ||
-          onlyWireIds.contains(wire.id) ||
-          wire.cachedPath == null;
-
-      if (shouldRecalculate) {
+      if (shouldRecalculate || wire.waypoints.isEmpty) {
         final points = PathFinder.findPath(
           start: start,
           end: end,
           obstacles: obstacles,
           existingSegments: allSegments,
         );
-        circuit.wires[i] = wire.copyWith(cachedPath: points);
+        
+        // Bake waypoints: everything except start and end
+        final newWaypoints = points.length <= 2
+            ? <Offset>[]
+            : points.sublist(1, points.length - 1);
+            
+        circuit.wires[i] = wire.copyWith(waypoints: newWaypoints);
       }
 
-      final points = circuit.wires[i].cachedPath ?? [];
+      final points = [start, ...circuit.wires[i].waypoints, end];
       for (int j = 0; j < points.length - 1; j++) {
         _addSegments(allSegments, points[j], points[j + 1]);
       }
@@ -1100,8 +1125,9 @@ class CircuitController extends ChangeNotifier {
     final node = _findNode(wire.fromNodeId);
     if (node == null) return null;
 
-    final pin =
-        node.outputPins.where((p) => p.id == wire.fromPinId).firstOrNull;
+    final pin = node.outputPins
+        .where((p) => p.id == wire.fromPinId)
+        .firstOrNull;
     if (pin == null) return null;
 
     return node.position + pin.localPosition;

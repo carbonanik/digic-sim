@@ -1,4 +1,5 @@
 import 'package:digital_logic_sim_2/editor/circuit_painter.dart';
+import 'package:digital_logic_sim_2/models/circuit_node.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -59,25 +60,26 @@ class _CircuitCanvasState extends State<CircuitCanvas> {
               onHover: (event) {
                 final controller = widget.controller;
                 final point = event.localPosition;
-                controller.setMousePosition(point);
 
                 final pinHit = HitTesting.findPinAt(controller.circuit, point);
-                controller.setHoveredPin(pinHit);
 
+                CircuitNode? nodeHit;
                 if (pinHit == null) {
-                  final nodeHit = HitTesting.findNodeAt(
-                    controller.circuit,
-                    point,
-                  );
-                  controller.setHoveredNode(nodeHit?.id);
-                } else {
-                  controller.setHoveredNode(null);
+                  nodeHit = HitTesting.findNodeAt(controller.circuit, point);
                 }
+
+                controller.updateHoverState(
+                  position: point,
+                  pinHit: pinHit,
+                  nodeId: pinHit == null ? nodeHit?.id : null,
+                );
               },
               onExit: (event) {
-                widget.controller.setHoveredPin(null);
-                widget.controller.setHoveredNode(null);
-                widget.controller.setMousePosition(null);
+                widget.controller.updateHoverState(
+                  position: null,
+                  pinHit: null,
+                  nodeId: null,
+                );
               },
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
@@ -292,7 +294,8 @@ class _CircuitCanvasState extends State<CircuitCanvas> {
                           circuit: widget.controller.circuit,
                           selectedNodeIds: widget.controller.selectedNodeIds,
                           selectedWireId: widget.controller.selectedWireId,
-                          repaintCounter: widget.controller.repaintCounter,
+                          repaintCounter:
+                              widget.controller.circuitRepaintCounter,
                         ),
                       ),
                     ),
@@ -310,7 +313,8 @@ class _CircuitCanvasState extends State<CircuitCanvas> {
                           selectedTool: widget.controller.selectedTool,
                           selectedCustomComponent:
                               widget.controller.selectedCustomComponent,
-                          repaintCounter: widget.controller.repaintCounter,
+                          repaintCounter:
+                              widget.controller.overlayRepaintCounter,
                         ),
                       ),
                     ),

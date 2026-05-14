@@ -47,6 +47,12 @@ class _LogicDesignerScreenState extends State<LogicDesignerScreen> {
   final CircuitController controller = CircuitController();
 
   @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return CallbackShortcuts(
       bindings: <ShortcutActivator, VoidCallback>{
