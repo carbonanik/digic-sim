@@ -45,6 +45,7 @@ class NodeFactory {
           inputPins: inputPins,
           outputPins: outputPins,
           value: map['value'] ?? false,
+          label: map['label'] ?? '',
         );
       case 'output':
         return OutputNode(
@@ -52,6 +53,7 @@ class NodeFactory {
           position: position,
           inputPins: inputPins,
           outputPins: outputPins,
+          label: map['label'] ?? '',
         );
       case 'segment_display':
         return SegmentDisplayNode(

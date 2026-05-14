@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 
 import '../controllers/circuit_controller.dart';
 import '../models/nodes/composed_node.dart';
+import '../models/nodes/io_nodes.dart';
 import 'editor_tools.dart';
 import 'hit_test.dart';
 
@@ -147,6 +148,11 @@ class _CircuitCanvasState extends State<CircuitCanvas> {
                     );
                     if (nodeHit is ComposedNode) {
                       widget.controller.loadDefinition(nodeHit.definition);
+                      return;
+                    }
+
+                    if (nodeHit is InputNode || nodeHit is OutputNode) {
+                      _showLabelDialog(context, nodeHit!);
                       return;
                     }
 
@@ -324,6 +330,66 @@ class _CircuitCanvasState extends State<CircuitCanvas> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  void _showLabelDialog(BuildContext context, CircuitNode node) {
+    String currentLabel = '';
+    if (node is InputNode) {
+      currentLabel = node.label;
+    } else if (node is OutputNode) {
+      currentLabel = node.label;
+    }
+
+    final textController = TextEditingController(text: currentLabel);
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xff0f172a),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+          side: const BorderSide(color: Color(0xff1f2937)),
+        ),
+        title: Text('Edit ${node is InputNode ? 'Input' : 'Output'} Label'),
+        content: TextField(
+          controller: textController,
+          autofocus: true,
+          decoration: InputDecoration(
+            hintText: 'Enter label...',
+            filled: true,
+            fillColor: const Color(0xff1e293b),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+          ),
+          onSubmitted: (value) {
+            widget.controller.updateNodeLabel(node.id, value);
+            Navigator.pop(context);
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              widget.controller.updateNodeLabel(node.id, textController.text);
+              Navigator.pop(context);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xff38bdf8),
+              foregroundColor: const Color(0xff020617),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: const Text('Save'),
+          ),
+        ],
       ),
     );
   }

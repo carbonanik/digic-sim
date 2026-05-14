@@ -671,6 +671,19 @@ class CircuitController extends ChangeNotifier {
     }
   }
 
+  void updateNodeLabel(String nodeId, String label) {
+    final node = circuit.nodes.where((n) => n.id == nodeId).firstOrNull;
+    if (node == null) return;
+
+    if (node is InputNode) {
+      node.label = label;
+    } else if (node is OutputNode) {
+      node.label = label;
+    }
+
+    notifyCircuitChanged();
+  }
+
   void startWire(CircuitNode node, Pin pin) {
     if (pin.isInput) return;
 
@@ -1003,7 +1016,7 @@ class CircuitController extends ChangeNotifier {
     LogicSimulator.simulate(circuit);
     _pathsDirty = true;
     _recalculatePaths();
-    notifyListeners();
+    notifyCircuitChanged();
   }
 
   void startMarqueeSelection(Offset position) {

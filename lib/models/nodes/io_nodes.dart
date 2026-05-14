@@ -3,6 +3,7 @@ import '../circuit_node.dart';
 
 class InputNode extends CircuitNode {
   bool value;
+  String label;
 
   InputNode({
     required super.id,
@@ -10,6 +11,7 @@ class InputNode extends CircuitNode {
     required super.inputPins,
     required super.outputPins,
     this.value = false,
+    this.label = '',
   });
 
   @override
@@ -54,7 +56,7 @@ class InputNode extends CircuitNode {
 
     canvas.drawRRect(rect, borderPaint);
 
-    _drawLabel(canvas, "INPUT");
+    _drawLabel(canvas, label.isNotEmpty ? label : "INPUT");
     _drawValue(canvas);
   }
 
@@ -70,7 +72,7 @@ class InputNode extends CircuitNode {
       ),
       textDirection: TextDirection.ltr,
     );
-    textPainter.layout();
+    textPainter.layout(maxWidth: 96);
     textPainter.paint(canvas, position + const Offset(16, 14));
   }
 
@@ -96,6 +98,7 @@ class InputNode extends CircuitNode {
       id: newId,
       position: position,
       value: value,
+      label: label,
       inputPins: inputPins.map((p) => p.clone(newId)).toList(),
       outputPins: outputPins.map((p) => p.clone(newId)).toList(),
     );
@@ -107,18 +110,21 @@ class InputNode extends CircuitNode {
       ...super.toMap(),
       'type': 'input',
       'value': value,
+      'label': label,
     };
   }
 }
 
 class OutputNode extends CircuitNode {
   bool value = false;
+  String label;
 
   OutputNode({
     required super.id,
     required super.position,
     required super.inputPins,
     required super.outputPins,
+    this.label = '',
   });
 
   @override
@@ -157,7 +163,7 @@ class OutputNode extends CircuitNode {
 
     canvas.drawRRect(rect, borderPaint);
 
-    _drawLabel(canvas, "OUTPUT");
+    _drawLabel(canvas, label.isNotEmpty ? label : "OUTPUT");
     _drawValue(canvas);
   }
 
@@ -173,7 +179,7 @@ class OutputNode extends CircuitNode {
       ),
       textDirection: TextDirection.ltr,
     );
-    textPainter.layout();
+    textPainter.layout(maxWidth: 96);
     textPainter.paint(canvas, position + const Offset(16, 14));
   }
 
@@ -198,6 +204,7 @@ class OutputNode extends CircuitNode {
     return OutputNode(
       id: newId,
       position: position,
+      label: label,
       inputPins: inputPins.map((p) => p.clone(newId)).toList(),
       outputPins: outputPins.map((p) => p.clone(newId)).toList(),
     );
@@ -208,6 +215,8 @@ class OutputNode extends CircuitNode {
     return {
       ...super.toMap(),
       'type': 'output',
+      'label': label,
     };
   }
 }
+

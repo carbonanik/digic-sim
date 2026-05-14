@@ -271,11 +271,11 @@ class _TopBar extends StatelessWidget {
     final nameController = TextEditingController();
     final inputControllers = List.generate(
       inputNodes.length,
-      (_) => TextEditingController(),
+      (i) => TextEditingController(text: inputNodes[i].label),
     );
     final outputControllers = List.generate(
       outputNodes.length,
-      (_) => TextEditingController(),
+      (i) => TextEditingController(text: outputNodes[i].label),
     );
 
     Color selectedColor = const Color(0xff1e3a8a);
