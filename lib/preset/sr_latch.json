@@ -2,211 +2,255 @@
     "name": "SR Latch",
     "nodes": [
         {
-            "id": "in_s",
-            "type": "input",
+            "id": "[#b840a]",
             "position": {
-                "dx": 50,
-                "dy": 80
+                "dx": 240,
+                "dy": 448
             },
             "inputPins": [],
             "outputPins": [
                 {
                     "id": "out",
-                    "nodeId": "in_s",
+                    "nodeId": "[#b840a]",
                     "isInput": false,
                     "localPosition": {
-                        "dx": 110,
+                        "dx": 112,
                         "dy": 32
-                    }
+                    },
+                    "value": false
                 }
-            ]
+            ],
+            "type": "input",
+            "value": false,
+            "label": "S"
         },
         {
-            "id": "in_r",
-            "type": "input",
+            "id": "[#2c9a1]",
             "position": {
-                "dx": 50,
-                "dy": 210
+                "dx": 240,
+                "dy": 304
             },
             "inputPins": [],
             "outputPins": [
                 {
                     "id": "out",
-                    "nodeId": "in_r",
+                    "nodeId": "[#2c9a1]",
                     "isInput": false,
                     "localPosition": {
-                        "dx": 110,
+                        "dx": 112,
                         "dy": 32
-                    }
+                    },
+                    "value": false
                 }
-            ]
+            ],
+            "type": "input",
+            "value": false,
+            "label": "R"
         },
         {
-            "id": "nor_q",
-            "type": "gate",
-            "gateType": "nor",
+            "id": "[#33aa6]",
             "position": {
-                "dx": 320,
-                "dy": 80
+                "dx": 496,
+                "dy": 320
             },
             "inputPins": [
                 {
-                    "id": "p0",
-                    "nodeId": "nor_q",
+                    "id": "a",
+                    "nodeId": "[#33aa6]",
                     "isInput": true,
                     "localPosition": {
                         "dx": 0,
-                        "dy": 22
-                    }
+                        "dy": 16
+                    },
+                    "value": false
                 },
                 {
-                    "id": "p1",
-                    "nodeId": "nor_q",
+                    "id": "b",
+                    "nodeId": "[#33aa6]",
                     "isInput": true,
                     "localPosition": {
                         "dx": 0,
-                        "dy": 42
-                    }
+                        "dy": 48
+                    },
+                    "value": true
                 }
             ],
             "outputPins": [
                 {
                     "id": "out",
-                    "nodeId": "nor_q",
+                    "nodeId": "[#33aa6]",
                     "isInput": false,
                     "localPosition": {
-                        "dx": 110,
+                        "dx": 112,
                         "dy": 32
-                    }
+                    },
+                    "value": false
                 }
-            ]
+            ],
+            "type": "gate",
+            "gateType": "nor"
         },
         {
-            "id": "nor_nq",
-            "type": "gate",
-            "gateType": "nor",
+            "id": "[#f07a8]",
             "position": {
-                "dx": 320,
-                "dy": 210
+                "dx": 496,
+                "dy": 432
             },
             "inputPins": [
                 {
-                    "id": "p0",
-                    "nodeId": "nor_nq",
+                    "id": "a",
+                    "nodeId": "[#f07a8]",
                     "isInput": true,
                     "localPosition": {
                         "dx": 0,
-                        "dy": 22
-                    }
+                        "dy": 16
+                    },
+                    "value": false
                 },
                 {
-                    "id": "p1",
-                    "nodeId": "nor_nq",
+                    "id": "b",
+                    "nodeId": "[#f07a8]",
                     "isInput": true,
                     "localPosition": {
                         "dx": 0,
-                        "dy": 42
-                    }
+                        "dy": 48
+                    },
+                    "value": false
                 }
             ],
             "outputPins": [
                 {
                     "id": "out",
-                    "nodeId": "nor_nq",
+                    "nodeId": "[#f07a8]",
                     "isInput": false,
                     "localPosition": {
-                        "dx": 110,
+                        "dx": 112,
                         "dy": 32
-                    }
+                    },
+                    "value": true
                 }
-            ]
+            ],
+            "type": "gate",
+            "gateType": "nor"
         },
         {
-            "id": "out_q",
-            "type": "output",
+            "id": "[#066a1]",
             "position": {
-                "dx": 540,
-                "dy": 80
+                "dx": 768,
+                "dy": 320
             },
             "inputPins": [
                 {
                     "id": "in",
-                    "nodeId": "out_q",
+                    "nodeId": "[#066a1]",
                     "isInput": true,
                     "localPosition": {
                         "dx": 0,
                         "dy": 32
-                    }
+                    },
+                    "value": false
                 }
             ],
-            "outputPins": []
+            "outputPins": [],
+            "type": "output",
+            "label": "Q"
         },
         {
-            "id": "out_nq",
-            "type": "output",
+            "id": "[#24bcf]",
             "position": {
-                "dx": 540,
-                "dy": 210
+                "dx": 768,
+                "dy": 432
             },
             "inputPins": [
                 {
                     "id": "in",
-                    "nodeId": "out_nq",
+                    "nodeId": "[#24bcf]",
                     "isInput": true,
                     "localPosition": {
                         "dx": 0,
                         "dy": 32
-                    }
+                    },
+                    "value": true
                 }
             ],
-            "outputPins": []
+            "outputPins": [],
+            "type": "output",
+            "label": "NOT Q"
         }
     ],
     "wires": [
         {
-            "id": "w_s_to_nq",
-            "fromNodeId": "in_s",
+            "id": "[#e498d]",
+            "fromNodeId": "[#33aa6]",
             "fromPinId": "out",
-            "toNodeId": "nor_nq",
-            "toPinId": "p0"
+            "toNodeId": "[#066a1]",
+            "toPinId": "in",
+            "waypoints": []
         },
         {
-            "id": "w_r_to_q",
-            "fromNodeId": "in_r",
+            "id": "[#9bd81]",
+            "fromNodeId": "[#f07a8]",
             "fromPinId": "out",
-            "toNodeId": "nor_q",
-            "toPinId": "p0"
+            "toNodeId": "[#24bcf]",
+            "toPinId": "in",
+            "waypoints": []
         },
         {
-            "id": "w_q_feedback",
-            "fromNodeId": "nor_q",
+            "id": "[#f9d41]",
+            "fromNodeId": "[#f07a8]",
             "fromPinId": "out",
-            "toNodeId": "nor_nq",
-            "toPinId": "p1"
+            "toNodeId": "[#33aa6]",
+            "toPinId": "b",
+            "waypoints": [
+                {
+                    "dx": 624,
+                    "dy": 464
+                },
+                {
+                    "dx": 624,
+                    "dy": 384
+                },
+                {
+                    "dx": 496,
+                    "dy": 384
+                }
+            ]
         },
         {
-            "id": "w_nq_feedback",
-            "fromNodeId": "nor_nq",
+            "id": "[#b9e07]",
+            "fromNodeId": "[#33aa6]",
             "fromPinId": "out",
-            "toNodeId": "nor_q",
-            "toPinId": "p1"
+            "toNodeId": "[#f07a8]",
+            "toPinId": "a",
+            "waypoints": [
+                {
+                    "dx": 608,
+                    "dy": 432
+                },
+                {
+                    "dx": 496,
+                    "dy": 432
+                }
+            ]
         },
         {
-            "id": "w_q_out",
-            "fromNodeId": "nor_q",
+            "id": "[#c58dc]",
+            "fromNodeId": "[#b840a]",
             "fromPinId": "out",
-            "toNodeId": "out_q",
-            "toPinId": "in"
+            "toNodeId": "[#f07a8]",
+            "toPinId": "b",
+            "waypoints": []
         },
         {
-            "id": "w_nq_out",
-            "fromNodeId": "nor_nq",
+            "id": "[#f3b2b]",
+            "fromNodeId": "[#2c9a1]",
             "fromPinId": "out",
-            "toNodeId": "out_nq",
-            "toPinId": "in"
+            "toNodeId": "[#33aa6]",
+            "toPinId": "a",
+            "waypoints": []
         }
     ],
-    "color": 4280166715,
+    "color": 4280171146,
     "inputLabels": [
         "S",
         "R"

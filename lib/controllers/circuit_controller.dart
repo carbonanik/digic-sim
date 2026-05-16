@@ -947,7 +947,23 @@ class CircuitController extends ChangeNotifier {
     final outputNodes = circuit.nodes.whereType<OutputNode>().toList();
 
     // 2. Clone current nodes and wires
-    final clonedNodes = circuit.nodes.map((n) => n.clone(n.id)).toList();
+    int inIdx = 0;
+    int outIdx = 0;
+    final clonedNodes = circuit.nodes.map((n) {
+      final clone = n.clone(n.id);
+      if (clone is InputNode) {
+        if (inIdx < inputLabels.length) {
+          clone.label = inputLabels[inIdx];
+        }
+        inIdx++;
+      } else if (clone is OutputNode) {
+        if (outIdx < outputLabels.length) {
+          clone.label = outputLabels[outIdx];
+        }
+        outIdx++;
+      }
+      return clone;
+    }).toList();
     final clonedWires = circuit.wires
         .map(
           (w) => Wire(
@@ -1053,8 +1069,23 @@ class CircuitController extends ChangeNotifier {
     // but here we can just use the same IDs or clone them properly.
     // Since we are loading it as the MAIN circuit, we can use the original IDs.
 
+    int inputIdx = 0;
+    int outputIdx = 0;
+
     for (final node in definition.nodes) {
-      circuit.nodes.add(node.clone(node.id));
+      final newNode = node.clone(node.id);
+      if (newNode is InputNode) {
+        if (inputIdx < definition.inputLabels.length) {
+          newNode.label = definition.inputLabels[inputIdx];
+        }
+        inputIdx++;
+      } else if (newNode is OutputNode) {
+        if (outputIdx < definition.outputLabels.length) {
+          newNode.label = definition.outputLabels[outputIdx];
+        }
+        outputIdx++;
+      }
+      circuit.nodes.add(newNode);
     }
 
     for (final wire in definition.wires) {
