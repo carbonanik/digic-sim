@@ -13,20 +13,64 @@ import 'editor_tools.dart';
 import 'hit_test.dart';
 
 class GridPainter extends CustomPainter {
+  final TransformationController transformationController;
+
+  GridPainter({required this.transformationController})
+      : super(repaint: transformationController);
+
   @override
   void paint(Canvas canvas, Size size) {
-    final gridPaint = Paint()
-      ..color = const Color(0xff1e293b)
-      ..strokeWidth = 1;
+    final matrix = transformationController.value;
+    final translation = matrix.getTranslation();
+    final scale = matrix.getMaxScaleOnAxis();
 
-    const gridSize = 16.0;
+    final opacity = (scale * 1.5).clamp(0.0, 1.0);
+    final paint = Paint()
+      ..color = const Color(0xff1e293b).withOpacity(opacity * 0.4)
+      ..strokeWidth = 0.5;
 
-    for (double x = 0; x < size.width; x += gridSize) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), gridPaint);
+    final majorPaint = Paint()
+      ..color = const Color(0xff334155).withOpacity(opacity * 0.8)
+      ..strokeWidth = 1.0;
+
+    final dotPaint = Paint()
+      ..color = const Color(0xff475569).withOpacity(opacity * 0.6)
+      ..style = PaintingStyle.fill;
+
+    const gridSize = 16.0; // Consistent with controller snapping
+    final scaledGridSize = gridSize * scale;
+    
+    final offsetX = translation.x % scaledGridSize;
+    final offsetY = translation.y % scaledGridSize;
+
+    final majorOffsetX = translation.x % (scaledGridSize * 8); // Every 8 units (128px)
+    final majorOffsetY = translation.y % (scaledGridSize * 8);
+
+    if (scale > 0.4) {
+      // Minor lines
+      for (double x = offsetX; x < size.width; x += scaledGridSize) {
+        canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+      }
+      for (double y = offsetY; y < size.height; y += scaledGridSize) {
+        canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+      }
     }
 
-    for (double y = 0; y < size.height; y += gridSize) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), gridPaint);
+    // Major lines
+    for (double x = majorOffsetX; x < size.width; x += scaledGridSize * 8) {
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), majorPaint);
+    }
+    for (double y = majorOffsetY; y < size.height; y += scaledGridSize * 8) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), majorPaint);
+    }
+
+    // Dots at major intersections for premium feel
+    if (scale > 0.6) {
+      for (double x = majorOffsetX; x < size.width; x += scaledGridSize * 8) {
+        for (double y = majorOffsetY; y < size.height; y += scaledGridSize * 8) {
+          canvas.drawCircle(Offset(x, y), 1.5 * scale, dotPaint);
+        }
+      }
     }
   }
 

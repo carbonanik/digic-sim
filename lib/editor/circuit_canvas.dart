@@ -52,10 +52,21 @@ class _CircuitCanvasState extends State<CircuitCanvas> {
               });
             }
           },
-          child: InteractiveViewer(
-            transformationController: transformationController,
-            minScale: 0.2,
-            maxScale: 3,
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: RepaintBoundary(
+                  child: CustomPaint(
+                    painter: GridPainter(
+                      transformationController: transformationController,
+                    ),
+                  ),
+                ),
+              ),
+              InteractiveViewer(
+                transformationController: transformationController,
+                minScale: 0.2,
+                maxScale: 3,
             boundaryMargin: const EdgeInsets.all(2000),
             child: MouseRegion(
               onHover: (event) {
@@ -290,12 +301,6 @@ class _CircuitCanvasState extends State<CircuitCanvas> {
                     RepaintBoundary(
                       child: CustomPaint(
                         size: const Size(3000, 2200),
-                        painter: GridPainter(),
-                      ),
-                    ),
-                    RepaintBoundary(
-                      child: CustomPaint(
-                        size: const Size(3000, 2200),
                         painter: CircuitPainter(
                           circuit: widget.controller.circuit,
                           selectedNodeIds: widget.controller.selectedNodeIds,
@@ -329,9 +334,11 @@ class _CircuitCanvasState extends State<CircuitCanvas> {
               ),
             ),
           ),
-        ),
+        ],
       ),
-    );
+    ),
+  ),
+);
   }
 
   void _showLabelDialog(BuildContext context, CircuitNode node) {
