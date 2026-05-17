@@ -37,8 +37,10 @@ class Pin {
         id: map['id'],
         nodeId: map['nodeId'],
         isInput: map['isInput'],
-        localPosition:
-            Offset(map['localPosition']['dx'], map['localPosition']['dy']),
+        localPosition: Offset(
+          (map['localPosition']['dx'] as num).toDouble(),
+          (map['localPosition']['dy'] as num).toDouble(),
+        ),
         value: map['value'] ?? false,
       );
 }

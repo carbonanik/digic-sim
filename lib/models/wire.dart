@@ -34,7 +34,7 @@ class Wire {
     toNodeId: map['toNodeId'],
     toPinId: map['toPinId'],
     waypoints: (map['waypoints'] as List? ?? [])
-        .map((w) => Offset(w['dx'] as double, w['dy'] as double))
+        .map((w) => Offset((w['dx'] as num).toDouble(), (w['dy'] as num).toDouble()))
         .toList(),
   );
 
