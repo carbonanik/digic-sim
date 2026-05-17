@@ -24,6 +24,15 @@ class _CircuitCanvasState extends State<CircuitCanvas> {
   bool _isSpacePressed = false;
   final FocusNode _focusNode = FocusNode();
 
+  /// Converts a screen-space [point] to scene-space coordinates,
+  /// accounting for the current pan and zoom of the InteractiveViewer.
+  Offset _toScene(Offset point) {
+    return MatrixUtils.transformPoint(
+      Matrix4.inverted(transformationController.value),
+      point,
+    );
+  }
+
   @override
   void dispose() {
     _focusNode.dispose();
@@ -61,29 +70,113 @@ class _CircuitCanvasState extends State<CircuitCanvas> {
                 ),
               ),
             ),
-            InteractiveViewer(
-              transformationController: transformationController,
-              minScale: 0.2,
-              maxScale: 3,
+            // ── GestureDetector + MouseRegion are both OUTSIDE InteractiveViewer ─
+            // All pointer positions are transformed into scene space via _toScene().
+            // Deltas (drag/pan) are divided by the current scale to convert them too.
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTapDown: _isSpacePressed
+                  ? null
+                  : (details) {
+                      final point = _toScene(details.localPosition);
+                      final controller = widget.controller;
 
-              boundaryMargin: const EdgeInsets.all(2000),
+                      final pinHit = HitTesting.findPinAt(
+                        controller.circuit,
+                        point,
+                      );
+
+                      // Context-aware wiring or Wire tool wiring
+                      if (controller.selectedTool == EditorTool.wire ||
+                          (controller.selectedTool == EditorTool.select &&
+                              pinHit != null)) {
+                        if (pinHit != null) {
+                          if (controller.wireStart == null) {
+                            controller.startWire(pinHit.node, pinHit.pin);
+                          } else {
+                            controller.finishWire(pinHit.node, pinHit.pin);
+                          }
+                        } else {
+                          controller.cancelWire();
+                        }
+                        return;
+                      }
+
+                      if (pinHit != null) return;
+
+                      final nodeHit = HitTesting.findNodeAt(
+                        controller.circuit,
+                        point,
+                      );
+
+                      if (nodeHit != null) {
+                        final localPoint = point - nodeHit.position;
+                        controller.handleNodeAction(nodeHit.id, localPoint);
+                        controller.selectNode(nodeHit.id);
+                        return;
+                      }
+
+                      if (controller.selectedTool == EditorTool.select) {
+                        final wireHit = HitTesting.findWireHitAt(
+                          controller.circuit,
+                          point,
+                        );
+                        if (wireHit != null) {
+                          controller.selectWire(wireHit.wire.id);
+                          return;
+                        }
+                        controller.selectNode(null);
+                      } else {
+                        controller.addGateFromTool(point);
+                      }
+                    },
+              onDoubleTap: () {
+                final pos = widget.controller.mousePosition;
+                if (pos != null) {
+                  final nodeHit = HitTesting.findNodeAt(
+                    widget.controller.circuit,
+                    pos,
+                  );
+                  if (nodeHit is ComposedNode) {
+                    widget.controller.loadDefinition(nodeHit.definition);
+                    return;
+                  }
+
+                  if (nodeHit is InputNode || nodeHit is OutputNode) {
+                    _showLabelDialog(context, nodeHit!);
+                    return;
+                  }
+
+                  final wireHit = HitTesting.findWireHitAt(
+                    widget.controller.circuit,
+                    pos,
+                  );
+                  if (wireHit != null) {
+                    widget.controller.resetWirePath(wireHit.wire.id);
+                    return;
+                  }
+                }
+              },
               child: MouseRegion(
                 onHover: (event) {
                   final controller = widget.controller;
-                  final point = event.localPosition;
+                  final scenePoint = _toScene(event.localPosition);
 
                   final pinHit = HitTesting.findPinAt(
                     controller.circuit,
-                    point,
+                    scenePoint,
                   );
 
                   CircuitNode? nodeHit;
                   if (pinHit == null) {
-                    nodeHit = HitTesting.findNodeAt(controller.circuit, point);
+                    nodeHit = HitTesting.findNodeAt(
+                      controller.circuit,
+                      scenePoint,
+                    );
                   }
 
                   controller.updateHoverState(
-                    position: point,
+                    position: scenePoint,
                     pinHit: pinHit,
                     nodeId: pinHit == null ? nodeHit?.id : null,
                   );
@@ -95,213 +188,135 @@ class _CircuitCanvasState extends State<CircuitCanvas> {
                     nodeId: null,
                   );
                 },
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTapDown: _isSpacePressed
-                      ? null
-                      : (details) {
-                          final point = details.localPosition;
-                          final controller = widget.controller;
+                child: InteractiveViewer(
+                  transformationController: transformationController,
+                  minScale: 0.2,
+                  maxScale: 3,
+                  boundaryMargin: const EdgeInsets.all(2000),
+                  panEnabled: _isSpacePressed ? true : false,
+                  onInteractionStart: (details) {
+                    // Only handle single-finger pan (pointerCount == 1).
+                    // Two-finger pinch-to-zoom is handled by InteractiveViewer itself.
+                    if (details.pointerCount != 1) return;
+                    if (_isSpacePressed) return;
 
-                          final pinHit = HitTesting.findPinAt(
-                            controller.circuit,
-                            point,
-                          );
+                    final controller = widget.controller;
+                    final point = _toScene(details.localFocalPoint);
+                    // final point = details.localFocalPoint;
+                    controller.resetDragAccumulator();
 
-                          // Context-aware wiring or Wire tool wiring
-                          if (controller.selectedTool == EditorTool.wire ||
-                              (controller.selectedTool == EditorTool.select &&
-                                  pinHit != null)) {
-                            if (pinHit != null) {
-                              if (controller.wireStart == null) {
-                                controller.startWire(pinHit.node, pinHit.pin);
-                              } else {
-                                controller.finishWire(pinHit.node, pinHit.pin);
-                              }
-                            } else {
-                              controller.cancelWire();
-                            }
-                            return;
-                          }
+                    final pinHit = HitTesting.findPinAt(
+                      controller.circuit,
+                      point,
+                    );
 
-                          if (pinHit != null) return;
+                    if (pinHit != null &&
+                        controller.selectedTool == EditorTool.select) {
+                      controller.startWire(pinHit.node, pinHit.pin);
+                      return;
+                    }
 
-                          final nodeHit = HitTesting.findNodeAt(
-                            controller.circuit,
-                            point,
-                          );
-
-                          if (nodeHit != null) {
-                            final localPoint = point - nodeHit.position;
-                            controller.handleNodeAction(nodeHit.id, localPoint);
-                            controller.selectNode(nodeHit.id);
-                            return;
-                          }
-
-                          if (controller.selectedTool == EditorTool.select) {
-                            final wireHit = HitTesting.findWireHitAt(
-                              controller.circuit,
-                              point,
-                            );
-                            if (wireHit != null) {
-                              controller.selectWire(wireHit.wire.id);
-                              return;
-                            }
-                            controller.selectNode(null);
-                          } else {
-                            controller.addGateFromTool(point);
-                          }
-                        },
-                  onDoubleTap: () {
-                    final pos = widget.controller.mousePosition;
-                    if (pos != null) {
+                    if (controller.selectedTool == EditorTool.select) {
                       final nodeHit = HitTesting.findNodeAt(
-                        widget.controller.circuit,
-                        pos,
+                        controller.circuit,
+                        point,
                       );
-                      if (nodeHit is ComposedNode) {
-                        widget.controller.loadDefinition(nodeHit.definition);
-                        return;
-                      }
-
-                      if (nodeHit is InputNode || nodeHit is OutputNode) {
-                        _showLabelDialog(context, nodeHit!);
-                        return;
-                      }
-
-                      final wireHit = HitTesting.findWireHitAt(
-                        widget.controller.circuit,
-                        pos,
-                      );
-                      if (wireHit != null) {
-                        widget.controller.resetWirePath(wireHit.wire.id);
-                        return;
+                      if (nodeHit != null) {
+                        if (!controller.selectedNodeIds.contains(nodeHit.id)) {
+                          controller.selectNode(nodeHit.id);
+                        }
+                      } else {
+                        final wireHit = HitTesting.findWireHitAt(
+                          controller.circuit,
+                          point,
+                        );
+                        if (wireHit != null) {
+                          controller.startWireDrag(wireHit, point);
+                        } else {
+                          controller.startMarqueeSelection(point);
+                        }
                       }
                     }
                   },
-                  onPanStart: _isSpacePressed
-                      ? null
-                      : (details) {
-                          final controller = widget.controller;
-                          final point = details.localPosition;
-                          controller.resetDragAccumulator();
+                  onInteractionUpdate: (details) {
+                    if (details.pointerCount != 1) return;
 
-                          final pinHit = HitTesting.findPinAt(
-                            controller.circuit,
-                            point,
-                          );
+                    if (_isSpacePressed) {
+                      // Space-pan: translate the scene matrix directly.
+                      final matrix = transformationController.value;
+                      final scale = matrix.getMaxScaleOnAxis();
+                      transformationController.value = matrix.clone()
+                        ..translate(
+                          details.focalPointDelta.dx / scale,
+                          details.focalPointDelta.dy / scale,
+                        );
+                      return;
+                    }
 
-                          if (pinHit != null &&
-                              controller.selectedTool == EditorTool.select) {
-                            controller.startWire(pinHit.node, pinHit.pin);
-                            return;
-                          }
+                    final controller = widget.controller;
+                    final scenePos = _toScene(details.localFocalPoint);
+                    final scale = transformationController.value
+                        .getMaxScaleOnAxis();
+                    final sceneDelta = details.focalPointDelta / scale;
 
-                          if (controller.selectedTool == EditorTool.select) {
-                            final nodeHit = HitTesting.findNodeAt(
-                              controller.circuit,
-                              point,
-                            );
-                            if (nodeHit != null) {
-                              // If we click a node that's not selected, select it (clearing others unless shift)
-                              // For now, let's just support single click select or drag already selected.
-                              if (!controller.selectedNodeIds.contains(
-                                nodeHit.id,
-                              )) {
-                                controller.selectNode(nodeHit.id);
-                              }
-                              // We'll move all selected nodes
-                            } else {
-                              final wireHit = HitTesting.findWireHitAt(
-                                controller.circuit,
-                                point,
-                              );
-                              if (wireHit != null) {
-                                controller.startWireDrag(wireHit, point);
-                              } else {
-                                // Clicked empty space
-                                controller.startMarqueeSelection(point);
-                              }
-                            }
-                          }
-                        },
-                  onPanUpdate: _isSpacePressed
-                      ? (details) {
-                          final matrix = transformationController.value;
-                          final scale = matrix.getMaxScaleOnAxis();
-                          transformationController.value = matrix.clone()
-                            ..translate(
-                              details.delta.dx / scale,
-                              details.delta.dy / scale,
-                            );
-                        }
-                      : (details) {
-                          final controller = widget.controller;
+                    if (controller.wireStart != null) {
+                      controller.updateTemporaryWire(scenePos);
+                      return;
+                    }
 
-                          if (controller.wireStart != null) {
-                            controller.updateTemporaryWire(
-                              details.localPosition,
-                            );
-                            return;
-                          }
+                    if (controller.selectionRect != null) {
+                      controller.updateMarqueeSelection(scenePos);
+                      return;
+                    }
 
-                          if (controller.selectionRect != null) {
-                            controller.updateMarqueeSelection(
-                              details.localPosition,
-                            );
-                            return;
-                          }
+                    if (controller.draggedWireHit != null) {
+                      controller.updateWireDrag(scenePos);
+                      return;
+                    }
 
-                          if (controller.draggedWireHit != null) {
-                            controller.updateWireDrag(details.localPosition);
-                            return;
-                          }
+                    if (controller.selectedTool == EditorTool.select &&
+                        controller.selectedNodeIds.isNotEmpty) {
+                      controller.moveSelectedNodes(sceneDelta);
+                    }
 
-                          if (controller.selectedTool == EditorTool.select &&
-                              controller.selectedNodeIds.isNotEmpty) {
-                            controller.moveSelectedNodes(details.delta);
-                          }
+                    if (controller.selectedTool == EditorTool.wire &&
+                        controller.wireStart != null) {
+                      controller.updateTemporaryWire(scenePos);
+                    }
+                  },
+                  onInteractionEnd: (details) {
+                    if (_isSpacePressed) return;
 
-                          if (controller.selectedTool == EditorTool.wire &&
-                              controller.wireStart != null) {
-                            controller.updateTemporaryWire(
-                              details.localPosition,
-                            );
-                          }
-                        },
-                  onPanEnd: _isSpacePressed
-                      ? null
-                      : (details) {
-                          final controller = widget.controller;
+                    final controller = widget.controller;
 
-                          if (controller.selectionRect != null) {
-                            controller.endMarqueeSelection();
-                            return;
-                          }
+                    if (controller.selectionRect != null) {
+                      controller.endMarqueeSelection();
+                      return;
+                    }
 
-                          if (controller.wireStart != null &&
-                              controller.temporaryWireEnd != null) {
-                            final pinHit = HitTesting.findPinAt(
-                              controller.circuit,
-                              controller.temporaryWireEnd!,
-                            );
-                            if (pinHit != null) {
-                              controller.finishWire(pinHit.node, pinHit.pin);
-                            } else {
-                              controller.cancelWire();
-                            }
-                            return;
-                          }
+                    if (controller.wireStart != null &&
+                        controller.temporaryWireEnd != null) {
+                      final pinHit = HitTesting.findPinAt(
+                        controller.circuit,
+                        controller.temporaryWireEnd!,
+                      );
+                      if (pinHit != null) {
+                        controller.finishWire(pinHit.node, pinHit.pin);
+                      } else {
+                        controller.cancelWire();
+                      }
+                      return;
+                    }
 
-                          if (controller.draggedWireHit != null) {
-                            controller.endWireDrag();
-                            return;
-                          }
+                    if (controller.draggedWireHit != null) {
+                      controller.endWireDrag();
+                      return;
+                    }
 
-                          if (controller.selectedNodeIds.isNotEmpty) {
-                            controller.endNodeMove();
-                          }
-                        },
+                    if (controller.selectedNodeIds.isNotEmpty) {
+                      controller.endNodeMove();
+                    }
+                  },
                   child: AnimatedBuilder(
                     animation: widget.controller,
                     builder: (context, _) => Stack(
