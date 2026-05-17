@@ -1,12 +1,13 @@
 import 'package:digital_logic_sim_2/models/nodes/io_nodes.dart';
 import 'package:digital_logic_sim_2/widgets/component_toolbar.dart';
 import 'package:flutter/material.dart';
-
 import 'package:flutter/services.dart';
 import 'controllers/circuit_controller.dart';
+import 'controllers/workspace_controller.dart';
 import 'editor/circuit_canvas.dart';
 import 'editor/editor_tools.dart';
 import 'utils/preset_library.dart';
+import 'widgets/workspace_tabs.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,11 +45,11 @@ class LogicDesignerScreen extends StatefulWidget {
 }
 
 class _LogicDesignerScreenState extends State<LogicDesignerScreen> {
-  final CircuitController controller = CircuitController();
+  final WorkspaceController workspaceController = WorkspaceController();
 
   @override
   void dispose() {
-    controller.dispose();
+    workspaceController.dispose();
     super.dispose();
   }
 
@@ -57,32 +58,70 @@ class _LogicDesignerScreenState extends State<LogicDesignerScreen> {
     return CallbackShortcuts(
       bindings: <ShortcutActivator, VoidCallback>{
         const SingleActivator(LogicalKeyboardKey.delete): () =>
-            controller.deleteSelected(),
+            workspaceController.activeController?.deleteSelected(),
         const SingleActivator(LogicalKeyboardKey.backspace): () =>
-            controller.deleteSelected(),
+            workspaceController.activeController?.deleteSelected(),
       },
       child: Focus(
         autofocus: true,
         child: Scaffold(
           body: Row(
             children: [
-              AnimatedBuilder(
-                animation: controller,
-                builder: (context, _) =>
-                    ComponentToolbar(controller: controller),
+              // 1. Toolbar: Listens to workspace changes to swap the controller it displays
+              ListenableBuilder(
+                listenable: workspaceController,
+                builder: (context, _) {
+                  final controller = workspaceController.activeController!;
+                  return AnimatedBuilder(
+                    animation: controller,
+                    builder: (context, _) => ComponentToolbar(
+                      controller: controller,
+                      workspaceController: workspaceController,
+                    ),
+                  );
+                },
               ),
               Expanded(
                 child: Column(
                   children: [
-                    AnimatedBuilder(
-                      animation: controller,
-                      builder: (context, _) => _TopBar(controller: controller),
+                    // 2. Top Bar: Listens to workspace changes for title/active controller
+                    ListenableBuilder(
+                      listenable: workspaceController,
+                      builder: (context, _) {
+                        final activeWorkspace =
+                            workspaceController.activeWorkspace!;
+                        final controller = activeWorkspace.controller;
+                        return AnimatedBuilder(
+                          animation: controller,
+                          builder: (context, _) => _TopBar(
+                            controller: controller,
+                            workspaceName: activeWorkspace.name,
+                          ),
+                        );
+                      },
                     ),
+                    // 3. Tabs: Listens to workspace controller
+                    ListenableBuilder(
+                      listenable: workspaceController,
+                      builder: (context, _) => WorkspaceTabs(
+                        workspaceController: workspaceController,
+                      ),
+                    ),
+                    // 4. Canvas Stack: Uses IndexedStack and only rebuilds when workspaces are added/removed
                     Expanded(
-                      child: AnimatedBuilder(
-                        animation: controller,
-                        builder: (context, _) =>
-                            CircuitCanvas(controller: controller),
+                      child: ListenableBuilder(
+                        listenable: workspaceController,
+                        builder: (context, _) {
+                          return IndexedStack(
+                            index: workspaceController.activeIndex,
+                            children: workspaceController.workspaces.map((w) {
+                              return CircuitCanvas(
+                                key: ValueKey(w.id),
+                                controller: w.controller,
+                              );
+                            }).toList(),
+                          );
+                        },
                       ),
                     ),
                   ],
@@ -98,8 +137,9 @@ class _LogicDesignerScreenState extends State<LogicDesignerScreen> {
 
 class _TopBar extends StatelessWidget {
   final CircuitController controller;
+  final String workspaceName;
 
-  const _TopBar({required this.controller});
+  const _TopBar({required this.controller, required this.workspaceName});
 
   @override
   Widget build(BuildContext context) {
@@ -124,12 +164,12 @@ class _TopBar extends StatelessWidget {
       child: Row(
         children: [
           // Project Status / Title
-          const Column(
+          Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'UNTITLED CIRCUIT',
+              const Text(
+                'LOGIC LAB WORKSPACE',
                 style: TextStyle(
                   color: Color(0xff4b5563),
                   fontSize: 10,
@@ -138,8 +178,8 @@ class _TopBar extends StatelessWidget {
                 ),
               ),
               Text(
-                'Main Workspace',
-                style: TextStyle(
+                workspaceName.toUpperCase(),
+                style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
                   color: Colors.white,

@@ -22,6 +22,12 @@ import 'dart:async';
 import 'dart:convert';
 
 class CircuitController extends ChangeNotifier {
+  @override
+  void dispose() {
+    _clockTimer?.cancel();
+    super.dispose();
+  }
+
   String exportIC(SubCircuitDefinition definition) {
     return jsonEncode(definition.toMap());
   }

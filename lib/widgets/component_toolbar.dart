@@ -1,3 +1,4 @@
+import 'package:digital_logic_sim_2/controllers/workspace_controller.dart';
 import 'package:digital_logic_sim_2/models/nodes/composed_node.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,8 +9,13 @@ import '../utils/preset_library.dart';
 
 class ComponentToolbar extends StatelessWidget {
   final CircuitController controller;
+  final WorkspaceController workspaceController;
 
-  const ComponentToolbar({super.key, required this.controller});
+  const ComponentToolbar({
+    super.key,
+    required this.controller,
+    required this.workspaceController,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -34,180 +40,211 @@ class ComponentToolbar extends StatelessWidget {
           ),
           const Divider(color: Color(0xff1f2937), height: 1),
           Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-              children: [
-                _SectionHeader(
-                  title: 'EDITOR TOOLS',
-                  icon: Icons.edit_note,
-                  onAction: () => controller.selectTool(EditorTool.select),
-                  actionLabel: 'Reset',
-                ),
-                _ToolButton(
-                  icon: Icons.mouse_outlined,
-                  label: 'Selection Mode',
-                  shortcut: 'V',
-                  selected: controller.selectedTool == EditorTool.select,
-                  onTap: () => controller.selectTool(EditorTool.select),
-                ),
-                _ToolButton(
-                  icon: Icons.delete_outline,
-                  label: 'Delete Selected',
-                  shortcut: 'Del',
-                  selected: false,
-                  onTap: () => controller.deleteSelected(),
-                  activeColor: Colors.redAccent.withOpacity(0.2),
-                ),
-                const SizedBox(height: 20),
-                const _SectionHeader(
-                  title: 'IO COMPONENTS',
-                  icon: Icons.settings_input_component,
-                ),
-                _ToolButton(
-                  icon: Icons.login_outlined,
-                  label: 'Input Switch',
-                  selected: controller.selectedTool == EditorTool.input,
-                  onTap: () => controller.selectTool(EditorTool.input),
-                ),
-                _ToolButton(
-                  icon: Icons.logout_outlined,
-                  label: 'Output Bulb',
-                  selected: controller.selectedTool == EditorTool.output,
-                  onTap: () => controller.selectTool(EditorTool.output),
-                ),
-                _ToolButton(
-                  icon: Icons.timer_outlined,
-                  label: 'Clock Generator',
-                  selected: controller.selectedTool == EditorTool.clock,
-                  onTap: () => controller.selectTool(EditorTool.clock),
-                ),
-                const SizedBox(height: 20),
-                const _SectionHeader(
-                  title: 'LOGIC GATES',
-                  icon: Icons.hub_outlined,
-                ),
-                _ToolButton(
-                  icon: Icons.join_inner_outlined,
-                  label: 'AND Gate',
-                  selected: controller.selectedTool == EditorTool.and,
-                  onTap: () => controller.selectTool(EditorTool.and),
-                ),
-                _ToolButton(
-                  icon: Icons.call_split_outlined,
-                  label: 'OR Gate',
-                  selected: controller.selectedTool == EditorTool.or,
-                  onTap: () => controller.selectTool(EditorTool.or),
-                ),
-                _ToolButton(
-                  icon: Icons.change_circle_outlined,
-                  label: 'NOT Gate',
-                  selected: controller.selectedTool == EditorTool.not,
-                  onTap: () => controller.selectTool(EditorTool.not),
-                ),
-                _ToolButton(
-                  icon: Icons.join_full_outlined,
-                  label: 'NAND Gate',
-                  selected: controller.selectedTool == EditorTool.nand,
-                  onTap: () => controller.selectTool(EditorTool.nand),
-                ),
-                _ToolButton(
-                  icon: Icons.device_hub_outlined,
-                  label: 'NOR Gate',
-                  selected: controller.selectedTool == EditorTool.nor,
-                  onTap: () => controller.selectTool(EditorTool.nor),
-                ),
-                _ToolButton(
-                  icon: Icons.merge_outlined,
-                  label: 'XOR Gate',
-                  selected: controller.selectedTool == EditorTool.xor,
-                  onTap: () => controller.selectTool(EditorTool.xor),
-                ),
-                const SizedBox(height: 20),
-                const _SectionHeader(
-                  title: 'ADVANCED',
-                  icon: Icons.biotech_outlined,
-                ),
-                _ToolButton(
-                  icon: Icons.seven_mp_outlined,
-                  label: '7-Seg Display',
-                  selected:
-                      controller.selectedTool == EditorTool.segmentDisplay,
-                  onTap: () => controller.selectTool(EditorTool.segmentDisplay),
-                ),
-                _ToolButton(
-                  icon: Icons.analytics_outlined,
-                  label: 'Waveform Monitor',
-                  selected: controller.selectedTool == EditorTool.waveform,
-                  onTap: () => controller.selectTool(EditorTool.waveform),
-                ),
-                _ToolButton(
-                  icon: Icons.light_outlined,
-                  label: 'RGB LED',
-                  selected: controller.selectedTool == EditorTool.rgbLed,
-                  onTap: () => controller.selectTool(EditorTool.rgbLed),
-                ),
-                _ToolButton(
-                  icon: Icons.biotech_outlined,
-                  label: 'Logic Probe',
-                  selected: controller.selectedTool == EditorTool.logicProbe,
-                  onTap: () => controller.selectTool(EditorTool.logicProbe),
-                ),
-                const SizedBox(height: 20),
-                const _SectionHeader(
-                  title: 'PRESET ICs',
-                  icon: Icons.library_books_outlined,
-                ),
-                ...PresetLibrary.presets.map(
-                  (def) => _ICCard(
-                    def: def,
-                    controller: controller,
-                    selected:
-                        controller.selectedTool == EditorTool.custom &&
-                        controller.selectedCustomComponent == def,
-                    isPreset: true,
+            child: CustomScrollView(
+              slivers: [
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                  sliver: SliverList(
+                    delegate: SliverChildListDelegate([
+                      _SectionHeader(
+                        title: 'EDITOR TOOLS',
+                        icon: Icons.edit_note,
+                        onAction: () => controller.selectTool(EditorTool.select),
+                        actionLabel: 'Reset',
+                      ),
+                      _ToolButton(
+                        icon: Icons.mouse_outlined,
+                        label: 'Selection Mode',
+                        shortcut: 'V',
+                        selected: controller.selectedTool == EditorTool.select,
+                        onTap: () => controller.selectTool(EditorTool.select),
+                      ),
+                      _ToolButton(
+                        icon: Icons.delete_outline,
+                        label: 'Delete Selected',
+                        shortcut: 'Del',
+                        selected: false,
+                        onTap: () => controller.deleteSelected(),
+                        activeColor: Colors.redAccent.withOpacity(0.2),
+                      ),
+                      const SizedBox(height: 20),
+                      const _SectionHeader(
+                        title: 'IO COMPONENTS',
+                        icon: Icons.settings_input_component,
+                      ),
+                      _ToolButton(
+                        icon: Icons.login_outlined,
+                        label: 'Input Switch',
+                        selected: controller.selectedTool == EditorTool.input,
+                        onTap: () => controller.selectTool(EditorTool.input),
+                      ),
+                      _ToolButton(
+                        icon: Icons.logout_outlined,
+                        label: 'Output Bulb',
+                        selected: controller.selectedTool == EditorTool.output,
+                        onTap: () => controller.selectTool(EditorTool.output),
+                      ),
+                      _ToolButton(
+                        icon: Icons.timer_outlined,
+                        label: 'Clock Generator',
+                        selected: controller.selectedTool == EditorTool.clock,
+                        onTap: () => controller.selectTool(EditorTool.clock),
+                      ),
+                      const SizedBox(height: 20),
+                      const _SectionHeader(
+                        title: 'LOGIC GATES',
+                        icon: Icons.hub_outlined,
+                      ),
+                      _ToolButton(
+                        icon: Icons.join_inner_outlined,
+                        label: 'AND Gate',
+                        selected: controller.selectedTool == EditorTool.and,
+                        onTap: () => controller.selectTool(EditorTool.and),
+                      ),
+                      _ToolButton(
+                        icon: Icons.call_split_outlined,
+                        label: 'OR Gate',
+                        selected: controller.selectedTool == EditorTool.or,
+                        onTap: () => controller.selectTool(EditorTool.or),
+                      ),
+                      _ToolButton(
+                        icon: Icons.change_circle_outlined,
+                        label: 'NOT Gate',
+                        selected: controller.selectedTool == EditorTool.not,
+                        onTap: () => controller.selectTool(EditorTool.not),
+                      ),
+                      _ToolButton(
+                        icon: Icons.join_full_outlined,
+                        label: 'NAND Gate',
+                        selected: controller.selectedTool == EditorTool.nand,
+                        onTap: () => controller.selectTool(EditorTool.nand),
+                      ),
+                      _ToolButton(
+                        icon: Icons.device_hub_outlined,
+                        label: 'NOR Gate',
+                        selected: controller.selectedTool == EditorTool.nor,
+                        onTap: () => controller.selectTool(EditorTool.nor),
+                      ),
+                      _ToolButton(
+                        icon: Icons.merge_outlined,
+                        label: 'XOR Gate',
+                        selected: controller.selectedTool == EditorTool.xor,
+                        onTap: () => controller.selectTool(EditorTool.xor),
+                      ),
+                      const SizedBox(height: 20),
+                      const _SectionHeader(
+                        title: 'ADVANCED',
+                        icon: Icons.biotech_outlined,
+                      ),
+                      _ToolButton(
+                        icon: Icons.seven_mp_outlined,
+                        label: '7-Seg Display',
+                        selected:
+                            controller.selectedTool == EditorTool.segmentDisplay,
+                        onTap: () => controller.selectTool(EditorTool.segmentDisplay),
+                      ),
+                      _ToolButton(
+                        icon: Icons.analytics_outlined,
+                        label: 'Waveform Monitor',
+                        selected: controller.selectedTool == EditorTool.waveform,
+                        onTap: () => controller.selectTool(EditorTool.waveform),
+                      ),
+                      _ToolButton(
+                        icon: Icons.light_outlined,
+                        label: 'RGB LED',
+                        selected: controller.selectedTool == EditorTool.rgbLed,
+                        onTap: () => controller.selectTool(EditorTool.rgbLed),
+                      ),
+                      _ToolButton(
+                        icon: Icons.biotech_outlined,
+                        label: 'Logic Probe',
+                        selected: controller.selectedTool == EditorTool.logicProbe,
+                        onTap: () => controller.selectTool(EditorTool.logicProbe),
+                      ),
+                      const SizedBox(height: 20),
+                      const _SectionHeader(
+                        title: 'PRESET ICs',
+                        icon: Icons.library_books_outlined,
+                      ),
+                    ]),
                   ),
                 ),
-                const SizedBox(height: 20),
-                _SectionHeader(
-                  title: 'SAVED ICs',
-                  icon: Icons.memory_outlined,
-                  onAction: () => _showImportDialog(context),
-                  actionLabel: 'Import',
-                ),
-                if (controller.customDefinitions.isEmpty)
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xff111827).withOpacity(0.5),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: const Color(0xff1f2937),
-                        style: BorderStyle.none,
-                      ),
-                    ),
-                    child: const Text(
-                      'No custom components yet.',
-                      style: TextStyle(
-                        color: Color(0xff4b5563),
-                        fontSize: 12,
-                        fontStyle: FontStyle.italic,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  )
-                else
-                  ...controller.customDefinitions.map(
-                    (def) => _ICCard(
-                      def: def,
-                      controller: controller,
-                      selected:
-                          controller.selectedTool == EditorTool.custom &&
-                          controller.selectedCustomComponent == def,
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        final def = PresetLibrary.presets[index];
+                        return _ICCard(
+                          def: def,
+                          controller: controller,
+                          workspaceController: workspaceController,
+                          selected: controller.selectedTool == EditorTool.custom &&
+                              controller.selectedCustomComponent == def,
+                          isPreset: true,
+                        );
+                      },
+                      childCount: PresetLibrary.presets.length,
                     ),
                   ),
-                const SizedBox(height: 24),
-                const _HintCard(),
-                const SizedBox(height: 40),
+                ),
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                  sliver: SliverList(
+                    delegate: SliverChildListDelegate([
+                      _SectionHeader(
+                        title: 'SAVED ICs',
+                        icon: Icons.memory_outlined,
+                        onAction: () => _showImportDialog(context),
+                        actionLabel: 'Import',
+                      ),
+                      if (controller.customDefinitions.isEmpty)
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: const Color(0xff111827).withOpacity(0.5),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: const Color(0xff1f2937),
+                              style: BorderStyle.none,
+                            ),
+                          ),
+                          child: const Text(
+                            'No custom components yet.',
+                            style: TextStyle(
+                              color: Color(0xff4b5563),
+                              fontSize: 12,
+                              fontStyle: FontStyle.italic,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                    ]),
+                  ),
+                ),
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        final def = controller.customDefinitions[index];
+                        return _ICCard(
+                          def: def,
+                          controller: controller,
+                          workspaceController: workspaceController,
+                          selected: controller.selectedTool == EditorTool.custom &&
+                              controller.selectedCustomComponent == def,
+                        );
+                      },
+                      childCount: controller.customDefinitions.length,
+                    ),
+                  ),
+                ),
+                const SliverPadding(
+                  padding: EdgeInsets.all(16),
+                  sliver: SliverToBoxAdapter(child: _HintCard()),
+                ),
+                const SliverToBoxAdapter(child: SizedBox(height: 40)),
               ],
             ),
           ),
@@ -504,12 +541,14 @@ class _ToolButtonState extends State<_ToolButton> {
 class _ICCard extends StatelessWidget {
   final SubCircuitDefinition def;
   final CircuitController controller;
+  final WorkspaceController workspaceController;
   final bool selected;
   final bool isPreset;
 
   const _ICCard({
     required this.def,
     required this.controller,
+    required this.workspaceController,
     required this.selected,
     this.isPreset = false,
   });
@@ -544,8 +583,11 @@ class _ICCard extends StatelessWidget {
               children: [
                 _SmallIconButton(
                   icon: Icons.edit_outlined,
-                  tooltip: 'Open in Editor',
-                  onTap: () => controller.loadDefinition(def),
+                  tooltip: 'Open in New Workspace',
+                  onTap: () {
+                    workspaceController.addWorkspace(def.name);
+                    workspaceController.activeController?.loadDefinition(def);
+                  },
                 ),
                 _SmallIconButton(
                   icon: Icons.content_copy_outlined,
