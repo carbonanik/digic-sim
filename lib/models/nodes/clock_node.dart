@@ -6,15 +6,7 @@ class ClockNode extends CircuitNode {
   bool value = false;
   double frequency = 1.0; // Hz
   DateTime lastToggleTime = DateTime.now();
-  static const List<double> frequencies = [
-    0.5,
-    1.0,
-    2.0,
-    5.0,
-    10.0,
-    20.0,
-    1000.0,
-  ];
+  static const List<double> frequencies = [0.5, 1.0, 2.0, 5.0, 10.0, 20.0];
 
   ClockNode({
     required super.id,

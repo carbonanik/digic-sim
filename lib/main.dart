@@ -1,4 +1,5 @@
 import 'package:digital_logic_sim_2/models/nodes/io_nodes.dart';
+import 'package:digital_logic_sim_2/widgets/ai_prompt_dialog.dart';
 import 'package:digital_logic_sim_2/widgets/component_toolbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -71,6 +72,9 @@ class _LogicDesignerScreenState extends State<LogicDesignerScreen> {
             workspaceController.activeController?.redo(),
         const SingleActivator(LogicalKeyboardKey.keyS): () =>
             workspaceController.activeController?.selectTool(EditorTool.select),
+        // shortcut for snap
+        const SingleActivator(LogicalKeyboardKey.keyG, control: true): () =>
+            workspaceController.activeController?.toggleGridSnapping(),
       },
       child: Focus(
         autofocus: true,
@@ -209,7 +213,7 @@ class _TopBar extends StatelessWidget {
               ),
               _IconButton(
                 icon: Icons.redo_rounded,
-                tooltip: 'Redo (Ctrl+Y)',
+                tooltip: 'Redo (Ctrl+Shift+Z)',
                 onTap: controller.redo,
               ),
             ],
@@ -248,6 +252,12 @@ class _TopBar extends StatelessWidget {
                 onTap: controller.toggleGridSnapping,
               ),
             ],
+          ),
+          const SizedBox(width: 12),
+
+          // AI Generate Action
+          _AiButton(
+            onTap: () => showAiPromptDialog(context, controller),
           ),
           const SizedBox(width: 12),
 
@@ -660,6 +670,100 @@ class _TopBarButton extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AiButton extends StatefulWidget {
+  final VoidCallback onTap;
+  const _AiButton({required this.onTap});
+
+  @override
+  State<_AiButton> createState() => _AiButtonState();
+}
+
+class _AiButtonState extends State<_AiButton>
+    with SingleTickerProviderStateMixin {
+  bool _hovered = false;
+  late final AnimationController _pulse;
+  late final Animation<double> _glow;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulse = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2000),
+    )..repeat(reverse: true);
+    _glow = Tween<double>(begin: 0.3, end: 0.7).animate(
+      CurvedAnimation(parent: _pulse, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _pulse.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedBuilder(
+          animation: _glow,
+          builder: (context, _) {
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xff7c3aed), Color(0xff0891b2)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xff8b5cf6)
+                        .withOpacity(_hovered ? 0.6 : _glow.value * 0.5),
+                    blurRadius: _hovered ? 18 : 10,
+                    spreadRadius: _hovered ? 2 : 0,
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  AnimatedScale(
+                    scale: _hovered ? 1.15 : 1.0,
+                    duration: const Duration(milliseconds: 180),
+                    child: const Icon(
+                      Icons.auto_awesome_rounded,
+                      size: 17,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'AI Generate',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );

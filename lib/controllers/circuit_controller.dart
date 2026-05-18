@@ -362,7 +362,7 @@ class CircuitController extends ChangeNotifier {
         // or if a clock toggled.
         if (changed || hasWaveforms) {
           LogicSimulator.simulate(circuit);
-          notifyListeners();
+          notifyCircuitChanged();
         }
       });
     } else if (!hasClocks && !hasWaveforms && _clockTimer != null) {
