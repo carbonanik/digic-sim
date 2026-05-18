@@ -43,19 +43,23 @@ class ComponentToolbar extends StatelessWidget {
             child: CustomScrollView(
               slivers: [
                 SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 20,
+                  ),
                   sliver: SliverList(
                     delegate: SliverChildListDelegate([
                       _SectionHeader(
                         title: 'EDITOR TOOLS',
                         icon: Icons.edit_note,
-                        onAction: () => controller.selectTool(EditorTool.select),
+                        onAction: () =>
+                            controller.selectTool(EditorTool.select),
                         actionLabel: 'Reset',
                       ),
                       _ToolButton(
                         icon: Icons.mouse_outlined,
                         label: 'Selection Mode',
-                        shortcut: 'V',
+                        shortcut: 'S',
                         selected: controller.selectedTool == EditorTool.select,
                         onTap: () => controller.selectTool(EditorTool.select),
                       ),
@@ -140,13 +144,16 @@ class ComponentToolbar extends StatelessWidget {
                         icon: Icons.seven_mp_outlined,
                         label: '7-Seg Display',
                         selected:
-                            controller.selectedTool == EditorTool.segmentDisplay,
-                        onTap: () => controller.selectTool(EditorTool.segmentDisplay),
+                            controller.selectedTool ==
+                            EditorTool.segmentDisplay,
+                        onTap: () =>
+                            controller.selectTool(EditorTool.segmentDisplay),
                       ),
                       _ToolButton(
                         icon: Icons.analytics_outlined,
                         label: 'Waveform Monitor',
-                        selected: controller.selectedTool == EditorTool.waveform,
+                        selected:
+                            controller.selectedTool == EditorTool.waveform,
                         onTap: () => controller.selectTool(EditorTool.waveform),
                       ),
                       _ToolButton(
@@ -158,8 +165,10 @@ class ComponentToolbar extends StatelessWidget {
                       _ToolButton(
                         icon: Icons.biotech_outlined,
                         label: 'Logic Probe',
-                        selected: controller.selectedTool == EditorTool.logicProbe,
-                        onTap: () => controller.selectTool(EditorTool.logicProbe),
+                        selected:
+                            controller.selectedTool == EditorTool.logicProbe,
+                        onTap: () =>
+                            controller.selectTool(EditorTool.logicProbe),
                       ),
                       const SizedBox(height: 20),
                       const _SectionHeader(
@@ -172,24 +181,25 @@ class ComponentToolbar extends StatelessWidget {
                 SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final def = PresetLibrary.presets[index];
-                        return _ICCard(
-                          def: def,
-                          controller: controller,
-                          workspaceController: workspaceController,
-                          selected: controller.selectedTool == EditorTool.custom &&
-                              controller.selectedCustomComponent == def,
-                          isPreset: true,
-                        );
-                      },
-                      childCount: PresetLibrary.presets.length,
-                    ),
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      final def = PresetLibrary.presets[index];
+                      return _ICCard(
+                        def: def,
+                        controller: controller,
+                        workspaceController: workspaceController,
+                        selected:
+                            controller.selectedTool == EditorTool.custom &&
+                            controller.selectedCustomComponent == def,
+                        isPreset: true,
+                      );
+                    }, childCount: PresetLibrary.presets.length),
                   ),
                 ),
                 SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 20,
+                  ),
                   sliver: SliverList(
                     delegate: SliverChildListDelegate([
                       _SectionHeader(
@@ -225,19 +235,17 @@ class ComponentToolbar extends StatelessWidget {
                 SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final def = controller.customDefinitions[index];
-                        return _ICCard(
-                          def: def,
-                          controller: controller,
-                          workspaceController: workspaceController,
-                          selected: controller.selectedTool == EditorTool.custom &&
-                              controller.selectedCustomComponent == def,
-                        );
-                      },
-                      childCount: controller.customDefinitions.length,
-                    ),
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      final def = controller.customDefinitions[index];
+                      return _ICCard(
+                        def: def,
+                        controller: controller,
+                        workspaceController: workspaceController,
+                        selected:
+                            controller.selectedTool == EditorTool.custom &&
+                            controller.selectedCustomComponent == def,
+                      );
+                    }, childCount: controller.customDefinitions.length),
                   ),
                 ),
                 const SliverPadding(

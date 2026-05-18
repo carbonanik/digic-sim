@@ -18,11 +18,17 @@ class CircuitCanvas extends StatefulWidget {
   State<CircuitCanvas> createState() => _CircuitCanvasState();
 }
 
-class _CircuitCanvasState extends State<CircuitCanvas> {
+class _CircuitCanvasState extends State<CircuitCanvas>
+    with SingleTickerProviderStateMixin {
   final TransformationController transformationController =
       TransformationController();
   bool _isSpacePressed = false;
   final FocusNode _focusNode = FocusNode();
+
+  // Pan hint toast
+  late AnimationController _toastAnimController;
+  late Animation<double> _toastOpacity;
+  bool _toastVisible = true;
 
   /// Converts a screen-space [point] to scene-space coordinates,
   /// accounting for the current pan and zoom of the InteractiveViewer.
@@ -34,7 +40,31 @@ class _CircuitCanvasState extends State<CircuitCanvas> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _toastAnimController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+    _toastOpacity = CurvedAnimation(
+      parent: _toastAnimController,
+      curve: Curves.easeOut,
+    );
+    // Fade in
+    _toastAnimController.forward();
+    // Hold then fade out
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) {
+        _toastAnimController.reverse().then((_) {
+          if (mounted) setState(() => _toastVisible = false);
+        });
+      }
+    });
+  }
+
+  @override
   void dispose() {
+    _toastAnimController.dispose();
     _focusNode.dispose();
     super.dispose();
   }
@@ -360,6 +390,71 @@ class _CircuitCanvasState extends State<CircuitCanvas> {
                 ),
               ),
             ),
+            // ── Pan hint toast ──────────────────────────────────────────────
+            if (_toastVisible)
+              Positioned(
+                bottom: 24,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: FadeTransition(
+                    opacity: _toastOpacity,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 18,
+                        vertical: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xff0f172a).withOpacity(0.92),
+                        borderRadius: BorderRadius.circular(999),
+                        border: Border.all(
+                          color: const Color(0xff38bdf8).withOpacity(0.25),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.35),
+                            blurRadius: 16,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.open_with_rounded,
+                            size: 15,
+                            color: const Color(0xff38bdf8).withOpacity(0.8),
+                          ),
+                          const SizedBox(width: 8),
+                          RichText(
+                            text: const TextSpan(
+                              style: TextStyle(
+                                fontSize: 12.5,
+                                color: Color(0xff94a3b8),
+                                fontWeight: FontWeight.w500,
+                                letterSpacing: 0.2,
+                              ),
+                              children: [
+                                TextSpan(text: 'Press '),
+                                TextSpan(
+                                  text: 'Space',
+                                  style: TextStyle(
+                                    color: Color(0xff38bdf8),
+                                    fontWeight: FontWeight.w700,
+                                    backgroundColor: Color(0xff1e3a52),
+                                  ),
+                                ),
+                                TextSpan(text: ' and drag to pan'),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),

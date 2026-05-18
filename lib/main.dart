@@ -61,6 +61,16 @@ class _LogicDesignerScreenState extends State<LogicDesignerScreen> {
             workspaceController.activeController?.deleteSelected(),
         const SingleActivator(LogicalKeyboardKey.backspace): () =>
             workspaceController.activeController?.deleteSelected(),
+        const SingleActivator(LogicalKeyboardKey.keyZ, control: true): () =>
+            workspaceController.activeController?.undo(),
+        const SingleActivator(
+          LogicalKeyboardKey.keyZ,
+          control: true,
+          shift: true,
+        ): () =>
+            workspaceController.activeController?.redo(),
+        const SingleActivator(LogicalKeyboardKey.keyS): () =>
+            workspaceController.activeController?.selectTool(EditorTool.select),
       },
       child: Focus(
         autofocus: true,
