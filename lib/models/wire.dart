@@ -1,5 +1,4 @@
 import 'dart:ui';
-import '../utils/pathfinder.dart';
 
 class Wire {
   final String id;
@@ -34,13 +33,14 @@ class Wire {
     toNodeId: map['toNodeId'],
     toPinId: map['toPinId'],
     waypoints: (map['waypoints'] as List? ?? [])
-        .map((w) => Offset((w['dx'] as num).toDouble(), (w['dy'] as num).toDouble()))
+        .map(
+          (w) =>
+              Offset((w['dx'] as num).toDouble(), (w['dy'] as num).toDouble()),
+        )
         .toList(),
   );
 
-  Wire copyWith({
-    List<Offset>? waypoints,
-  }) {
+  Wire copyWith({List<Offset>? waypoints}) {
     return Wire(
       id: id,
       fromNodeId: fromNodeId,
@@ -51,10 +51,7 @@ class Wire {
     );
   }
 
-  List<Offset> getPathPoints(
-    Offset start,
-    Offset end,
-  ) {
+  List<Offset> getPathPoints(Offset start, Offset end) {
     return [start, ...waypoints, end];
   }
 }

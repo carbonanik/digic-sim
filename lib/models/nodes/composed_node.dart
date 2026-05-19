@@ -14,6 +14,23 @@ class SubCircuitDefinition {
   final List<String> inputLabels;
   final List<String> outputLabels;
 
+  static final List<SubCircuitDefinition> registry = [];
+
+  static void register(SubCircuitDefinition definition) {
+    if (!registry.any((d) => d.name.toLowerCase() == definition.name.toLowerCase())) {
+      registry.add(definition);
+    }
+  }
+
+  static SubCircuitDefinition? resolve(String name) {
+    for (final def in registry) {
+      if (def.name.toLowerCase() == name.toLowerCase()) {
+        return def;
+      }
+    }
+    return null;
+  }
+
   SubCircuitDefinition({
     required this.name,
     required this.nodes,
@@ -35,8 +52,14 @@ class SubCircuitDefinition {
   }
 
   static SubCircuitDefinition fromMap(Map<String, dynamic> map) {
+    final String name = map['name'] ?? 'Unknown IC';
+    final resolved = resolve(name);
+    if (resolved != null && (map['nodes'] == null || (map['nodes'] as List).isEmpty)) {
+      return resolved;
+    }
+
     return SubCircuitDefinition(
-      name: map['name'] ?? 'Unknown IC',
+      name: name,
       nodes: (map['nodes'] as List? ?? [])
           .map((n) => NodeFactory.fromMap(n as Map<String, dynamic>))
           .toList(),

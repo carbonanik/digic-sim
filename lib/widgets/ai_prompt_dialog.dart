@@ -1,10 +1,12 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../controllers/circuit_controller.dart';
 import '../models/nodes/composed_node.dart';
 import '../services/gemini_service.dart';
+import '../utils/preset_library.dart';
 
 // ---------------------------------------------------------------------------
 // Public entry-point: call this from the top-bar AI button
@@ -96,9 +98,14 @@ class _AiPromptDialogState extends State<_AiPromptDialog>
     });
 
     try {
+      final availableComponents = [
+        ...PresetLibrary.presets,
+        ...widget.controller.customDefinitions,
+      ];
       final json = await GeminiService.generateCircuit(
         apiKey: apiKey,
         prompt: prompt,
+        availableComponents: availableComponents,
       );
       setState(() {
         _state = _AiState.success;
@@ -257,6 +264,41 @@ class _AiPromptDialogState extends State<_AiPromptDialog>
               ],
             ),
           ),
+          Tooltip(
+            message: 'Copy System Prompt for testing',
+            child: IconButton(
+              icon: const Icon(Icons.copy_rounded, color: Color(0xff06b6d4)),
+              onPressed: () {
+                final presets = PresetLibrary.presets;
+                final customDefs = widget.controller.customDefinitions;
+                final allComposed = [...presets, ...customDefs];
+                final systemPrompt = GeminiService.buildSystemPrompt(
+                  availableComponents: allComposed,
+                );
+                Clipboard.setData(ClipboardData(text: systemPrompt));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Row(
+                      children: const [
+                        Icon(Icons.check_circle_outline, color: Color(0xff4ade80), size: 16),
+                        SizedBox(width: 8),
+                        Text('System prompt copied to clipboard!'),
+                      ],
+                    ),
+                    behavior: SnackBarBehavior.floating,
+                    backgroundColor: const Color(0xff1e293b),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: const BorderSide(color: Color(0xff334155)),
+                    ),
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+              },
+              splashRadius: 20,
+            ),
+          ),
+          const SizedBox(width: 8),
           IconButton(
             icon: const Icon(Icons.close_rounded, color: Color(0xff4b5563)),
             onPressed: () => Navigator.of(context).pop(),

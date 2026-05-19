@@ -1,7 +1,6 @@
 import 'dart:collection';
 import 'package:flutter/material.dart';
 import '../circuit_node.dart';
-import '../pin.dart';
 
 class WaveformNode extends CircuitNode {
   static const int maxHistory = 100;

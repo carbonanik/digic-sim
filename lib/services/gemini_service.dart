@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../models/nodes/composed_node.dart';
 
 /// Calls the Gemini API and returns a JSON string representing a logic circuit
 /// that matches the [prompt] description.
@@ -75,6 +76,61 @@ NODE TYPES and their required fields:
   "outputPins": [{"id": "out", "nodeId": "<same id>", "isInput": false, "localPosition": {"dx": 112, "dy": 32}}]
 }
 
+9. SEGMENT DISPLAY (shows 7-segment output):
+{
+  "id": "<unique string>",
+  "type": "segment_display",
+  "position": {"dx": <number>, "dy": <number>},
+  "inputPins": [
+    {"id": "seg_0", "nodeId": "<same id>", "isInput": true, "localPosition": {"dx": 0, "dy": 16}},
+    {"id": "seg_1", "nodeId": "<same id>", "isInput": true, "localPosition": {"dx": 0, "dy": 32}},
+    {"id": "seg_2", "nodeId": "<same id>", "isInput": true, "localPosition": {"dx": 0, "dy": 48}},
+    {"id": "seg_3", "nodeId": "<same id>", "isInput": true, "localPosition": {"dx": 0, "dy": 64}},
+    {"id": "seg_4", "nodeId": "<same id>", "isInput": true, "localPosition": {"dx": 0, "dy": 80}},
+    {"id": "seg_5", "nodeId": "<same id>", "isInput": true, "localPosition": {"dx": 0, "dy": 96}},
+    {"id": "seg_6", "nodeId": "<same id>", "isInput": true, "localPosition": {"dx": 0, "dy": 112}}
+  ],
+  "outputPins": []
+}
+
+10. CLOCK (generates periodic high/low signal):
+{
+  "id": "<unique string>",
+  "type": "clock",
+  "position": {"dx": <number>, "dy": <number>},
+  "inputPins": [],
+  "outputPins": [{"id": "out", "nodeId": "<same id>", "isInput": false, "localPosition": {"dx": 112, "dy": 32}}],
+  "value": false,
+  "frequency": 1.0
+}
+
+11. WAVEFORM (oscilloscope display with 4 signal inputs):
+{
+  "id": "<unique string>",
+  "type": "waveform",
+  "position": {"dx": <number>, "dy": <number>},
+  "inputPins": [
+    {"id": "in_0", "nodeId": "<same id>", "isInput": true, "localPosition": {"dx": 0, "dy": 48}},
+    {"id": "in_1", "nodeId": "<same id>", "isInput": true, "localPosition": {"dx": 0, "dy": 80}},
+    {"id": "in_2", "nodeId": "<same id>", "isInput": true, "localPosition": {"dx": 0, "dy": 112}},
+    {"id": "in_3", "nodeId": "<same id>", "isInput": true, "localPosition": {"dx": 0, "dy": 144}}
+  ],
+  "outputPins": []
+}
+
+12. RGB LED (emits colored light based on R, G, B inputs):
+{
+  "id": "<unique string>",
+  "type": "rgb_led",
+  "position": {"dx": <number>, "dy": <number>},
+  "inputPins": [
+    {"id": "r", "nodeId": "<same id>", "isInput": true, "localPosition": {"dx": 0, "dy": 16}},
+    {"id": "g", "nodeId": "<same id>", "isInput": true, "localPosition": {"dx": 0, "dy": 48}},
+    {"id": "b", "nodeId": "<same id>", "isInput": true, "localPosition": {"dx": 0, "dy": 80}}
+  ],
+  "outputPins": []
+}
+
 WIRE object:
 {
   "id": "<unique string>",
@@ -89,15 +145,65 @@ LAYOUT RULES:
 - Place INPUT nodes on the LEFT side, starting at dx=100, spacing dy by 96 between each.
 - Place OUTPUT nodes on the RIGHT side at dx=800+, vertically centered.
 - Place logic gates in the MIDDLE, spaced horizontally by ~160 and vertically by ~96.
-- All positions are absolute pixel coordinates. Use multiples of 32 for alignment (grid is 16px).
+- All positions are absolute pixel coordinates. Use multiples of 16 for alignment (grid is 16px).
 - Each input pin of a gate may only be connected by ONE wire.
 
 OUTPUT RULES:
 - Output ONLY the raw JSON object. No markdown, no explanation.
 - Make sure all node "id" values are unique strings (e.g. "n1", "n2", "g1", "g2", "out1").
 - Make sure every wire references valid node IDs and pin IDs that exist in the nodes list.
-- Make sure all the position values are multiples of 16 (x & y).
 ''';
+
+  static String buildSystemPrompt({
+    List<SubCircuitDefinition> availableComponents = const [],
+  }) {
+    final componentsSection = StringBuffer();
+    if (availableComponents.isNotEmpty) {
+      componentsSection.writeln(
+        '\nAVAILABLE COMPOSED COMPONENTS (INTEGRATED CIRCUITS):',
+      );
+      componentsSection.writeln(
+        'You can (and should) reuse these pre-designed composed components if they fit the design. To instantiate them, use "type": "composed" and specify their "definition": {"name": "<Component Name>"} with the exact pin IDs listed below.',
+      );
+      for (final def in availableComponents) {
+        componentsSection.writeln('\n- Component "${def.name}":');
+        componentsSection.writeln('  Inputs:');
+        for (int i = 0; i < def.inputLabels.length; i++) {
+          componentsSection.writeln(
+            '    Pin ID "in_$i" (Label: "${def.inputLabels[i]}"), localPosition: {"dx": 0, "dy": ${32 + i * 16}}',
+          );
+        }
+        componentsSection.writeln('  Outputs:');
+        for (int i = 0; i < def.outputLabels.length; i++) {
+          componentsSection.writeln(
+            '    Pin ID "out_$i" (Label: "${def.outputLabels[i]}"), localPosition: {"dx": 160, "dy": ${32 + i * 16}}',
+          );
+        }
+        componentsSection.writeln('  Example JSON for "${def.name}":');
+        componentsSection.writeln('  {');
+        componentsSection.writeln('    "id": "<unique string>",');
+        componentsSection.writeln('    "type": "composed",');
+        componentsSection.writeln(
+          '    "position": {"dx": <number>, "dy": <number>},',
+        );
+        final inPins = List.generate(
+          def.inputLabels.length,
+          (i) =>
+              '      {"id": "in_$i", "nodeId": "<same id>", "isInput": true, "localPosition": {"dx": 0, "dy": ${32 + i * 16}}}',
+        ).join(',\n');
+        componentsSection.writeln('    "inputPins": [\n$inPins\n    ],');
+        final outPins = List.generate(
+          def.outputLabels.length,
+          (i) =>
+              '      {"id": "out_$i", "nodeId": "<same id>", "isInput": false, "localPosition": {"dx": 160, "dy": ${32 + i * 16}}}',
+        ).join(',\n');
+        componentsSection.writeln('    "outputPins": [\n$outPins\n    ],');
+        componentsSection.writeln('    "definition": {"name": "${def.name}"}');
+        componentsSection.writeln('  }');
+      }
+    }
+    return '$_systemPrompt\n$componentsSection';
+  }
 
   /// Generates circuit JSON from [prompt] using the Gemini API.
   /// Returns the raw JSON string on success.
@@ -105,14 +211,20 @@ OUTPUT RULES:
   static Future<String> generateCircuit({
     required String apiKey,
     required String prompt,
+    List<SubCircuitDefinition> availableComponents = const [],
   }) async {
     final url = Uri.parse('$_baseUrl?key=$apiKey');
+
+    final systemPrompt = buildSystemPrompt(availableComponents: availableComponents);
 
     final body = jsonEncode({
       'contents': [
         {
           'parts': [
-            {'text': '$_systemPrompt\n\nUser request: $prompt'},
+            {
+              'text':
+                  '$systemPrompt\n\nUser request: $prompt',
+            },
           ],
         },
       ],

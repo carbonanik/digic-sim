@@ -37,6 +37,7 @@ class CircuitController extends ChangeNotifier {
       final map = jsonDecode(json);
       final definition = SubCircuitDefinition.fromMap(map);
       customDefinitions.add(definition);
+      SubCircuitDefinition.register(definition);
       notifyListeners();
     } catch (e) {
       debugPrint('Error importing IC: $e');
@@ -45,6 +46,7 @@ class CircuitController extends ChangeNotifier {
 
   void removeCustomDefinition(SubCircuitDefinition definition) {
     customDefinitions.remove(definition);
+    SubCircuitDefinition.registry.remove(definition);
     notifyListeners();
   }
 
@@ -994,6 +996,7 @@ class CircuitController extends ChangeNotifier {
     );
 
     customDefinitions.add(definition);
+    SubCircuitDefinition.register(definition);
     notifyListeners();
   }
 

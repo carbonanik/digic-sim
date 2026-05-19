@@ -24,7 +24,9 @@ class PresetLibrary {
       for (final path in assetPaths) {
         final jsonString = await rootBundle.loadString(path);
         final map = jsonDecode(jsonString);
-        loadedPresets.add(SubCircuitDefinition.fromMap(map));
+        final definition = SubCircuitDefinition.fromMap(map);
+        loadedPresets.add(definition);
+        SubCircuitDefinition.register(definition);
       }
 
       _cachedPresets = loadedPresets;

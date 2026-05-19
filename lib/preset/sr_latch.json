@@ -4,8 +4,8 @@
         {
             "id": "[#b840a]",
             "position": {
-                "dx": 240,
-                "dy": 448
+                "dx": 240.0,
+                "dy": 448.0
             },
             "inputPins": [],
             "outputPins": [
@@ -14,8 +14,8 @@
                     "nodeId": "[#b840a]",
                     "isInput": false,
                     "localPosition": {
-                        "dx": 112,
-                        "dy": 32
+                        "dx": 112.0,
+                        "dy": 32.0
                     },
                     "value": false
                 }
@@ -27,8 +27,8 @@
         {
             "id": "[#2c9a1]",
             "position": {
-                "dx": 240,
-                "dy": 304
+                "dx": 240.0,
+                "dy": 304.0
             },
             "inputPins": [],
             "outputPins": [
@@ -37,8 +37,8 @@
                     "nodeId": "[#2c9a1]",
                     "isInput": false,
                     "localPosition": {
-                        "dx": 112,
-                        "dy": 32
+                        "dx": 112.0,
+                        "dy": 32.0
                     },
                     "value": false
                 }
@@ -48,96 +48,10 @@
             "label": "R"
         },
         {
-            "id": "[#33aa6]",
-            "position": {
-                "dx": 496,
-                "dy": 320
-            },
-            "inputPins": [
-                {
-                    "id": "a",
-                    "nodeId": "[#33aa6]",
-                    "isInput": true,
-                    "localPosition": {
-                        "dx": 0,
-                        "dy": 16
-                    },
-                    "value": false
-                },
-                {
-                    "id": "b",
-                    "nodeId": "[#33aa6]",
-                    "isInput": true,
-                    "localPosition": {
-                        "dx": 0,
-                        "dy": 48
-                    },
-                    "value": true
-                }
-            ],
-            "outputPins": [
-                {
-                    "id": "out",
-                    "nodeId": "[#33aa6]",
-                    "isInput": false,
-                    "localPosition": {
-                        "dx": 112,
-                        "dy": 32
-                    },
-                    "value": false
-                }
-            ],
-            "type": "gate",
-            "gateType": "nor"
-        },
-        {
-            "id": "[#f07a8]",
-            "position": {
-                "dx": 496,
-                "dy": 432
-            },
-            "inputPins": [
-                {
-                    "id": "a",
-                    "nodeId": "[#f07a8]",
-                    "isInput": true,
-                    "localPosition": {
-                        "dx": 0,
-                        "dy": 16
-                    },
-                    "value": false
-                },
-                {
-                    "id": "b",
-                    "nodeId": "[#f07a8]",
-                    "isInput": true,
-                    "localPosition": {
-                        "dx": 0,
-                        "dy": 48
-                    },
-                    "value": false
-                }
-            ],
-            "outputPins": [
-                {
-                    "id": "out",
-                    "nodeId": "[#f07a8]",
-                    "isInput": false,
-                    "localPosition": {
-                        "dx": 112,
-                        "dy": 32
-                    },
-                    "value": true
-                }
-            ],
-            "type": "gate",
-            "gateType": "nor"
-        },
-        {
             "id": "[#066a1]",
             "position": {
-                "dx": 768,
-                "dy": 320
+                "dx": 768.0,
+                "dy": 320.0
             },
             "inputPins": [
                 {
@@ -145,10 +59,10 @@
                     "nodeId": "[#066a1]",
                     "isInput": true,
                     "localPosition": {
-                        "dx": 0,
-                        "dy": 32
+                        "dx": 0.0,
+                        "dy": 32.0
                     },
-                    "value": false
+                    "value": true
                 }
             ],
             "outputPins": [],
@@ -158,8 +72,8 @@
         {
             "id": "[#24bcf]",
             "position": {
-                "dx": 768,
-                "dy": 432
+                "dx": 768.0,
+                "dy": 432.0
             },
             "inputPins": [
                 {
@@ -167,8 +81,8 @@
                     "nodeId": "[#24bcf]",
                     "isInput": true,
                     "localPosition": {
-                        "dx": 0,
-                        "dy": 32
+                        "dx": 0.0,
+                        "dy": 32.0
                     },
                     "value": true
                 }
@@ -176,81 +90,167 @@
             "outputPins": [],
             "type": "output",
             "label": "NOT Q"
+        },
+        {
+            "id": "[#e59ea]",
+            "position": {
+                "dx": 496.0,
+                "dy": 320.0
+            },
+            "inputPins": [
+                {
+                    "id": "a",
+                    "nodeId": "[#e59ea]",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0.0,
+                        "dy": 16.0
+                    },
+                    "value": false
+                },
+                {
+                    "id": "b",
+                    "nodeId": "[#e59ea]",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0.0,
+                        "dy": 48.0
+                    },
+                    "value": true
+                }
+            ],
+            "outputPins": [
+                {
+                    "id": "out",
+                    "nodeId": "[#e59ea]",
+                    "isInput": false,
+                    "localPosition": {
+                        "dx": 112.0,
+                        "dy": 32.0
+                    },
+                    "value": true
+                }
+            ],
+            "type": "gate",
+            "gateType": "nand"
+        },
+        {
+            "id": "[#21eb1]",
+            "position": {
+                "dx": 496.0,
+                "dy": 432.0
+            },
+            "inputPins": [
+                {
+                    "id": "a",
+                    "nodeId": "[#21eb1]",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0.0,
+                        "dy": 16.0
+                    },
+                    "value": true
+                },
+                {
+                    "id": "b",
+                    "nodeId": "[#21eb1]",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0.0,
+                        "dy": 48.0
+                    },
+                    "value": false
+                }
+            ],
+            "outputPins": [
+                {
+                    "id": "out",
+                    "nodeId": "[#21eb1]",
+                    "isInput": false,
+                    "localPosition": {
+                        "dx": 112.0,
+                        "dy": 32.0
+                    },
+                    "value": true
+                }
+            ],
+            "type": "gate",
+            "gateType": "nand"
         }
     ],
     "wires": [
         {
-            "id": "[#e498d]",
-            "fromNodeId": "[#33aa6]",
-            "fromPinId": "out",
-            "toNodeId": "[#066a1]",
-            "toPinId": "in",
-            "waypoints": []
-        },
-        {
-            "id": "[#9bd81]",
-            "fromNodeId": "[#f07a8]",
+            "id": "[#69817]",
+            "fromNodeId": "[#21eb1]",
             "fromPinId": "out",
             "toNodeId": "[#24bcf]",
             "toPinId": "in",
             "waypoints": []
         },
         {
-            "id": "[#f9d41]",
-            "fromNodeId": "[#f07a8]",
+            "id": "[#dabdf]",
+            "fromNodeId": "[#e59ea]",
             "fromPinId": "out",
-            "toNodeId": "[#33aa6]",
-            "toPinId": "b",
-            "waypoints": [
-                {
-                    "dx": 624,
-                    "dy": 464
-                },
-                {
-                    "dx": 624,
-                    "dy": 384
-                },
-                {
-                    "dx": 496,
-                    "dy": 384
-                }
-            ]
-        },
-        {
-            "id": "[#b9e07]",
-            "fromNodeId": "[#33aa6]",
-            "fromPinId": "out",
-            "toNodeId": "[#f07a8]",
-            "toPinId": "a",
-            "waypoints": [
-                {
-                    "dx": 608,
-                    "dy": 432
-                },
-                {
-                    "dx": 496,
-                    "dy": 432
-                }
-            ]
-        },
-        {
-            "id": "[#c58dc]",
-            "fromNodeId": "[#b840a]",
-            "fromPinId": "out",
-            "toNodeId": "[#f07a8]",
-            "toPinId": "b",
+            "toNodeId": "[#066a1]",
+            "toPinId": "in",
             "waypoints": []
         },
         {
-            "id": "[#f3b2b]",
+            "id": "[#8c5fd]",
             "fromNodeId": "[#2c9a1]",
             "fromPinId": "out",
-            "toNodeId": "[#33aa6]",
+            "toNodeId": "[#e59ea]",
             "toPinId": "a",
             "waypoints": []
+        },
+        {
+            "id": "[#58bd1]",
+            "fromNodeId": "[#b840a]",
+            "fromPinId": "out",
+            "toNodeId": "[#21eb1]",
+            "toPinId": "b",
+            "waypoints": []
+        },
+        {
+            "id": "[#1e91f]",
+            "fromNodeId": "[#e59ea]",
+            "fromPinId": "out",
+            "toNodeId": "[#21eb1]",
+            "toPinId": "a",
+            "waypoints": [
+                {
+                    "dx": 624.0,
+                    "dy": 352.0
+                },
+                {
+                    "dx": 624.0,
+                    "dy": 432.0
+                },
+                {
+                    "dx": 496.0,
+                    "dy": 432.0
+                }
+            ]
+        },
+        {
+            "id": "[#fa203]",
+            "fromNodeId": "[#21eb1]",
+            "fromPinId": "out",
+            "toNodeId": "[#e59ea]",
+            "toPinId": "b",
+            "waypoints": [
+                {
+                    "dx": 608.0,
+                    "dy": 384.0
+                },
+                {
+                    "dx": 496.0,
+                    "dy": 384.0
+                }
+            ]
         }
     ],
-    "color": 4280171146,
+    "color": 4285536885,
     "inputLabels": [
         "S",
         "R"

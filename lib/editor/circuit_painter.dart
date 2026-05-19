@@ -16,7 +16,7 @@ class GridPainter extends CustomPainter {
   final TransformationController transformationController;
 
   GridPainter({required this.transformationController})
-      : super(repaint: transformationController);
+    : super(repaint: transformationController);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -39,11 +39,12 @@ class GridPainter extends CustomPainter {
 
     const gridSize = 16.0; // Consistent with controller snapping
     final scaledGridSize = gridSize * scale;
-    
+
     final offsetX = translation.x % scaledGridSize;
     final offsetY = translation.y % scaledGridSize;
 
-    final majorOffsetX = translation.x % (scaledGridSize * 8); // Every 8 units (128px)
+    final majorOffsetX =
+        translation.x % (scaledGridSize * 8); // Every 8 units (128px)
     final majorOffsetY = translation.y % (scaledGridSize * 8);
 
     if (scale > 0.4) {
@@ -67,7 +68,11 @@ class GridPainter extends CustomPainter {
     // Dots at major intersections for premium feel
     if (scale > 0.6) {
       for (double x = majorOffsetX; x < size.width; x += scaledGridSize * 8) {
-        for (double y = majorOffsetY; y < size.height; y += scaledGridSize * 8) {
+        for (
+          double y = majorOffsetY;
+          y < size.height;
+          y += scaledGridSize * 8
+        ) {
           canvas.drawCircle(Offset(x, y), 1.5 * scale, dotPaint);
         }
       }
