@@ -565,10 +565,10 @@ class CircuitController extends ChangeNotifier {
   void _applyAction(CircuitAction action, {required bool undo}) {
     if (undo) {
       for (final node in action.addedNodes) {
-        circuit.nodes.remove(node);
+        circuit.nodes.removeWhere((n) => n.id == node.id);
       }
       for (final wire in action.addedWires) {
-        circuit.wires.remove(wire);
+        circuit.wires.removeWhere((w) => w.id == wire.id);
       }
       for (final node in action.removedNodes) {
         circuit.nodes.add(node);
@@ -584,10 +584,10 @@ class CircuitController extends ChangeNotifier {
         circuit.wires.add(wire);
       }
       for (final node in action.removedNodes) {
-        circuit.nodes.remove(node);
+        circuit.nodes.removeWhere((n) => n.id == node.id);
       }
       for (final wire in action.removedWires) {
-        circuit.wires.remove(wire);
+        circuit.wires.removeWhere((w) => w.id == wire.id);
       }
     }
     _updateClockTimer();

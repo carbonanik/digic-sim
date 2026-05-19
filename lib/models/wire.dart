@@ -54,4 +54,12 @@ class Wire {
   List<Offset> getPathPoints(Offset start, Offset end) {
     return [start, ...waypoints, end];
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Wire && runtimeType == other.runtimeType && id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
 }
