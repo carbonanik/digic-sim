@@ -987,6 +987,7 @@ class CircuitController extends ChangeNotifier {
 
     // 3. Create definition
     final definition = SubCircuitDefinition(
+      id: name.replaceAll(' ', '_').toLowerCase(),
       name: name,
       nodes: clonedNodes,
       wires: clonedWires,

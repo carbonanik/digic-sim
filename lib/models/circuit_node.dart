@@ -24,7 +24,7 @@ abstract class CircuitNode {
 
   CircuitNode clone(String newId);
 
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> toMap({bool isNested = false}) {
     return {
       'id': id,
       'position': {'dx': position.dx, 'dy': position.dy},

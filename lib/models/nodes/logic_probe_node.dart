@@ -82,7 +82,10 @@ class LogicProbeNode extends CircuitNode {
   }
 
   @override
-  Map<String, dynamic> toMap() {
-    return {...super.toMap(), 'type': 'logic_probe'};
+  Map<String, dynamic> toMap({bool isNested = false}) {
+    return {
+      ...super.toMap(isNested: isNested),
+      'type': 'logic_probe',
+    };
   }
 }

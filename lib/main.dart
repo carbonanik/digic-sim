@@ -256,9 +256,7 @@ class _TopBar extends StatelessWidget {
           const SizedBox(width: 12),
 
           // AI Generate Action
-          _AiButton(
-            onTap: () => showAiPromptDialog(context, controller),
-          ),
+          _AiButton(onTap: () => showAiPromptDialog(context, controller)),
           const SizedBox(width: 12),
 
           // IC Action
@@ -697,9 +695,10 @@ class _AiButtonState extends State<_AiButton>
       vsync: this,
       duration: const Duration(milliseconds: 2000),
     )..repeat(reverse: true);
-    _glow = Tween<double>(begin: 0.3, end: 0.7).animate(
-      CurvedAnimation(parent: _pulse, curve: Curves.easeInOut),
-    );
+    _glow = Tween<double>(
+      begin: 0.3,
+      end: 0.7,
+    ).animate(CurvedAnimation(parent: _pulse, curve: Curves.easeInOut));
   }
 
   @override
@@ -721,8 +720,7 @@ class _AiButtonState extends State<_AiButton>
           builder: (context, _) {
             return AnimatedContainer(
               duration: const Duration(milliseconds: 180),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
                   colors: [Color(0xff7c3aed), Color(0xff0891b2)],
@@ -732,8 +730,9 @@ class _AiButtonState extends State<_AiButton>
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xff8b5cf6)
-                        .withOpacity(_hovered ? 0.6 : _glow.value * 0.5),
+                    color: const Color(
+                      0xff8b5cf6,
+                    ).withOpacity(_hovered ? 0.6 : _glow.value * 0.5),
                     blurRadius: _hovered ? 18 : 10,
                     spreadRadius: _hovered ? 2 : 0,
                   ),

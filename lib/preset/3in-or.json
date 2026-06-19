@@ -1,17 +1,17 @@
 {
-    "name": "SR Latch",
+    "name": "3 in or",
     "nodes": [
         {
-            "id": "[#b840a]",
+            "id": "[#34bf1]",
             "position": {
-                "dx": 240.0,
-                "dy": 448.0
+                "dx": 256.0,
+                "dy": 256.0
             },
             "inputPins": [],
             "outputPins": [
                 {
                     "id": "out",
-                    "nodeId": "[#b840a]",
+                    "nodeId": "[#34bf1]",
                     "isInput": false,
                     "localPosition": {
                         "dx": 112.0,
@@ -22,19 +22,19 @@
             ],
             "type": "input",
             "value": false,
-            "label": "S"
+            "label": ""
         },
         {
-            "id": "[#2c9a1]",
+            "id": "[#a7e86]",
             "position": {
-                "dx": 240.0,
-                "dy": 304.0
+                "dx": 256.0,
+                "dy": 320.0
             },
             "inputPins": [],
             "outputPins": [
                 {
                     "id": "out",
-                    "nodeId": "[#2c9a1]",
+                    "nodeId": "[#a7e86]",
                     "isInput": false,
                     "localPosition": {
                         "dx": 112.0,
@@ -45,62 +45,41 @@
             ],
             "type": "input",
             "value": false,
-            "label": "R"
+            "label": ""
         },
         {
-            "id": "[#066a1]",
+            "id": "[#0bf24]",
             "position": {
-                "dx": 768.0,
-                "dy": 320.0
+                "dx": 256.0,
+                "dy": 192.0
             },
-            "inputPins": [
+            "inputPins": [],
+            "outputPins": [
                 {
-                    "id": "in",
-                    "nodeId": "[#066a1]",
-                    "isInput": true,
+                    "id": "out",
+                    "nodeId": "[#0bf24]",
+                    "isInput": false,
                     "localPosition": {
-                        "dx": 0.0,
+                        "dx": 112.0,
                         "dy": 32.0
                     },
-                    "value": true
+                    "value": false
                 }
             ],
-            "outputPins": [],
-            "type": "output",
-            "label": "Q"
+            "type": "input",
+            "value": false,
+            "label": ""
         },
         {
-            "id": "[#24bcf]",
+            "id": "[#ba120]",
             "position": {
-                "dx": 768.0,
-                "dy": 432.0
-            },
-            "inputPins": [
-                {
-                    "id": "in",
-                    "nodeId": "[#24bcf]",
-                    "isInput": true,
-                    "localPosition": {
-                        "dx": 0.0,
-                        "dy": 32.0
-                    },
-                    "value": true
-                }
-            ],
-            "outputPins": [],
-            "type": "output",
-            "label": "NOT Q"
-        },
-        {
-            "id": "[#e59ea]",
-            "position": {
-                "dx": 496.0,
-                "dy": 320.0
+                "dx": 512.0,
+                "dy": 288.0
             },
             "inputPins": [
                 {
                     "id": "a",
-                    "nodeId": "[#e59ea]",
+                    "nodeId": "[#ba120]",
                     "isInput": true,
                     "localPosition": {
                         "dx": 0.0,
@@ -110,50 +89,7 @@
                 },
                 {
                     "id": "b",
-                    "nodeId": "[#e59ea]",
-                    "isInput": true,
-                    "localPosition": {
-                        "dx": 0.0,
-                        "dy": 48.0
-                    },
-                    "value": true
-                }
-            ],
-            "outputPins": [
-                {
-                    "id": "out",
-                    "nodeId": "[#e59ea]",
-                    "isInput": false,
-                    "localPosition": {
-                        "dx": 112.0,
-                        "dy": 32.0
-                    },
-                    "value": true
-                }
-            ],
-            "type": "gate",
-            "gateType": "nand"
-        },
-        {
-            "id": "[#21eb1]",
-            "position": {
-                "dx": 496.0,
-                "dy": 432.0
-            },
-            "inputPins": [
-                {
-                    "id": "a",
-                    "nodeId": "[#21eb1]",
-                    "isInput": true,
-                    "localPosition": {
-                        "dx": 0.0,
-                        "dy": 16.0
-                    },
-                    "value": true
-                },
-                {
-                    "id": "b",
-                    "nodeId": "[#21eb1]",
+                    "nodeId": "[#ba120]",
                     "isInput": true,
                     "localPosition": {
                         "dx": 0.0,
@@ -165,98 +101,154 @@
             "outputPins": [
                 {
                     "id": "out",
-                    "nodeId": "[#21eb1]",
+                    "nodeId": "[#ba120]",
                     "isInput": false,
                     "localPosition": {
                         "dx": 112.0,
                         "dy": 32.0
                     },
-                    "value": true
+                    "value": false
                 }
             ],
             "type": "gate",
-            "gateType": "nand"
+            "gateType": "or"
+        },
+        {
+            "id": "[#b9e37]",
+            "position": {
+                "dx": 656.0,
+                "dy": 240.0
+            },
+            "inputPins": [
+                {
+                    "id": "a",
+                    "nodeId": "[#b9e37]",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0.0,
+                        "dy": 16.0
+                    },
+                    "value": false
+                },
+                {
+                    "id": "b",
+                    "nodeId": "[#b9e37]",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0.0,
+                        "dy": 48.0
+                    },
+                    "value": false
+                }
+            ],
+            "outputPins": [
+                {
+                    "id": "out",
+                    "nodeId": "[#b9e37]",
+                    "isInput": false,
+                    "localPosition": {
+                        "dx": 112.0,
+                        "dy": 32.0
+                    },
+                    "value": false
+                }
+            ],
+            "type": "gate",
+            "gateType": "or"
+        },
+        {
+            "id": "[#906ce]",
+            "position": {
+                "dx": 848.0,
+                "dy": 240.0
+            },
+            "inputPins": [
+                {
+                    "id": "in",
+                    "nodeId": "[#906ce]",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0.0,
+                        "dy": 32.0
+                    },
+                    "value": false
+                }
+            ],
+            "outputPins": [],
+            "type": "output",
+            "value": false,
+            "label": ""
         }
     ],
     "wires": [
         {
-            "id": "[#69817]",
-            "fromNodeId": "[#21eb1]",
+            "id": "[#4439e]",
+            "fromNodeId": "[#34bf1]",
             "fromPinId": "out",
-            "toNodeId": "[#24bcf]",
-            "toPinId": "in",
-            "waypoints": []
-        },
-        {
-            "id": "[#dabdf]",
-            "fromNodeId": "[#e59ea]",
-            "fromPinId": "out",
-            "toNodeId": "[#066a1]",
-            "toPinId": "in",
-            "waypoints": []
-        },
-        {
-            "id": "[#8c5fd]",
-            "fromNodeId": "[#2c9a1]",
-            "fromPinId": "out",
-            "toNodeId": "[#e59ea]",
-            "toPinId": "a",
-            "waypoints": []
-        },
-        {
-            "id": "[#58bd1]",
-            "fromNodeId": "[#b840a]",
-            "fromPinId": "out",
-            "toNodeId": "[#21eb1]",
-            "toPinId": "b",
-            "waypoints": []
-        },
-        {
-            "id": "[#1e91f]",
-            "fromNodeId": "[#e59ea]",
-            "fromPinId": "out",
-            "toNodeId": "[#21eb1]",
+            "toNodeId": "[#ba120]",
             "toPinId": "a",
             "waypoints": [
                 {
-                    "dx": 624.0,
+                    "dx": 512.0,
+                    "dy": 288.0
+                }
+            ]
+        },
+        {
+            "id": "[#d98ee]",
+            "fromNodeId": "[#a7e86]",
+            "fromPinId": "out",
+            "toNodeId": "[#ba120]",
+            "toPinId": "b",
+            "waypoints": [
+                {
+                    "dx": 512.0,
                     "dy": 352.0
-                },
-                {
-                    "dx": 624.0,
-                    "dy": 432.0
-                },
-                {
-                    "dx": 496.0,
-                    "dy": 432.0
                 }
             ]
         },
         {
-            "id": "[#fa203]",
-            "fromNodeId": "[#21eb1]",
+            "id": "[#d9260]",
+            "fromNodeId": "[#0bf24]",
             "fromPinId": "out",
-            "toNodeId": "[#e59ea]",
+            "toNodeId": "[#b9e37]",
+            "toPinId": "a",
+            "waypoints": [
+                {
+                    "dx": 656.0,
+                    "dy": 224.0
+                }
+            ]
+        },
+        {
+            "id": "[#936ef]",
+            "fromNodeId": "[#ba120]",
+            "fromPinId": "out",
+            "toNodeId": "[#b9e37]",
             "toPinId": "b",
             "waypoints": [
                 {
-                    "dx": 608.0,
-                    "dy": 384.0
-                },
-                {
-                    "dx": 496.0,
-                    "dy": 384.0
+                    "dx": 624.0,
+                    "dy": 288.0
                 }
             ]
+        },
+        {
+            "id": "[#38845]",
+            "fromNodeId": "[#b9e37]",
+            "fromPinId": "out",
+            "toNodeId": "[#906ce]",
+            "toPinId": "in",
+            "waypoints": []
         }
     ],
-    "color": 4285536885,
+    "color": 4280171146,
     "inputLabels": [
-        "S",
-        "R"
+        "",
+        "",
+        ""
     ],
     "outputLabels": [
-        "Q",
-        "NOT Q"
+        ""
     ]
 }

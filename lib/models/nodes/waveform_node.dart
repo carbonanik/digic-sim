@@ -144,7 +144,7 @@ class WaveformNode extends CircuitNode {
   }
 
   @override
-  Map<String, dynamic> toMap() {
-    return {...super.toMap(), 'type': 'waveform'};
+  Map<String, dynamic> toMap({bool isNested = false}) {
+    return {...super.toMap(isNested: isNested), 'type': 'waveform'};
   }
 }

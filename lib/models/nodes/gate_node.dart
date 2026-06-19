@@ -210,7 +210,11 @@ class GateNode extends CircuitNode {
   }
 
   @override
-  Map<String, dynamic> toMap() {
-    return {...super.toMap(), 'type': 'gate', 'gateType': type.name};
+  Map<String, dynamic> toMap({bool isNested = false}) {
+    return {
+      ...super.toMap(isNested: isNested),
+      'type': 'gate',
+      'gateType': type.name,
+    };
   }
 }

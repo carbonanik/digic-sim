@@ -155,7 +155,12 @@ class ClockNode extends CircuitNode {
   }
 
   @override
-  Map<String, dynamic> toMap() {
-    return {...super.toMap(), 'type': 'clock', 'frequency': frequency};
+  Map<String, dynamic> toMap({bool isNested = false}) {
+    return {
+      ...super.toMap(isNested: isNested),
+      'type': 'clock',
+      'value': value,
+      'frequency': frequency,
+    };
   }
 }

@@ -105,9 +105,9 @@ class InputNode extends CircuitNode {
   }
 
   @override
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> toMap({bool isNested = false}) {
     return {
-      ...super.toMap(),
+      ...super.toMap(isNested: isNested),
       'type': 'input',
       'value': value,
       'label': label,
@@ -116,7 +116,7 @@ class InputNode extends CircuitNode {
 }
 
 class OutputNode extends CircuitNode {
-  bool value = false;
+  bool value;
   String label;
 
   OutputNode({
@@ -124,6 +124,7 @@ class OutputNode extends CircuitNode {
     required super.position,
     required super.inputPins,
     required super.outputPins,
+    this.value = false,
     this.label = '',
   });
 
@@ -204,6 +205,7 @@ class OutputNode extends CircuitNode {
     return OutputNode(
       id: newId,
       position: position,
+      value: value,
       label: label,
       inputPins: inputPins.map((p) => p.clone(newId)).toList(),
       outputPins: outputPins.map((p) => p.clone(newId)).toList(),
@@ -211,10 +213,11 @@ class OutputNode extends CircuitNode {
   }
 
   @override
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> toMap({bool isNested = false}) {
     return {
-      ...super.toMap(),
+      ...super.toMap(isNested: isNested),
       'type': 'output',
+      'value': value,
       'label': label,
     };
   }

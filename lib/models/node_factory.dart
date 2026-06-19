@@ -53,6 +53,7 @@ class NodeFactory {
           position: position,
           inputPins: inputPins,
           outputPins: outputPins,
+          value: map['value'] ?? false,
           label: map['label'] ?? '',
         );
       case 'segment_display':
@@ -71,12 +72,29 @@ class NodeFactory {
           value: map['value'] ?? false,
         )..frequency = (map['frequency'] as num?)?.toDouble() ?? 1.0;
       case 'composed':
+        final String? referenceId = map['reference'];
+        final SubCircuitDefinition definition;
+        if (referenceId != null) {
+          final resolved = SubCircuitDefinition.resolveById(referenceId);
+          if (resolved != null) {
+            definition = resolved;
+          } else {
+            definition = SubCircuitDefinition(
+              id: referenceId,
+              name: referenceId.replaceAll('_', ' '),
+              nodes: [],
+              wires: [],
+            );
+          }
+        } else {
+          definition = SubCircuitDefinition.fromMap(map['definition']);
+        }
         return ComposedNode(
           id: id,
           position: position,
           inputPins: inputPins,
           outputPins: outputPins,
-          definition: SubCircuitDefinition.fromMap(map['definition']),
+          definition: definition,
         );
       case 'waveform':
         return WaveformNode(

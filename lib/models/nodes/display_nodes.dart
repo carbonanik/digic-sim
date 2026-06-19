@@ -129,9 +129,9 @@ class SegmentDisplayNode extends CircuitNode {
   }
 
   @override
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> toMap({bool isNested = false}) {
     return {
-      ...super.toMap(),
+      ...super.toMap(isNested: isNested),
       'type': 'segment_display',
     };
   }

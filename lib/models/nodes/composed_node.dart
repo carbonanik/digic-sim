@@ -7,17 +7,39 @@ import '../wire.dart';
 import 'io_nodes.dart';
 
 class SubCircuitDefinition {
+  final String id;
   final String name;
-  final List<CircuitNode> nodes;
-  final List<Wire> wires;
+  final List<CircuitNode> _nodes;
+  final List<Wire> _wires;
   final Color color;
   final List<String> inputLabels;
   final List<String> outputLabels;
 
+  List<CircuitNode> get nodes {
+    if (_nodes.isEmpty) {
+      final resolved = resolveById(id) ?? resolve(name);
+      if (resolved != null && resolved != this) {
+        return resolved.nodes;
+      }
+    }
+    return _nodes;
+  }
+
+  List<Wire> get wires {
+    if (_wires.isEmpty) {
+      final resolved = resolveById(id) ?? resolve(name);
+      if (resolved != null && resolved != this) {
+        return resolved.wires;
+      }
+    }
+    return _wires;
+  }
+
   static final List<SubCircuitDefinition> registry = [];
 
   static void register(SubCircuitDefinition definition) {
-    if (!registry.any((d) => d.name.toLowerCase() == definition.name.toLowerCase())) {
+    // Avoid duplicate by id or name (case-insensitive)
+    if (!registry.any((d) => d.id == definition.id || d.name.toLowerCase() == definition.name.toLowerCase())) {
       registry.add(definition);
     }
   }
@@ -31,19 +53,31 @@ class SubCircuitDefinition {
     return null;
   }
 
+  static SubCircuitDefinition? resolveById(String id) {
+    for (final def in registry) {
+      if (def.id == id) {
+        return def;
+      }
+    }
+    return null;
+  }
+
   SubCircuitDefinition({
+    required this.id,
     required this.name,
-    required this.nodes,
-    required this.wires,
+    required List<CircuitNode> nodes,
+    required List<Wire> wires,
     this.color = const Color(0xff334155),
     this.inputLabels = const [],
     this.outputLabels = const [],
-  });
+  })  : _nodes = nodes,
+        _wires = wires;
 
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> toMap({bool includeNodes = true}) {
     return {
+      'id': id,
       'name': name,
-      'nodes': nodes.map((n) => n.toMap()).toList(),
+      if (includeNodes) 'nodes': nodes.map((n) => n.toMap(isNested: true)).toList(),
       'wires': wires.map((w) => w.toMap()).toList(),
       'color': color.value,
       'inputLabels': inputLabels,
@@ -52,6 +86,7 @@ class SubCircuitDefinition {
   }
 
   static SubCircuitDefinition fromMap(Map<String, dynamic> map) {
+    final String id = map['id'] ?? (map['name'] ?? 'unknown').replaceAll(' ', '_');
     final String name = map['name'] ?? 'Unknown IC';
     final resolved = resolve(name);
     if (resolved != null && (map['nodes'] == null || (map['nodes'] as List).isEmpty)) {
@@ -59,6 +94,7 @@ class SubCircuitDefinition {
     }
 
     return SubCircuitDefinition(
+      id: id,
       name: name,
       nodes: (map['nodes'] as List? ?? [])
           .map((n) => NodeFactory.fromMap(n as Map<String, dynamic>))
@@ -257,11 +293,19 @@ class ComposedNode extends CircuitNode {
   }
 
   @override
-  Map<String, dynamic> toMap() {
-    return {
-      ...super.toMap(),
-      'type': 'composed',
-      'definition': definition.toMap(),
-    };
+  Map<String, dynamic> toMap({bool isNested = false}) {
+    if (isNested) {
+      return {
+        ...super.toMap(isNested: isNested),
+        'type': 'composed',
+        'reference': definition.id,
+      };
+    } else {
+      return {
+        ...super.toMap(isNested: isNested),
+        'type': 'composed',
+        'definition': definition.toMap(includeNodes: true),
+      };
+    }
   }
 }
