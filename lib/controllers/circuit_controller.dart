@@ -18,6 +18,7 @@ import '../models/nodes/waveform_node.dart';
 import '../models/nodes/rgb_led_node.dart';
 import '../models/nodes/logic_probe_node.dart';
 import '../utils/pathfinder.dart';
+import '../services/database_helper.dart';
 import 'dart:async';
 import 'dart:convert';
 
@@ -38,6 +39,7 @@ class CircuitController extends ChangeNotifier {
       final definition = SubCircuitDefinition.fromMap(map);
       customDefinitions.add(definition);
       SubCircuitDefinition.register(definition);
+      DatabaseHelper.saveIC(definition);
       notifyListeners();
     } catch (e) {
       debugPrint('Error importing IC: $e');
@@ -47,12 +49,23 @@ class CircuitController extends ChangeNotifier {
   void removeCustomDefinition(SubCircuitDefinition definition) {
     customDefinitions.remove(definition);
     SubCircuitDefinition.registry.remove(definition);
+    DatabaseHelper.deleteIC(definition.id);
     notifyListeners();
   }
 
   Circuit circuit = Circuit(nodes: [], wires: []);
 
-  List<SubCircuitDefinition> customDefinitions = [];
+  static final List<SubCircuitDefinition> _globalCustomDefinitions = [];
+  List<SubCircuitDefinition> get customDefinitions => _globalCustomDefinitions;
+
+  static Future<void> initializeCustomDefinitions() async {
+    final list = await DatabaseHelper.loadAllICs();
+    _globalCustomDefinitions.clear();
+    for (final def in list) {
+      _globalCustomDefinitions.add(def);
+      SubCircuitDefinition.register(def);
+    }
+  }
 
   Timer? _clockTimer;
 
@@ -998,6 +1011,7 @@ class CircuitController extends ChangeNotifier {
 
     customDefinitions.add(definition);
     SubCircuitDefinition.register(definition);
+    DatabaseHelper.saveIC(definition);
     notifyListeners();
   }
 

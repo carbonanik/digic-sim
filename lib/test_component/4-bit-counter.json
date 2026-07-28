@@ -1,0 +1,3834 @@
+{
+    "name": "4-Bit Counter",
+    "nodes": [
+        {
+            "id": "clk_in",
+            "type": "input",
+            "position": {
+                "dx": 50,
+                "dy": 300
+            },
+            "inputPins": [],
+            "outputPins": [
+                {
+                    "id": "out",
+                    "nodeId": "clk_in",
+                    "isInput": false,
+                    "localPosition": {
+                        "dx": 110,
+                        "dy": 32
+                    }
+                }
+            ]
+        },
+        {
+            "id": "reset_in",
+            "type": "input",
+            "position": {
+                "dx": 50,
+                "dy": 450
+            },
+            "inputPins": [],
+            "outputPins": [
+                {
+                    "id": "out",
+                    "nodeId": "reset_in",
+                    "isInput": false,
+                    "localPosition": {
+                        "dx": 110,
+                        "dy": 32
+                    }
+                }
+            ]
+        },
+        {
+            "id": "bit_0",
+            "type": "composed",
+            "position": {
+                "dx": 300,
+                "dy": 100
+            },
+            "inputPins": [
+                {
+                    "id": "in_0",
+                    "nodeId": "bit_0",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 30
+                    }
+                },
+                {
+                    "id": "in_1",
+                    "nodeId": "bit_0",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 50
+                    }
+                },
+                {
+                    "id": "in_2",
+                    "nodeId": "bit_0",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 70
+                    }
+                }
+            ],
+            "outputPins": [
+                {
+                    "id": "out_0",
+                    "nodeId": "bit_0",
+                    "isInput": false,
+                    "localPosition": {
+                        "dx": 140,
+                        "dy": 30
+                    }
+                },
+                {
+                    "id": "out_1",
+                    "nodeId": "bit_0",
+                    "isInput": false,
+                    "localPosition": {
+                        "dx": 140,
+                        "dy": 50
+                    }
+                }
+            ],
+            "definition": {
+                "name": "D Flip-Flop",
+                "nodes": [
+                    {
+                        "id": "in_d",
+                        "type": "input",
+                        "position": {
+                            "dx": 50,
+                            "dy": 100
+                        },
+                        "inputPins": [],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "in_d",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "in_clk",
+                        "type": "input",
+                        "position": {
+                            "dx": 50,
+                            "dy": 250
+                        },
+                        "inputPins": [],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "in_clk",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "not_clk",
+                        "type": "gate",
+                        "gateType": "not",
+                        "position": {
+                            "dx": 200,
+                            "dy": 250
+                        },
+                        "inputPins": [
+                            {
+                                "id": "in",
+                                "nodeId": "not_clk",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 32
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "not_clk",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "m1",
+                        "type": "gate",
+                        "gateType": "nand",
+                        "position": {
+                            "dx": 400,
+                            "dy": 50
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "m1",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "m1",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "m1",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "m2",
+                        "type": "gate",
+                        "gateType": "nand",
+                        "position": {
+                            "dx": 400,
+                            "dy": 150
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "m2",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "m2",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "m2",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "m3",
+                        "type": "gate",
+                        "gateType": "nand",
+                        "position": {
+                            "dx": 550,
+                            "dy": 50
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "m3",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "m3",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "m3",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "m4",
+                        "type": "gate",
+                        "gateType": "nand",
+                        "position": {
+                            "dx": 550,
+                            "dy": 150
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "m4",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "m4",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "m4",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "s1",
+                        "type": "gate",
+                        "gateType": "nand",
+                        "position": {
+                            "dx": 750,
+                            "dy": 50
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "s1",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "s1",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "s1",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "s2",
+                        "type": "gate",
+                        "gateType": "nand",
+                        "position": {
+                            "dx": 750,
+                            "dy": 150
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "s2",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "s2",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "s2",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "s3",
+                        "type": "gate",
+                        "gateType": "nand",
+                        "position": {
+                            "dx": 900,
+                            "dy": 50
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "s3",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "s3",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "s3",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "s4",
+                        "type": "gate",
+                        "gateType": "nand",
+                        "position": {
+                            "dx": 900,
+                            "dy": 150
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "s4",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "s4",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "s4",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "not_d",
+                        "type": "gate",
+                        "gateType": "not",
+                        "position": {
+                            "dx": 200,
+                            "dy": 100
+                        },
+                        "inputPins": [
+                            {
+                                "id": "in",
+                                "nodeId": "not_d",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 32
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "not_d",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "out_q",
+                        "type": "output",
+                        "position": {
+                            "dx": 1100,
+                            "dy": 50
+                        },
+                        "inputPins": [
+                            {
+                                "id": "in",
+                                "nodeId": "out_q",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 32
+                                }
+                            }
+                        ],
+                        "outputPins": []
+                    },
+                    {
+                        "id": "out_q_inv",
+                        "type": "output",
+                        "position": {
+                            "dx": 1100,
+                            "dy": 150
+                        },
+                        "inputPins": [
+                            {
+                                "id": "in",
+                                "nodeId": "out_q_inv",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 32
+                                }
+                            }
+                        ],
+                        "outputPins": []
+                    },
+                    {
+                        "id": "in_reset",
+                        "type": "input",
+                        "position": {
+                            "dx": 50,
+                            "dy": 400
+                        },
+                        "inputPins": [],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "in_reset",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "not_reset",
+                        "type": "gate",
+                        "gateType": "not",
+                        "position": {
+                            "dx": 200,
+                            "dy": 400
+                        },
+                        "inputPins": [
+                            {
+                                "id": "in",
+                                "nodeId": "not_reset",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 32
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "not_reset",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "and_m3",
+                        "type": "gate",
+                        "gateType": "and",
+                        "position": {
+                            "dx": 650,
+                            "dy": 50
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "and_m3",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "and_m3",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "and_m3",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "and_s3",
+                        "type": "gate",
+                        "gateType": "and",
+                        "position": {
+                            "dx": 1000,
+                            "dy": 50
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "and_s3",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "and_s3",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "and_s3",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "or_s4",
+                        "type": "gate",
+                        "gateType": "or",
+                        "position": {
+                            "dx": 1000,
+                            "dy": 150
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "or_s4",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "or_s4",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "or_s4",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "wires": [
+                    {
+                        "id": "w1",
+                        "fromNodeId": "in_d",
+                        "fromPinId": "out",
+                        "toNodeId": "m1",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w2",
+                        "fromNodeId": "in_d",
+                        "fromPinId": "out",
+                        "toNodeId": "not_d",
+                        "toPinId": "in"
+                    },
+                    {
+                        "id": "w3",
+                        "fromNodeId": "not_d",
+                        "fromPinId": "out",
+                        "toNodeId": "m2",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w4",
+                        "fromNodeId": "in_clk",
+                        "fromPinId": "out",
+                        "toNodeId": "m1",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w5",
+                        "fromNodeId": "in_clk",
+                        "fromPinId": "out",
+                        "toNodeId": "m2",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w6",
+                        "fromNodeId": "in_clk",
+                        "fromPinId": "out",
+                        "toNodeId": "not_clk",
+                        "toPinId": "in"
+                    },
+                    {
+                        "id": "w7",
+                        "fromNodeId": "m1",
+                        "fromPinId": "out",
+                        "toNodeId": "m3",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w8",
+                        "fromNodeId": "m2",
+                        "fromPinId": "out",
+                        "toNodeId": "m4",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w_m3_to_and",
+                        "fromNodeId": "m3",
+                        "fromPinId": "out",
+                        "toNodeId": "and_m3",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w_not_reset_to_and_m3",
+                        "fromNodeId": "not_reset",
+                        "fromPinId": "out",
+                        "toNodeId": "and_m3",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w9",
+                        "fromNodeId": "and_m3",
+                        "fromPinId": "out",
+                        "toNodeId": "m4",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w10",
+                        "fromNodeId": "m4",
+                        "fromPinId": "out",
+                        "toNodeId": "m3",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w11",
+                        "fromNodeId": "and_m3",
+                        "fromPinId": "out",
+                        "toNodeId": "s1",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w12",
+                        "fromNodeId": "m4",
+                        "fromPinId": "out",
+                        "toNodeId": "s2",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w13",
+                        "fromNodeId": "not_clk",
+                        "fromPinId": "out",
+                        "toNodeId": "s1",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w14",
+                        "fromNodeId": "not_clk",
+                        "fromPinId": "out",
+                        "toNodeId": "s2",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w15",
+                        "fromNodeId": "s1",
+                        "fromPinId": "out",
+                        "toNodeId": "s3",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w16",
+                        "fromNodeId": "s2",
+                        "fromPinId": "out",
+                        "toNodeId": "s4",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w_s3_to_and",
+                        "fromNodeId": "s3",
+                        "fromPinId": "out",
+                        "toNodeId": "and_s3",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w_not_reset_to_and_s3",
+                        "fromNodeId": "not_reset",
+                        "fromPinId": "out",
+                        "toNodeId": "and_s3",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w17",
+                        "fromNodeId": "and_s3",
+                        "fromPinId": "out",
+                        "toNodeId": "s4",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w_s4_to_or",
+                        "fromNodeId": "s4",
+                        "fromPinId": "out",
+                        "toNodeId": "or_s4",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w_reset_to_or",
+                        "fromNodeId": "in_reset",
+                        "fromPinId": "out",
+                        "toNodeId": "or_s4",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w18",
+                        "fromNodeId": "or_s4",
+                        "fromPinId": "out",
+                        "toNodeId": "s3",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w19",
+                        "fromNodeId": "and_s3",
+                        "fromPinId": "out",
+                        "toNodeId": "out_q",
+                        "toPinId": "in"
+                    },
+                    {
+                        "id": "w20",
+                        "fromNodeId": "or_s4",
+                        "fromPinId": "out",
+                        "toNodeId": "out_q_inv",
+                        "toPinId": "in"
+                    },
+                    {
+                        "id": "w_reset_to_not",
+                        "fromNodeId": "in_reset",
+                        "fromPinId": "out",
+                        "toNodeId": "not_reset",
+                        "toPinId": "in"
+                    }
+                ],
+                "color": 4280166715,
+                "inputLabels": [
+                    "D",
+                    "CLK",
+                    "CLR"
+                ],
+                "outputLabels": [
+                    "Q",
+                    "NOT Q"
+                ]
+            }
+        },
+        {
+            "id": "bit_1",
+            "type": "composed",
+            "position": {
+                "dx": 300,
+                "dy": 250
+            },
+            "inputPins": [
+                {
+                    "id": "in_0",
+                    "nodeId": "bit_1",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 30
+                    }
+                },
+                {
+                    "id": "in_1",
+                    "nodeId": "bit_1",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 50
+                    }
+                },
+                {
+                    "id": "in_2",
+                    "nodeId": "bit_1",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 70
+                    }
+                }
+            ],
+            "outputPins": [
+                {
+                    "id": "out_0",
+                    "nodeId": "bit_1",
+                    "isInput": false,
+                    "localPosition": {
+                        "dx": 140,
+                        "dy": 30
+                    }
+                },
+                {
+                    "id": "out_1",
+                    "nodeId": "bit_1",
+                    "isInput": false,
+                    "localPosition": {
+                        "dx": 140,
+                        "dy": 50
+                    }
+                }
+            ],
+            "definition": {
+                "name": "D Flip-Flop",
+                "nodes": [
+                    {
+                        "id": "in_d",
+                        "type": "input",
+                        "position": {
+                            "dx": 50,
+                            "dy": 100
+                        },
+                        "inputPins": [],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "in_d",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "in_clk",
+                        "type": "input",
+                        "position": {
+                            "dx": 50,
+                            "dy": 250
+                        },
+                        "inputPins": [],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "in_clk",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "not_clk",
+                        "type": "gate",
+                        "gateType": "not",
+                        "position": {
+                            "dx": 200,
+                            "dy": 250
+                        },
+                        "inputPins": [
+                            {
+                                "id": "in",
+                                "nodeId": "not_clk",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 32
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "not_clk",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "m1",
+                        "type": "gate",
+                        "gateType": "nand",
+                        "position": {
+                            "dx": 400,
+                            "dy": 50
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "m1",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "m1",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "m1",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "m2",
+                        "type": "gate",
+                        "gateType": "nand",
+                        "position": {
+                            "dx": 400,
+                            "dy": 150
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "m2",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "m2",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "m2",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "m3",
+                        "type": "gate",
+                        "gateType": "nand",
+                        "position": {
+                            "dx": 550,
+                            "dy": 50
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "m3",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "m3",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "m3",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "m4",
+                        "type": "gate",
+                        "gateType": "nand",
+                        "position": {
+                            "dx": 550,
+                            "dy": 150
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "m4",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "m4",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "m4",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "s1",
+                        "type": "gate",
+                        "gateType": "nand",
+                        "position": {
+                            "dx": 750,
+                            "dy": 50
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "s1",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "s1",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "s1",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "s2",
+                        "type": "gate",
+                        "gateType": "nand",
+                        "position": {
+                            "dx": 750,
+                            "dy": 150
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "s2",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "s2",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "s2",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "s3",
+                        "type": "gate",
+                        "gateType": "nand",
+                        "position": {
+                            "dx": 900,
+                            "dy": 50
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "s3",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "s3",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "s3",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "s4",
+                        "type": "gate",
+                        "gateType": "nand",
+                        "position": {
+                            "dx": 900,
+                            "dy": 150
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "s4",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "s4",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "s4",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "not_d",
+                        "type": "gate",
+                        "gateType": "not",
+                        "position": {
+                            "dx": 200,
+                            "dy": 100
+                        },
+                        "inputPins": [
+                            {
+                                "id": "in",
+                                "nodeId": "not_d",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 32
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "not_d",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "out_q",
+                        "type": "output",
+                        "position": {
+                            "dx": 1100,
+                            "dy": 50
+                        },
+                        "inputPins": [
+                            {
+                                "id": "in",
+                                "nodeId": "out_q",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 32
+                                }
+                            }
+                        ],
+                        "outputPins": []
+                    },
+                    {
+                        "id": "out_q_inv",
+                        "type": "output",
+                        "position": {
+                            "dx": 1100,
+                            "dy": 150
+                        },
+                        "inputPins": [
+                            {
+                                "id": "in",
+                                "nodeId": "out_q_inv",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 32
+                                }
+                            }
+                        ],
+                        "outputPins": []
+                    },
+                    {
+                        "id": "in_reset",
+                        "type": "input",
+                        "position": {
+                            "dx": 50,
+                            "dy": 400
+                        },
+                        "inputPins": [],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "in_reset",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "not_reset",
+                        "type": "gate",
+                        "gateType": "not",
+                        "position": {
+                            "dx": 200,
+                            "dy": 400
+                        },
+                        "inputPins": [
+                            {
+                                "id": "in",
+                                "nodeId": "not_reset",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 32
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "not_reset",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "and_m3",
+                        "type": "gate",
+                        "gateType": "and",
+                        "position": {
+                            "dx": 650,
+                            "dy": 50
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "and_m3",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "and_m3",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "and_m3",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "and_s3",
+                        "type": "gate",
+                        "gateType": "and",
+                        "position": {
+                            "dx": 1000,
+                            "dy": 50
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "and_s3",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "and_s3",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "and_s3",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "or_s4",
+                        "type": "gate",
+                        "gateType": "or",
+                        "position": {
+                            "dx": 1000,
+                            "dy": 150
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "or_s4",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "or_s4",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "or_s4",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "wires": [
+                    {
+                        "id": "w1",
+                        "fromNodeId": "in_d",
+                        "fromPinId": "out",
+                        "toNodeId": "m1",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w2",
+                        "fromNodeId": "in_d",
+                        "fromPinId": "out",
+                        "toNodeId": "not_d",
+                        "toPinId": "in"
+                    },
+                    {
+                        "id": "w3",
+                        "fromNodeId": "not_d",
+                        "fromPinId": "out",
+                        "toNodeId": "m2",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w4",
+                        "fromNodeId": "in_clk",
+                        "fromPinId": "out",
+                        "toNodeId": "m1",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w5",
+                        "fromNodeId": "in_clk",
+                        "fromPinId": "out",
+                        "toNodeId": "m2",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w6",
+                        "fromNodeId": "in_clk",
+                        "fromPinId": "out",
+                        "toNodeId": "not_clk",
+                        "toPinId": "in"
+                    },
+                    {
+                        "id": "w7",
+                        "fromNodeId": "m1",
+                        "fromPinId": "out",
+                        "toNodeId": "m3",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w8",
+                        "fromNodeId": "m2",
+                        "fromPinId": "out",
+                        "toNodeId": "m4",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w_m3_to_and",
+                        "fromNodeId": "m3",
+                        "fromPinId": "out",
+                        "toNodeId": "and_m3",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w_not_reset_to_and_m3",
+                        "fromNodeId": "not_reset",
+                        "fromPinId": "out",
+                        "toNodeId": "and_m3",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w9",
+                        "fromNodeId": "and_m3",
+                        "fromPinId": "out",
+                        "toNodeId": "m4",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w10",
+                        "fromNodeId": "m4",
+                        "fromPinId": "out",
+                        "toNodeId": "m3",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w11",
+                        "fromNodeId": "and_m3",
+                        "fromPinId": "out",
+                        "toNodeId": "s1",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w12",
+                        "fromNodeId": "m4",
+                        "fromPinId": "out",
+                        "toNodeId": "s2",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w13",
+                        "fromNodeId": "not_clk",
+                        "fromPinId": "out",
+                        "toNodeId": "s1",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w14",
+                        "fromNodeId": "not_clk",
+                        "fromPinId": "out",
+                        "toNodeId": "s2",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w15",
+                        "fromNodeId": "s1",
+                        "fromPinId": "out",
+                        "toNodeId": "s3",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w16",
+                        "fromNodeId": "s2",
+                        "fromPinId": "out",
+                        "toNodeId": "s4",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w_s3_to_and",
+                        "fromNodeId": "s3",
+                        "fromPinId": "out",
+                        "toNodeId": "and_s3",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w_not_reset_to_and_s3",
+                        "fromNodeId": "not_reset",
+                        "fromPinId": "out",
+                        "toNodeId": "and_s3",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w17",
+                        "fromNodeId": "and_s3",
+                        "fromPinId": "out",
+                        "toNodeId": "s4",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w_s4_to_or",
+                        "fromNodeId": "s4",
+                        "fromPinId": "out",
+                        "toNodeId": "or_s4",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w_reset_to_or",
+                        "fromNodeId": "in_reset",
+                        "fromPinId": "out",
+                        "toNodeId": "or_s4",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w18",
+                        "fromNodeId": "or_s4",
+                        "fromPinId": "out",
+                        "toNodeId": "s3",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w19",
+                        "fromNodeId": "and_s3",
+                        "fromPinId": "out",
+                        "toNodeId": "out_q",
+                        "toPinId": "in"
+                    },
+                    {
+                        "id": "w20",
+                        "fromNodeId": "or_s4",
+                        "fromPinId": "out",
+                        "toNodeId": "out_q_inv",
+                        "toPinId": "in"
+                    },
+                    {
+                        "id": "w_reset_to_not",
+                        "fromNodeId": "in_reset",
+                        "fromPinId": "out",
+                        "toNodeId": "not_reset",
+                        "toPinId": "in"
+                    }
+                ],
+                "color": 4280166715,
+                "inputLabels": [
+                    "D",
+                    "CLK",
+                    "CLR"
+                ],
+                "outputLabels": [
+                    "Q",
+                    "NOT Q"
+                ]
+            }
+        },
+        {
+            "id": "bit_2",
+            "type": "composed",
+            "position": {
+                "dx": 300,
+                "dy": 400
+            },
+            "inputPins": [
+                {
+                    "id": "in_0",
+                    "nodeId": "bit_2",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 30
+                    }
+                },
+                {
+                    "id": "in_1",
+                    "nodeId": "bit_2",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 50
+                    }
+                },
+                {
+                    "id": "in_2",
+                    "nodeId": "bit_2",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 70
+                    }
+                }
+            ],
+            "outputPins": [
+                {
+                    "id": "out_0",
+                    "nodeId": "bit_2",
+                    "isInput": false,
+                    "localPosition": {
+                        "dx": 140,
+                        "dy": 30
+                    }
+                },
+                {
+                    "id": "out_1",
+                    "nodeId": "bit_2",
+                    "isInput": false,
+                    "localPosition": {
+                        "dx": 140,
+                        "dy": 50
+                    }
+                }
+            ],
+            "definition": {
+                "name": "D Flip-Flop",
+                "nodes": [
+                    {
+                        "id": "in_d",
+                        "type": "input",
+                        "position": {
+                            "dx": 50,
+                            "dy": 100
+                        },
+                        "inputPins": [],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "in_d",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "in_clk",
+                        "type": "input",
+                        "position": {
+                            "dx": 50,
+                            "dy": 250
+                        },
+                        "inputPins": [],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "in_clk",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "not_clk",
+                        "type": "gate",
+                        "gateType": "not",
+                        "position": {
+                            "dx": 200,
+                            "dy": 250
+                        },
+                        "inputPins": [
+                            {
+                                "id": "in",
+                                "nodeId": "not_clk",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 32
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "not_clk",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "m1",
+                        "type": "gate",
+                        "gateType": "nand",
+                        "position": {
+                            "dx": 400,
+                            "dy": 50
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "m1",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "m1",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "m1",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "m2",
+                        "type": "gate",
+                        "gateType": "nand",
+                        "position": {
+                            "dx": 400,
+                            "dy": 150
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "m2",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "m2",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "m2",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "m3",
+                        "type": "gate",
+                        "gateType": "nand",
+                        "position": {
+                            "dx": 550,
+                            "dy": 50
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "m3",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "m3",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "m3",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "m4",
+                        "type": "gate",
+                        "gateType": "nand",
+                        "position": {
+                            "dx": 550,
+                            "dy": 150
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "m4",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "m4",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "m4",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "s1",
+                        "type": "gate",
+                        "gateType": "nand",
+                        "position": {
+                            "dx": 750,
+                            "dy": 50
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "s1",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "s1",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "s1",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "s2",
+                        "type": "gate",
+                        "gateType": "nand",
+                        "position": {
+                            "dx": 750,
+                            "dy": 150
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "s2",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "s2",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "s2",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "s3",
+                        "type": "gate",
+                        "gateType": "nand",
+                        "position": {
+                            "dx": 900,
+                            "dy": 50
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "s3",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "s3",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "s3",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "s4",
+                        "type": "gate",
+                        "gateType": "nand",
+                        "position": {
+                            "dx": 900,
+                            "dy": 150
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "s4",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "s4",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "s4",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "not_d",
+                        "type": "gate",
+                        "gateType": "not",
+                        "position": {
+                            "dx": 200,
+                            "dy": 100
+                        },
+                        "inputPins": [
+                            {
+                                "id": "in",
+                                "nodeId": "not_d",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 32
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "not_d",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "out_q",
+                        "type": "output",
+                        "position": {
+                            "dx": 1100,
+                            "dy": 50
+                        },
+                        "inputPins": [
+                            {
+                                "id": "in",
+                                "nodeId": "out_q",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 32
+                                }
+                            }
+                        ],
+                        "outputPins": []
+                    },
+                    {
+                        "id": "out_q_inv",
+                        "type": "output",
+                        "position": {
+                            "dx": 1100,
+                            "dy": 150
+                        },
+                        "inputPins": [
+                            {
+                                "id": "in",
+                                "nodeId": "out_q_inv",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 32
+                                }
+                            }
+                        ],
+                        "outputPins": []
+                    },
+                    {
+                        "id": "in_reset",
+                        "type": "input",
+                        "position": {
+                            "dx": 50,
+                            "dy": 400
+                        },
+                        "inputPins": [],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "in_reset",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "not_reset",
+                        "type": "gate",
+                        "gateType": "not",
+                        "position": {
+                            "dx": 200,
+                            "dy": 400
+                        },
+                        "inputPins": [
+                            {
+                                "id": "in",
+                                "nodeId": "not_reset",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 32
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "not_reset",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "and_m3",
+                        "type": "gate",
+                        "gateType": "and",
+                        "position": {
+                            "dx": 650,
+                            "dy": 50
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "and_m3",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "and_m3",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "and_m3",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "and_s3",
+                        "type": "gate",
+                        "gateType": "and",
+                        "position": {
+                            "dx": 1000,
+                            "dy": 50
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "and_s3",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "and_s3",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "and_s3",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "or_s4",
+                        "type": "gate",
+                        "gateType": "or",
+                        "position": {
+                            "dx": 1000,
+                            "dy": 150
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "or_s4",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "or_s4",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "or_s4",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "wires": [
+                    {
+                        "id": "w1",
+                        "fromNodeId": "in_d",
+                        "fromPinId": "out",
+                        "toNodeId": "m1",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w2",
+                        "fromNodeId": "in_d",
+                        "fromPinId": "out",
+                        "toNodeId": "not_d",
+                        "toPinId": "in"
+                    },
+                    {
+                        "id": "w3",
+                        "fromNodeId": "not_d",
+                        "fromPinId": "out",
+                        "toNodeId": "m2",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w4",
+                        "fromNodeId": "in_clk",
+                        "fromPinId": "out",
+                        "toNodeId": "m1",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w5",
+                        "fromNodeId": "in_clk",
+                        "fromPinId": "out",
+                        "toNodeId": "m2",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w6",
+                        "fromNodeId": "in_clk",
+                        "fromPinId": "out",
+                        "toNodeId": "not_clk",
+                        "toPinId": "in"
+                    },
+                    {
+                        "id": "w7",
+                        "fromNodeId": "m1",
+                        "fromPinId": "out",
+                        "toNodeId": "m3",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w8",
+                        "fromNodeId": "m2",
+                        "fromPinId": "out",
+                        "toNodeId": "m4",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w_m3_to_and",
+                        "fromNodeId": "m3",
+                        "fromPinId": "out",
+                        "toNodeId": "and_m3",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w_not_reset_to_and_m3",
+                        "fromNodeId": "not_reset",
+                        "fromPinId": "out",
+                        "toNodeId": "and_m3",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w9",
+                        "fromNodeId": "and_m3",
+                        "fromPinId": "out",
+                        "toNodeId": "m4",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w10",
+                        "fromNodeId": "m4",
+                        "fromPinId": "out",
+                        "toNodeId": "m3",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w11",
+                        "fromNodeId": "and_m3",
+                        "fromPinId": "out",
+                        "toNodeId": "s1",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w12",
+                        "fromNodeId": "m4",
+                        "fromPinId": "out",
+                        "toNodeId": "s2",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w13",
+                        "fromNodeId": "not_clk",
+                        "fromPinId": "out",
+                        "toNodeId": "s1",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w14",
+                        "fromNodeId": "not_clk",
+                        "fromPinId": "out",
+                        "toNodeId": "s2",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w15",
+                        "fromNodeId": "s1",
+                        "fromPinId": "out",
+                        "toNodeId": "s3",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w16",
+                        "fromNodeId": "s2",
+                        "fromPinId": "out",
+                        "toNodeId": "s4",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w_s3_to_and",
+                        "fromNodeId": "s3",
+                        "fromPinId": "out",
+                        "toNodeId": "and_s3",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w_not_reset_to_and_s3",
+                        "fromNodeId": "not_reset",
+                        "fromPinId": "out",
+                        "toNodeId": "and_s3",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w17",
+                        "fromNodeId": "and_s3",
+                        "fromPinId": "out",
+                        "toNodeId": "s4",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w_s4_to_or",
+                        "fromNodeId": "s4",
+                        "fromPinId": "out",
+                        "toNodeId": "or_s4",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w_reset_to_or",
+                        "fromNodeId": "in_reset",
+                        "fromPinId": "out",
+                        "toNodeId": "or_s4",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w18",
+                        "fromNodeId": "or_s4",
+                        "fromPinId": "out",
+                        "toNodeId": "s3",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w19",
+                        "fromNodeId": "and_s3",
+                        "fromPinId": "out",
+                        "toNodeId": "out_q",
+                        "toPinId": "in"
+                    },
+                    {
+                        "id": "w20",
+                        "fromNodeId": "or_s4",
+                        "fromPinId": "out",
+                        "toNodeId": "out_q_inv",
+                        "toPinId": "in"
+                    },
+                    {
+                        "id": "w_reset_to_not",
+                        "fromNodeId": "in_reset",
+                        "fromPinId": "out",
+                        "toNodeId": "not_reset",
+                        "toPinId": "in"
+                    }
+                ],
+                "color": 4280166715,
+                "inputLabels": [
+                    "D",
+                    "CLK",
+                    "CLR"
+                ],
+                "outputLabels": [
+                    "Q",
+                    "NOT Q"
+                ]
+            }
+        },
+        {
+            "id": "bit_3",
+            "type": "composed",
+            "position": {
+                "dx": 300,
+                "dy": 550
+            },
+            "inputPins": [
+                {
+                    "id": "in_0",
+                    "nodeId": "bit_3",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 30
+                    }
+                },
+                {
+                    "id": "in_1",
+                    "nodeId": "bit_3",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 50
+                    }
+                },
+                {
+                    "id": "in_2",
+                    "nodeId": "bit_3",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 70
+                    }
+                }
+            ],
+            "outputPins": [
+                {
+                    "id": "out_0",
+                    "nodeId": "bit_3",
+                    "isInput": false,
+                    "localPosition": {
+                        "dx": 140,
+                        "dy": 30
+                    }
+                },
+                {
+                    "id": "out_1",
+                    "nodeId": "bit_3",
+                    "isInput": false,
+                    "localPosition": {
+                        "dx": 140,
+                        "dy": 50
+                    }
+                }
+            ],
+            "definition": {
+                "name": "D Flip-Flop",
+                "nodes": [
+                    {
+                        "id": "in_d",
+                        "type": "input",
+                        "position": {
+                            "dx": 50,
+                            "dy": 100
+                        },
+                        "inputPins": [],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "in_d",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "in_clk",
+                        "type": "input",
+                        "position": {
+                            "dx": 50,
+                            "dy": 250
+                        },
+                        "inputPins": [],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "in_clk",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "not_clk",
+                        "type": "gate",
+                        "gateType": "not",
+                        "position": {
+                            "dx": 200,
+                            "dy": 250
+                        },
+                        "inputPins": [
+                            {
+                                "id": "in",
+                                "nodeId": "not_clk",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 32
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "not_clk",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "m1",
+                        "type": "gate",
+                        "gateType": "nand",
+                        "position": {
+                            "dx": 400,
+                            "dy": 50
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "m1",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "m1",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "m1",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "m2",
+                        "type": "gate",
+                        "gateType": "nand",
+                        "position": {
+                            "dx": 400,
+                            "dy": 150
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "m2",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "m2",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "m2",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "m3",
+                        "type": "gate",
+                        "gateType": "nand",
+                        "position": {
+                            "dx": 550,
+                            "dy": 50
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "m3",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "m3",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "m3",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "m4",
+                        "type": "gate",
+                        "gateType": "nand",
+                        "position": {
+                            "dx": 550,
+                            "dy": 150
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "m4",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "m4",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "m4",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "s1",
+                        "type": "gate",
+                        "gateType": "nand",
+                        "position": {
+                            "dx": 750,
+                            "dy": 50
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "s1",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "s1",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "s1",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "s2",
+                        "type": "gate",
+                        "gateType": "nand",
+                        "position": {
+                            "dx": 750,
+                            "dy": 150
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "s2",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "s2",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "s2",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "s3",
+                        "type": "gate",
+                        "gateType": "nand",
+                        "position": {
+                            "dx": 900,
+                            "dy": 50
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "s3",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "s3",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "s3",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "s4",
+                        "type": "gate",
+                        "gateType": "nand",
+                        "position": {
+                            "dx": 900,
+                            "dy": 150
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "s4",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "s4",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "s4",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "not_d",
+                        "type": "gate",
+                        "gateType": "not",
+                        "position": {
+                            "dx": 200,
+                            "dy": 100
+                        },
+                        "inputPins": [
+                            {
+                                "id": "in",
+                                "nodeId": "not_d",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 32
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "not_d",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "out_q",
+                        "type": "output",
+                        "position": {
+                            "dx": 1100,
+                            "dy": 50
+                        },
+                        "inputPins": [
+                            {
+                                "id": "in",
+                                "nodeId": "out_q",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 32
+                                }
+                            }
+                        ],
+                        "outputPins": []
+                    },
+                    {
+                        "id": "out_q_inv",
+                        "type": "output",
+                        "position": {
+                            "dx": 1100,
+                            "dy": 150
+                        },
+                        "inputPins": [
+                            {
+                                "id": "in",
+                                "nodeId": "out_q_inv",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 32
+                                }
+                            }
+                        ],
+                        "outputPins": []
+                    },
+                    {
+                        "id": "in_reset",
+                        "type": "input",
+                        "position": {
+                            "dx": 50,
+                            "dy": 400
+                        },
+                        "inputPins": [],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "in_reset",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "not_reset",
+                        "type": "gate",
+                        "gateType": "not",
+                        "position": {
+                            "dx": 200,
+                            "dy": 400
+                        },
+                        "inputPins": [
+                            {
+                                "id": "in",
+                                "nodeId": "not_reset",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 32
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "not_reset",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "and_m3",
+                        "type": "gate",
+                        "gateType": "and",
+                        "position": {
+                            "dx": 650,
+                            "dy": 50
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "and_m3",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "and_m3",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "and_m3",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "and_s3",
+                        "type": "gate",
+                        "gateType": "and",
+                        "position": {
+                            "dx": 1000,
+                            "dy": 50
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "and_s3",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "and_s3",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "and_s3",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "or_s4",
+                        "type": "gate",
+                        "gateType": "or",
+                        "position": {
+                            "dx": 1000,
+                            "dy": 150
+                        },
+                        "inputPins": [
+                            {
+                                "id": "p0",
+                                "nodeId": "or_s4",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 22
+                                }
+                            },
+                            {
+                                "id": "p1",
+                                "nodeId": "or_s4",
+                                "isInput": true,
+                                "localPosition": {
+                                    "dx": 0,
+                                    "dy": 42
+                                }
+                            }
+                        ],
+                        "outputPins": [
+                            {
+                                "id": "out",
+                                "nodeId": "or_s4",
+                                "isInput": false,
+                                "localPosition": {
+                                    "dx": 110,
+                                    "dy": 32
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "wires": [
+                    {
+                        "id": "w1",
+                        "fromNodeId": "in_d",
+                        "fromPinId": "out",
+                        "toNodeId": "m1",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w2",
+                        "fromNodeId": "in_d",
+                        "fromPinId": "out",
+                        "toNodeId": "not_d",
+                        "toPinId": "in"
+                    },
+                    {
+                        "id": "w3",
+                        "fromNodeId": "not_d",
+                        "fromPinId": "out",
+                        "toNodeId": "m2",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w4",
+                        "fromNodeId": "in_clk",
+                        "fromPinId": "out",
+                        "toNodeId": "m1",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w5",
+                        "fromNodeId": "in_clk",
+                        "fromPinId": "out",
+                        "toNodeId": "m2",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w6",
+                        "fromNodeId": "in_clk",
+                        "fromPinId": "out",
+                        "toNodeId": "not_clk",
+                        "toPinId": "in"
+                    },
+                    {
+                        "id": "w7",
+                        "fromNodeId": "m1",
+                        "fromPinId": "out",
+                        "toNodeId": "m3",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w8",
+                        "fromNodeId": "m2",
+                        "fromPinId": "out",
+                        "toNodeId": "m4",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w_m3_to_and",
+                        "fromNodeId": "m3",
+                        "fromPinId": "out",
+                        "toNodeId": "and_m3",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w_not_reset_to_and_m3",
+                        "fromNodeId": "not_reset",
+                        "fromPinId": "out",
+                        "toNodeId": "and_m3",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w9",
+                        "fromNodeId": "and_m3",
+                        "fromPinId": "out",
+                        "toNodeId": "m4",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w10",
+                        "fromNodeId": "m4",
+                        "fromPinId": "out",
+                        "toNodeId": "m3",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w11",
+                        "fromNodeId": "and_m3",
+                        "fromPinId": "out",
+                        "toNodeId": "s1",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w12",
+                        "fromNodeId": "m4",
+                        "fromPinId": "out",
+                        "toNodeId": "s2",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w13",
+                        "fromNodeId": "not_clk",
+                        "fromPinId": "out",
+                        "toNodeId": "s1",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w14",
+                        "fromNodeId": "not_clk",
+                        "fromPinId": "out",
+                        "toNodeId": "s2",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w15",
+                        "fromNodeId": "s1",
+                        "fromPinId": "out",
+                        "toNodeId": "s3",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w16",
+                        "fromNodeId": "s2",
+                        "fromPinId": "out",
+                        "toNodeId": "s4",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w_s3_to_and",
+                        "fromNodeId": "s3",
+                        "fromPinId": "out",
+                        "toNodeId": "and_s3",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w_not_reset_to_and_s3",
+                        "fromNodeId": "not_reset",
+                        "fromPinId": "out",
+                        "toNodeId": "and_s3",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w17",
+                        "fromNodeId": "and_s3",
+                        "fromPinId": "out",
+                        "toNodeId": "s4",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w_s4_to_or",
+                        "fromNodeId": "s4",
+                        "fromPinId": "out",
+                        "toNodeId": "or_s4",
+                        "toPinId": "p0"
+                    },
+                    {
+                        "id": "w_reset_to_or",
+                        "fromNodeId": "in_reset",
+                        "fromPinId": "out",
+                        "toNodeId": "or_s4",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w18",
+                        "fromNodeId": "or_s4",
+                        "fromPinId": "out",
+                        "toNodeId": "s3",
+                        "toPinId": "p1"
+                    },
+                    {
+                        "id": "w19",
+                        "fromNodeId": "and_s3",
+                        "fromPinId": "out",
+                        "toNodeId": "out_q",
+                        "toPinId": "in"
+                    },
+                    {
+                        "id": "w20",
+                        "fromNodeId": "or_s4",
+                        "fromPinId": "out",
+                        "toNodeId": "out_q_inv",
+                        "toPinId": "in"
+                    },
+                    {
+                        "id": "w_reset_to_not",
+                        "fromNodeId": "in_reset",
+                        "fromPinId": "out",
+                        "toNodeId": "not_reset",
+                        "toPinId": "in"
+                    }
+                ],
+                "color": 4280166715,
+                "inputLabels": [
+                    "D",
+                    "CLK",
+                    "CLR"
+                ],
+                "outputLabels": [
+                    "Q",
+                    "NOT Q"
+                ]
+            }
+        },
+        {
+            "id": "out_node_3",
+            "type": "output",
+            "position": {
+                "dx": 600,
+                "dy": 100
+            },
+            "inputPins": [
+                {
+                    "id": "in",
+                    "nodeId": "out_node_3",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 32
+                    }
+                }
+            ],
+            "outputPins": []
+        },
+        {
+            "id": "out_node_2",
+            "type": "output",
+            "position": {
+                "dx": 600,
+                "dy": 250
+            },
+            "inputPins": [
+                {
+                    "id": "in",
+                    "nodeId": "out_node_2",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 32
+                    }
+                }
+            ],
+            "outputPins": []
+        },
+        {
+            "id": "out_node_1",
+            "type": "output",
+            "position": {
+                "dx": 600,
+                "dy": 400
+            },
+            "inputPins": [
+                {
+                    "id": "in",
+                    "nodeId": "out_node_1",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 32
+                    }
+                }
+            ],
+            "outputPins": []
+        },
+        {
+            "id": "out_node_0",
+            "type": "output",
+            "position": {
+                "dx": 600,
+                "dy": 550
+            },
+            "inputPins": [
+                {
+                    "id": "in",
+                    "nodeId": "out_node_0",
+                    "isInput": true,
+                    "localPosition": {
+                        "dx": 0,
+                        "dy": 32
+                    }
+                }
+            ],
+            "outputPins": []
+        }
+    ],
+    "wires": [
+        {
+            "id": "wire_fb_0",
+            "fromNodeId": "bit_0",
+            "fromPinId": "out_1",
+            "toNodeId": "bit_0",
+            "toPinId": "in_0"
+        },
+        {
+            "id": "wire_clk_0",
+            "fromNodeId": "clk_in",
+            "fromPinId": "out",
+            "toNodeId": "bit_0",
+            "toPinId": "in_1"
+        },
+        {
+            "id": "wire_fb_1",
+            "fromNodeId": "bit_1",
+            "fromPinId": "out_1",
+            "toNodeId": "bit_1",
+            "toPinId": "in_0"
+        },
+        {
+            "id": "wire_clk_1",
+            "fromNodeId": "bit_0",
+            "fromPinId": "out_0",
+            "toNodeId": "bit_1",
+            "toPinId": "in_1"
+        },
+        {
+            "id": "wire_fb_2",
+            "fromNodeId": "bit_2",
+            "fromPinId": "out_1",
+            "toNodeId": "bit_2",
+            "toPinId": "in_0"
+        },
+        {
+            "id": "wire_clk_2",
+            "fromNodeId": "bit_1",
+            "fromPinId": "out_0",
+            "toNodeId": "bit_2",
+            "toPinId": "in_1"
+        },
+        {
+            "id": "wire_fb_3",
+            "fromNodeId": "bit_3",
+            "fromPinId": "out_1",
+            "toNodeId": "bit_3",
+            "toPinId": "in_0"
+        },
+        {
+            "id": "wire_clk_3",
+            "fromNodeId": "bit_2",
+            "fromPinId": "out_0",
+            "toNodeId": "bit_3",
+            "toPinId": "in_1"
+        },
+        {
+            "id": "wire_final_out_3",
+            "fromNodeId": "bit_3",
+            "fromPinId": "out_0",
+            "toNodeId": "out_node_3",
+            "toPinId": "in"
+        },
+        {
+            "id": "wire_final_out_2",
+            "fromNodeId": "bit_2",
+            "fromPinId": "out_0",
+            "toNodeId": "out_node_2",
+            "toPinId": "in"
+        },
+        {
+            "id": "wire_final_out_1",
+            "fromNodeId": "bit_1",
+            "fromPinId": "out_0",
+            "toNodeId": "out_node_1",
+            "toPinId": "in"
+        },
+        {
+            "id": "wire_final_out_0",
+            "fromNodeId": "bit_0",
+            "fromPinId": "out_0",
+            "toNodeId": "out_node_0",
+            "toPinId": "in"
+        },
+        {
+            "id": "wire_reset_0",
+            "fromNodeId": "reset_in",
+            "fromPinId": "out",
+            "toNodeId": "bit_0",
+            "toPinId": "in_2"
+        },
+        {
+            "id": "wire_reset_1",
+            "fromNodeId": "reset_in",
+            "fromPinId": "out",
+            "toNodeId": "bit_1",
+            "toPinId": "in_2"
+        },
+        {
+            "id": "wire_reset_2",
+            "fromNodeId": "reset_in",
+            "fromPinId": "out",
+            "toNodeId": "bit_2",
+            "toPinId": "in_2"
+        },
+        {
+            "id": "wire_reset_3",
+            "fromNodeId": "reset_in",
+            "fromPinId": "out",
+            "toNodeId": "bit_3",
+            "toPinId": "in_2"
+        }
+    ],
+    "color": 4278238420,
+    "inputLabels": [
+        "CLK",
+        "RESET"
+    ],
+    "outputLabels": [
+        "Q3 (MSB)",
+        "Q2",
+        "Q1",
+        "Q0 (LSB)"
+    ]
+}

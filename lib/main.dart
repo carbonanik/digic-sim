@@ -13,6 +13,7 @@ import 'widgets/workspace_tabs.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await PresetLibrary.initialize();
+  await CircuitController.initializeCustomDefinitions();
   runApp(const LogicDesignerApp());
 }
 
