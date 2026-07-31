@@ -3,6 +3,18 @@ import '../models/circuit_node.dart';
 import '../models/pin.dart';
 import '../models/wire.dart';
 
+class LogicSimulationResult {
+  const LogicSimulationResult({
+    required this.elapsed,
+    required this.steps,
+    required this.stabilized,
+  });
+
+  final Duration elapsed;
+  final int steps;
+  final bool stabilized;
+}
+
 class LogicSimulator {
   /// Simulates the circuit until it reaches a stable state or [maxSteps] is reached.
   ///
@@ -11,8 +23,17 @@ class LogicSimulator {
   /// 2. Using an event-driven approach (dirty-node tracking) to only evaluate
   ///    components that could have changed.
   /// 3. Reducing unnecessary list allocations and iterative searches.
-  static void simulate(Circuit circuit) {
-    if (circuit.nodes.isEmpty) return;
+  static LogicSimulationResult simulate(Circuit circuit) {
+    final stopwatch = Stopwatch()..start();
+
+    if (circuit.nodes.isEmpty) {
+      stopwatch.stop();
+      return LogicSimulationResult(
+        elapsed: stopwatch.elapsed,
+        steps: 0,
+        stabilized: true,
+      );
+    }
 
     // 1. Setup lookup maps for O(1) complexity.
     final Map<String, CircuitNode> nodeMap = {};
@@ -106,5 +127,12 @@ class LogicSimulator {
 
       dirtyNodeIds = nextDirty;
     }
+
+    stopwatch.stop();
+    return LogicSimulationResult(
+      elapsed: stopwatch.elapsed,
+      steps: stepCount,
+      stabilized: dirtyNodeIds.isEmpty,
+    );
   }
 }

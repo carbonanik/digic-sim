@@ -91,6 +91,15 @@ class CircuitController extends ChangeNotifier {
   int circuitRepaintCounter = 0;
   int overlayRepaintCounter = 0;
 
+  double simulationFps = 0;
+  double averageSimulationMs = 0;
+  int lastSimulationSteps = 0;
+  bool lastSimulationStabilized = true;
+
+  int _simulationFramesInWindow = 0;
+  int _simulationMicrosInWindow = 0;
+  DateTime _simulationWindowStartedAt = DateTime.now();
+
   Offset _dragAccumulator = Offset.zero;
   bool snapToGridEnabled = true;
 
@@ -176,6 +185,26 @@ class CircuitController extends ChangeNotifier {
   void notifyOverlayChanged() {
     overlayRepaintCounter++;
     super.notifyListeners();
+  }
+
+  void _simulateCircuit() {
+    final result = LogicSimulator.simulate(circuit);
+    _simulationFramesInWindow++;
+    _simulationMicrosInWindow += result.elapsed.inMicroseconds;
+    lastSimulationSteps = result.steps;
+    lastSimulationStabilized = result.stabilized;
+
+    final now = DateTime.now();
+    final windowElapsed = now.difference(_simulationWindowStartedAt);
+    if (windowElapsed.inMilliseconds >= 500) {
+      simulationFps =
+          _simulationFramesInWindow * 1000 / windowElapsed.inMilliseconds;
+      averageSimulationMs =
+          _simulationMicrosInWindow / _simulationFramesInWindow / 1000;
+      _simulationFramesInWindow = 0;
+      _simulationMicrosInWindow = 0;
+      _simulationWindowStartedAt = now;
+    }
   }
 
   void clear() {
@@ -376,7 +405,7 @@ class CircuitController extends ChangeNotifier {
         // Always simulate if we have waveforms to keep them scrolling,
         // or if a clock toggled.
         if (changed || hasWaveforms) {
-          LogicSimulator.simulate(circuit);
+          _simulateCircuit();
           notifyCircuitChanged();
         }
       });
@@ -436,7 +465,7 @@ class CircuitController extends ChangeNotifier {
     undoStack.add(CircuitAction(addedNodes: [node]));
     redoStack.clear(); // Clear redo stack after new action
 
-    LogicSimulator.simulate(circuit);
+    _simulateCircuit();
     _pathsDirty = true;
     _recalculatePaths();
     notifyCircuitChanged();
@@ -465,7 +494,7 @@ class CircuitController extends ChangeNotifier {
     );
     redoStack.clear();
 
-    LogicSimulator.simulate(circuit);
+    _simulateCircuit();
     _pathsDirty = true;
     _recalculatePaths();
     notifyCircuitChanged();
@@ -481,7 +510,7 @@ class CircuitController extends ChangeNotifier {
     undoStack.add(CircuitAction(removedWires: [wire]));
     redoStack.clear();
 
-    LogicSimulator.simulate(circuit);
+    _simulateCircuit();
     _pathsDirty = true;
     _recalculatePaths();
     notifyCircuitChanged();
@@ -524,7 +553,7 @@ class CircuitController extends ChangeNotifier {
       );
       redoStack.clear();
 
-      LogicSimulator.simulate(circuit);
+      _simulateCircuit();
       _pathsDirty = true;
       _recalculatePaths();
       notifyCircuitChanged();
@@ -556,7 +585,7 @@ class CircuitController extends ChangeNotifier {
     _applyAction(action, undo: true);
     redoStack.add(action);
 
-    LogicSimulator.simulate(circuit);
+    _simulateCircuit();
     _pathsDirty = true;
     _recalculatePaths();
     notifyCircuitChanged();
@@ -569,7 +598,7 @@ class CircuitController extends ChangeNotifier {
     _applyAction(action, undo: false);
     undoStack.add(action);
 
-    LogicSimulator.simulate(circuit);
+    _simulateCircuit();
     _pathsDirty = true;
     _recalculatePaths();
     notifyCircuitChanged();
@@ -687,7 +716,7 @@ class CircuitController extends ChangeNotifier {
     if (node == null) return;
 
     if (node.onAction(localPosition)) {
-      LogicSimulator.simulate(circuit);
+      _simulateCircuit();
       notifyCircuitChanged();
     }
   }
@@ -753,7 +782,7 @@ class CircuitController extends ChangeNotifier {
     wireStart = null;
     temporaryWireEnd = null;
 
-    LogicSimulator.simulate(circuit);
+    _simulateCircuit();
     _pathsDirty = true;
     _recalculatePaths();
     notifyCircuitChanged();
@@ -1053,7 +1082,7 @@ class CircuitController extends ChangeNotifier {
     undoStack.add(CircuitAction(addedNodes: [node]));
     redoStack.clear();
 
-    LogicSimulator.simulate(circuit);
+    _simulateCircuit();
     _pathsDirty = true;
     _recalculatePaths();
     notifyCircuitChanged();
@@ -1126,7 +1155,7 @@ class CircuitController extends ChangeNotifier {
     }
 
     _updateClockTimer();
-    LogicSimulator.simulate(circuit);
+    _simulateCircuit();
     _pathsDirty = true;
     _recalculatePaths();
     notifyCircuitChanged();

@@ -410,6 +410,15 @@ class _CircuitCanvasState extends State<CircuitCanvas>
                   ),
                 ),
               ),
+              Positioned(
+                top: 16,
+                right: 16,
+                child: AnimatedBuilder(
+                  animation: widget.controller,
+                  builder: (context, _) =>
+                      _buildSimulationMonitor(widget.controller),
+                ),
+              ),
               // ── Pan hint toast ──────────────────────────────────────────────
               if (_toastVisible)
                 Positioned(
@@ -475,6 +484,51 @@ class _CircuitCanvasState extends State<CircuitCanvas>
                     ),
                   ),
                 ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSimulationMonitor(CircuitController controller) {
+    final fps = controller.simulationFps;
+    final averageMs = controller.averageSimulationMs;
+    final statusColor = controller.lastSimulationStabilized
+        ? const Color(0xff22c55e)
+        : const Color(0xfff59e0b);
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: const Color(0xff020617).withOpacity(0.88),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: const Color(0xff334155)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.28),
+            blurRadius: 14,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+        child: DefaultTextStyle(
+          style: const TextStyle(
+            color: Color(0xffcbd5e1),
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.speed_rounded, size: 16, color: statusColor),
+              const SizedBox(width: 8),
+              Text('${fps.toStringAsFixed(1)} SIM/S'),
+              const SizedBox(width: 10),
+              Text('${averageMs.toStringAsFixed(2)} ms'),
+              const SizedBox(width: 10),
+              Text('${controller.lastSimulationSteps} steps'),
             ],
           ),
         ),
