@@ -176,6 +176,9 @@ class CircuitPainter extends CustomPainter {
       final isSelected = selectedNodeIds.contains(node.id);
       node.paint(canvas, isSelected);
       _drawPins(canvas, node);
+      if (node is ComposedNode) {
+        _drawComposedNodePinLabels(canvas, node);
+      }
     }
   }
 
@@ -203,6 +206,61 @@ class CircuitPainter extends CustomPainter {
 
     canvas.drawCircle(position, radius, paint);
     canvas.drawCircle(position, radius, border);
+  }
+
+  void _drawComposedNodePinLabels(Canvas canvas, ComposedNode node) {
+    for (int i = 0; i < node.inputPins.length; i++) {
+      final label = node.inputPinLabelAt(i);
+      if (label.isEmpty) continue;
+
+      final pinPosition = node.position + node.inputPins[i].localPosition;
+      _drawComposedNodePinLabel(
+        canvas,
+        label,
+        pinPosition + const Offset(12, -8),
+        Alignment.centerLeft,
+      );
+    }
+
+    for (int i = 0; i < node.outputPins.length; i++) {
+      final label = node.outputPinLabelAt(i);
+      if (label.isEmpty) continue;
+
+      final pinPosition = node.position + node.outputPins[i].localPosition;
+      _drawComposedNodePinLabel(
+        canvas,
+        label,
+        pinPosition + const Offset(-12, -8),
+        Alignment.centerRight,
+      );
+    }
+  }
+
+  void _drawComposedNodePinLabel(
+    Canvas canvas,
+    String text,
+    Offset anchor,
+    Alignment alignment,
+  ) {
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: text,
+        style: const TextStyle(
+          color: Color(0xffe5e7eb),
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+      maxLines: 1,
+      ellipsis: '...',
+    );
+    textPainter.layout(maxWidth: 54);
+
+    final dx = alignment == Alignment.centerRight
+        ? anchor.dx - textPainter.width
+        : anchor.dx;
+    textPainter.paint(canvas, Offset(dx, anchor.dy));
   }
 
   Offset? _getWireStart(Wire wire) {

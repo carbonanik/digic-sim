@@ -39,7 +39,11 @@ class SubCircuitDefinition {
 
   static void register(SubCircuitDefinition definition) {
     // Avoid duplicate by id or name (case-insensitive)
-    if (!registry.any((d) => d.id == definition.id || d.name.toLowerCase() == definition.name.toLowerCase())) {
+    if (!registry.any(
+      (d) =>
+          d.id == definition.id ||
+          d.name.toLowerCase() == definition.name.toLowerCase(),
+    )) {
       registry.add(definition);
     }
   }
@@ -70,14 +74,15 @@ class SubCircuitDefinition {
     this.color = const Color(0xff334155),
     this.inputLabels = const [],
     this.outputLabels = const [],
-  })  : _nodes = nodes,
-        _wires = wires;
+  }) : _nodes = nodes,
+       _wires = wires;
 
   Map<String, dynamic> toMap({bool includeNodes = true}) {
     return {
       'id': id,
       'name': name,
-      if (includeNodes) 'nodes': nodes.map((n) => n.toMap(isNested: true)).toList(),
+      if (includeNodes)
+        'nodes': nodes.map((n) => n.toMap(isNested: true)).toList(),
       'wires': wires.map((w) => w.toMap()).toList(),
       'color': color.value,
       'inputLabels': inputLabels,
@@ -86,10 +91,12 @@ class SubCircuitDefinition {
   }
 
   static SubCircuitDefinition fromMap(Map<String, dynamic> map) {
-    final String id = map['id'] ?? (map['name'] ?? 'unknown').replaceAll(' ', '_');
+    final String id =
+        map['id'] ?? (map['name'] ?? 'unknown').replaceAll(' ', '_');
     final String name = map['name'] ?? 'Unknown IC';
     final resolved = resolve(name);
-    if (resolved != null && (map['nodes'] == null || (map['nodes'] as List).isEmpty)) {
+    if (resolved != null &&
+        (map['nodes'] == null || (map['nodes'] as List).isEmpty)) {
       return resolved;
     }
 
@@ -206,7 +213,6 @@ class ComposedNode extends CircuitNode {
     canvas.drawRRect(rect, borderPaint);
 
     _drawLabel(canvas);
-    _drawPinLabels(canvas);
   }
 
   void _drawLabel(Canvas canvas) {
@@ -229,56 +235,32 @@ class ComposedNode extends CircuitNode {
     );
   }
 
-  void _drawPinLabels(Canvas canvas) {
-    // Draw Input Labels
-    for (int i = 0; i < inputPins.length; i++) {
-      final pin = inputPins[i];
-      final label = i < definition.inputLabels.length
-          ? definition.inputLabels[i]
-          : '';
-      if (label.isEmpty) continue;
-
-      _drawPinLabel(
-        canvas,
-        label,
-        position + pin.localPosition + const Offset(10, -8),
-        true,
-      );
+  String inputPinLabelAt(int index) {
+    if (index < definition.inputLabels.length &&
+        definition.inputLabels[index].isNotEmpty) {
+      return definition.inputLabels[index];
     }
 
-    // Draw Output Labels
-    for (int i = 0; i < outputPins.length; i++) {
-      final pin = outputPins[i];
-      final label = i < definition.outputLabels.length
-          ? definition.outputLabels[i]
-          : '';
-      if (label.isEmpty) continue;
-
-      _drawPinLabel(
-        canvas,
-        label,
-        position + pin.localPosition + const Offset(-10, -8),
-        false,
-      );
+    final inputNodes = definition.nodes.whereType<InputNode>().toList();
+    if (index < inputNodes.length && inputNodes[index].label.isNotEmpty) {
+      return inputNodes[index].label;
     }
+
+    return '';
   }
 
-  void _drawPinLabel(Canvas canvas, String text, Offset pos, bool isLeft) {
-    final textPainter = TextPainter(
-      text: TextSpan(
-        text: text,
-        style: const TextStyle(
-          color: Color(0xff94a3b8),
-          fontSize: 10,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      textDirection: TextDirection.ltr,
-    );
-    textPainter.layout();
+  String outputPinLabelAt(int index) {
+    if (index < definition.outputLabels.length &&
+        definition.outputLabels[index].isNotEmpty) {
+      return definition.outputLabels[index];
+    }
 
-    final x = isLeft ? pos.dx : pos.dx - textPainter.width;
-    textPainter.paint(canvas, Offset(x, pos.dy));
+    final outputNodes = definition.nodes.whereType<OutputNode>().toList();
+    if (index < outputNodes.length && outputNodes[index].label.isNotEmpty) {
+      return outputNodes[index].label;
+    }
+
+    return '';
   }
 
   @override
