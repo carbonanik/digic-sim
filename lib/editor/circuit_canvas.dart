@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../controllers/circuit_controller.dart';
+import '../models/nodes/clock_node.dart';
 import '../models/nodes/composed_node.dart';
 import '../models/nodes/gate_node.dart';
 import '../models/nodes/io_nodes.dart';
@@ -210,10 +211,10 @@ class _CircuitCanvasState extends State<CircuitCanvas>
                       return;
                     }
 
-                    if (nodeHit is InputNode || nodeHit is OutputNode) {
-                      _showLabelDialog(context, nodeHit!);
-                      return;
-                    }
+                    // if (nodeHit is InputNode || nodeHit is OutputNode) {
+                    //   _showLabelDialog(context, nodeHit!);
+                    //   return;
+                    // }
 
                     final wireHit = HitTesting.findWireHitAt(
                       widget.controller.circuit,
@@ -628,6 +629,8 @@ class _CircuitCanvasState extends State<CircuitCanvas>
     final String nodeTypeName = switch (node) {
       InputNode() => 'Input',
       OutputNode() => 'Output',
+      ClockNode n =>
+        'Clock (${n.frequency >= 1.0 ? n.frequency.toInt() : n.frequency}Hz)',
       ComposedNode n => 'IC (${n.definition.name})',
       GateNode n => '${n.type.name.toUpperCase()} Gate',
       _ => 'Component',
@@ -660,6 +663,54 @@ class _CircuitCanvasState extends State<CircuitCanvas>
           ),
         ),
         const PopupMenuDivider(height: 1),
+        if (node is ClockNode) ...[
+          PopupMenuItem<String>(
+            enabled: false,
+            height: 28,
+            child: Text(
+              'FREQUENCY (Hz)',
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey.shade500,
+                letterSpacing: 0.8,
+              ),
+            ),
+          ),
+          ...ClockNode.frequencies.map(
+            (freq) => PopupMenuItem<String>(
+              value: 'freq_$freq',
+              height: 34,
+              child: Row(
+                children: [
+                  Icon(
+                    node.frequency == freq
+                        ? Icons.radio_button_checked_rounded
+                        : Icons.radio_button_unchecked_rounded,
+                    size: 16,
+                    color: node.frequency == freq
+                        ? const Color(0xff38bdf8)
+                        : const Color(0xff64748b),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    '${freq >= 1.0 ? freq.toInt() : freq} Hz',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: node.frequency == freq
+                          ? const Color(0xff38bdf8)
+                          : Colors.white,
+                      fontWeight: node.frequency == freq
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const PopupMenuDivider(height: 1),
+        ],
         if (node is InputNode || node is OutputNode)
           const PopupMenuItem<String>(
             value: 'edit_label',
@@ -725,6 +776,15 @@ class _CircuitCanvasState extends State<CircuitCanvas>
       ],
     ).then((value) {
       if (value == null) return;
+      if (value.startsWith('freq_')) {
+        final freqStr = value.replaceFirst('freq_', '');
+        final parsed = double.tryParse(freqStr);
+        if (parsed != null && node is ClockNode) {
+          node.frequency = parsed;
+          widget.controller.notifyCircuitChanged();
+        }
+        return;
+      }
       switch (value) {
         case 'edit_label':
           if (context.mounted) {
