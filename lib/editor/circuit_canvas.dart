@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 
 import '../controllers/circuit_controller.dart';
 import '../models/nodes/composed_node.dart';
+import '../models/nodes/gate_node.dart';
 import '../models/nodes/io_nodes.dart';
 import 'editor_tools.dart';
 import 'hit_test.dart';
@@ -175,6 +176,26 @@ class _CircuitCanvasState extends State<CircuitCanvas>
                           controller.selectNode(null);
                         } else {
                           controller.addGateFromTool(point);
+                        }
+                      },
+                onSecondaryTapDown: _isSpacePressed
+                    ? null
+                    : (details) {
+                        final point = _toScene(details.localPosition);
+                        final controller = widget.controller;
+
+                        final nodeHit = HitTesting.findNodeAt(
+                          controller.circuit,
+                          point,
+                        );
+
+                        if (nodeHit != null) {
+                          controller.selectNode(nodeHit.id);
+                          _showComponentContextMenu(
+                            context,
+                            details.globalPosition,
+                            nodeHit,
+                          );
                         }
                       },
                 onDoubleTap: () {
@@ -594,5 +615,137 @@ class _CircuitCanvasState extends State<CircuitCanvas>
         ],
       ),
     );
+  }
+
+  void _showComponentContextMenu(
+    BuildContext context,
+    Offset globalPosition,
+    CircuitNode node,
+  ) {
+    final RenderBox overlay =
+        Overlay.of(context).context.findRenderObject() as RenderBox;
+
+    final String nodeTypeName = switch (node) {
+      InputNode() => 'Input',
+      OutputNode() => 'Output',
+      ComposedNode n => 'IC (${n.definition.name})',
+      GateNode n => '${n.type.name.toUpperCase()} Gate',
+      _ => 'Component',
+    };
+
+    showMenu<String>(
+      context: context,
+      position: RelativeRect.fromRect(
+        Rect.fromLTWH(globalPosition.dx, globalPosition.dy, 0, 0),
+        Offset.zero & overlay.size,
+      ),
+      color: const Color(0xff0f172a),
+      elevation: 8,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: const BorderSide(color: Color(0xff1f2937)),
+      ),
+      items: [
+        PopupMenuItem<String>(
+          enabled: false,
+          height: 36,
+          child: Text(
+            nodeTypeName,
+            style: const TextStyle(
+              color: Color(0xff38bdf8),
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.8,
+            ),
+          ),
+        ),
+        const PopupMenuDivider(height: 1),
+        if (node is InputNode || node is OutputNode)
+          const PopupMenuItem<String>(
+            value: 'edit_label',
+            child: Row(
+              children: [
+                Icon(Icons.edit_outlined, size: 18, color: Color(0xff94a3b8)),
+                SizedBox(width: 10),
+                Text(
+                  'Edit Label',
+                  style: TextStyle(fontSize: 13, color: Colors.white),
+                ),
+              ],
+            ),
+          ),
+        if (node is ComposedNode)
+          const PopupMenuItem<String>(
+            value: 'open_ic',
+            child: Row(
+              children: [
+                Icon(
+                  Icons.open_in_new_rounded,
+                  size: 18,
+                  color: Color(0xff38bdf8),
+                ),
+                SizedBox(width: 10),
+                Text(
+                  'View Inside IC',
+                  style: TextStyle(fontSize: 13, color: Colors.white),
+                ),
+              ],
+            ),
+          ),
+        const PopupMenuItem<String>(
+          value: 'duplicate',
+          child: Row(
+            children: [
+              Icon(Icons.copy_rounded, size: 18, color: Color(0xff94a3b8)),
+              SizedBox(width: 10),
+              Text(
+                'Duplicate',
+                style: TextStyle(fontSize: 13, color: Colors.white),
+              ),
+            ],
+          ),
+        ),
+        const PopupMenuItem<String>(
+          value: 'delete',
+          child: Row(
+            children: [
+              Icon(
+                Icons.delete_outline_rounded,
+                size: 18,
+                color: Colors.redAccent,
+              ),
+              SizedBox(width: 10),
+              Text(
+                'Delete',
+                style: TextStyle(fontSize: 13, color: Colors.redAccent),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ).then((value) {
+      if (value == null) return;
+      switch (value) {
+        case 'edit_label':
+          if (context.mounted) {
+            _showLabelDialog(context, node);
+          }
+          break;
+        case 'open_ic':
+          if (node is ComposedNode) {
+            widget.controller.loadDefinition(node.definition);
+          }
+          break;
+        case 'duplicate':
+          final newNode = node.clone(UniqueKey().toString());
+          newNode.position = node.position + const Offset(32, 32);
+          widget.controller.circuit.nodes.add(newNode);
+          widget.controller.selectNode(newNode.id);
+          break;
+        case 'delete':
+          widget.controller.removeNode(node);
+          break;
+      }
+    });
   }
 }
