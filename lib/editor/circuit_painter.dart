@@ -1,4 +1,5 @@
 import 'package:digital_logic_sim_2/controllers/circuit_controller.dart';
+import 'package:digital_logic_sim_2/utils/ext.dart';
 import 'package:flutter/material.dart';
 import '../models/circuit.dart';
 import '../models/circuit_node.dart';
@@ -317,7 +318,7 @@ class OverlayPainter extends CustomPainter {
       ..strokeJoin = StrokeJoin.round
       ..strokeCap = StrokeCap.round;
 
-    final obstacles = circuit.nodes.map((n) => n.rect).toList();
+    final obstacles = circuit.nodes.toObstacles();
     final points = PathFinder.findPath(
       start: start,
       end: temporaryWireEnd!,

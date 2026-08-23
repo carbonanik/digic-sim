@@ -1,5 +1,6 @@
 import 'package:digital_logic_sim_2/controllers/circuit_action.dart';
 import 'package:digital_logic_sim_2/simulator/logic_simulator.dart';
+import 'package:digital_logic_sim_2/utils/ext.dart';
 import 'package:flutter/material.dart';
 
 import '../editor/editor_tools.dart';
@@ -236,7 +237,7 @@ class CircuitController extends ChangeNotifier {
       final points = PathFinder.findPath(
         start: start,
         end: end,
-        obstacles: circuit.nodes.map((n) => n.rect).toList(),
+        obstacles: circuit.nodes.toObstacles(),
       );
       // Waypoints are everything except start and end
       _initialWaypoints = points.length <= 2
@@ -753,6 +754,7 @@ class CircuitController extends ChangeNotifier {
 
     final start = wireStart!;
 
+    // is finish node is same as start node
     if (start.node.id == node.id) {
       cancelWire();
       return;
@@ -1164,7 +1166,7 @@ class CircuitController extends ChangeNotifier {
   void _recalculatePaths({List<String>? onlyWireIds}) {
     if (!_pathsDirty && onlyWireIds == null) return;
 
-    final obstacles = circuit.nodes.map((n) => n.rect).toList();
+    final obstacles = circuit.nodes.toObstacles();
     final allSegments = <WireSegment>{};
 
     for (int i = 0; i < circuit.wires.length; i++) {
