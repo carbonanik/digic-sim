@@ -671,8 +671,17 @@ class CircuitController extends ChangeNotifier {
           node.position += delta;
         }
       }
+      final affectedWireIds = circuit.wires
+          .where(
+            (w) =>
+                selectedNodeIds.contains(w.fromNodeId) ||
+                selectedNodeIds.contains(w.toNodeId),
+          )
+          .map((w) => w.id)
+          .toList();
+
       _pathsDirty = true;
-      _recalculatePaths();
+      _recalculatePaths(onlyWireIds: affectedWireIds, translationDelta: delta);
       notifyCircuitChanged();
       return;
     }
@@ -701,7 +710,10 @@ class CircuitController extends ChangeNotifier {
           .map((w) => w.id)
           .toList();
 
-      _recalculatePaths(onlyWireIds: affectedWireIds);
+      _recalculatePaths(
+        onlyWireIds: affectedWireIds,
+        translationDelta: snappedDelta,
+      );
       notifyCircuitChanged();
     }
   }
@@ -1163,7 +1175,7 @@ class CircuitController extends ChangeNotifier {
     notifyCircuitChanged();
   }
 
-  void _recalculatePaths({List<String>? onlyWireIds}) {
+  void _recalculatePaths({List<String>? onlyWireIds, Offset? translationDelta}) {
     if (!_pathsDirty && onlyWireIds == null) return;
 
     final obstacles = circuit.nodes.toObstacles();
@@ -1179,7 +1191,108 @@ class CircuitController extends ChangeNotifier {
       final shouldRecalculate =
           onlyWireIds != null && onlyWireIds.contains(wire.id);
 
-      if (shouldRecalculate || wire.waypoints.isEmpty) {
+      if (shouldRecalculate) {
+        final fromMoved = selectedNodeIds.contains(wire.fromNodeId);
+        final toMoved = selectedNodeIds.contains(wire.toNodeId);
+
+        if (fromMoved && toMoved) {
+          // If both ends moved together, translate waypoints or do full recalculation if waypoints empty
+          if (wire.waypoints.isEmpty) {
+            final points = PathFinder.findPath(
+              start: start,
+              end: end,
+              obstacles: obstacles,
+              existingSegments: allSegments,
+            );
+            final newWaypoints = points.length <= 2
+                ? <Offset>[]
+                : points.sublist(1, points.length - 1);
+            circuit.wires[i] = wire.copyWith(waypoints: newWaypoints);
+          } else if (translationDelta != null) {
+            final newWaypoints = wire.waypoints
+                .map((wp) => wp + translationDelta)
+                .toList();
+            circuit.wires[i] = wire.copyWith(waypoints: newWaypoints);
+          }
+        } else if (fromMoved || toMoved) {
+          if (wire.waypoints.isEmpty) {
+            // No custom waypoints yet: do standard pathfinding
+            final points = PathFinder.findPath(
+              start: start,
+              end: end,
+              obstacles: obstacles,
+              existingSegments: allSegments,
+            );
+            final newWaypoints = points.length <= 2
+                ? <Offset>[]
+                : points.sublist(1, points.length - 1);
+            circuit.wires[i] = wire.copyWith(waypoints: newWaypoints);
+          } else {
+            List<Offset> waypoints = List<Offset>.from(wire.waypoints);
+
+            if (fromMoved) {
+              // Reroute from start (component1) to target (immediate waypoint or end)
+              // If there's 1 waypoint: target is end pin. Remove waypoint 0 and reroute from start -> end.
+              // If there are >1 waypoints: target is waypoint[1]. Remove waypoint 0 and reroute start -> waypoint[1].
+              final target = waypoints.length > 1 ? waypoints[1] : end;
+              final subPath = PathFinder.findPath(
+                start: start,
+                end: target,
+                obstacles: obstacles,
+                existingSegments: allSegments,
+              );
+              // subPath starts with `start` and ends with `target`
+              final newSubWaypoints = subPath.length <= 2
+                  ? <Offset>[]
+                  : subPath.sublist(1, subPath.length - 1);
+
+              if (waypoints.length > 1) {
+                // Replace waypoint[0] with new sub-waypoints
+                waypoints = [...newSubWaypoints, ...waypoints.sublist(1)];
+              } else {
+                // Replace waypoint[0] with new sub-waypoints
+                waypoints = newSubWaypoints;
+              }
+            }
+
+            if (toMoved) {
+              // Reroute from immediate waypoint (or start) to end (component2)
+              // If there's 1 waypoint: startTarget is start pin. Remove last waypoint and reroute start -> end.
+              // If there are >1 waypoints: startTarget is waypoints[waypoints.length - 2].
+              final startTarget = waypoints.length > 1
+                  ? waypoints[waypoints.length - 2]
+                  : start;
+
+              final subPath = PathFinder.findPath(
+                start: startTarget,
+                end: end,
+                obstacles: obstacles,
+                existingSegments: allSegments,
+              );
+              final newSubWaypoints = subPath.length <= 2
+                  ? <Offset>[]
+                  : subPath.sublist(1, subPath.length - 1);
+
+              if (waypoints.length > 1) {
+                waypoints = [
+                  ...waypoints.sublist(0, waypoints.length - 1),
+                  ...newSubWaypoints,
+                ];
+              } else {
+                waypoints = newSubWaypoints;
+              }
+            }
+
+            final fullPoints = [start, ...waypoints, end];
+            final simplifiedFull = _simplifyOrthogonalPoints(fullPoints);
+            final finalWaypoints = simplifiedFull.length <= 2
+                ? <Offset>[]
+                : simplifiedFull.sublist(1, simplifiedFull.length - 1);
+
+            circuit.wires[i] = wire.copyWith(waypoints: finalWaypoints);
+          }
+        }
+      } else if (wire.waypoints.isEmpty) {
         final points = PathFinder.findPath(
           start: start,
           end: end,
@@ -1187,7 +1300,6 @@ class CircuitController extends ChangeNotifier {
           existingSegments: allSegments,
         );
 
-        // Bake waypoints: everything except start and end
         final newWaypoints = points.length <= 2
             ? <Offset>[]
             : points.sublist(1, points.length - 1);
