@@ -747,6 +747,48 @@ class CircuitController extends ChangeNotifier {
     notifyCircuitChanged();
   }
 
+  void updateNodeLabels(Map<String, String> labels) {
+    bool changed = false;
+    for (final node in circuit.nodes) {
+      final label = labels[node.id];
+      if (label == null) continue;
+      if (node is InputNode) {
+        node.label = label;
+        changed = true;
+      } else if (node is OutputNode) {
+        node.label = label;
+        changed = true;
+      }
+    }
+    if (changed) notifyCircuitChanged();
+  }
+
+  void duplicateSelected() {
+    if (selectedNodeIds.isEmpty) return;
+
+    final nodesToDuplicate = circuit.nodes
+        .where((n) => selectedNodeIds.contains(n.id))
+        .toList();
+
+    final newNodes = <CircuitNode>[];
+    for (final node in nodesToDuplicate) {
+      final newNode = node.clone(UniqueKey().toString());
+      newNode.position = node.position + const Offset(32, 32);
+      circuit.nodes.add(newNode);
+      newNodes.add(newNode);
+    }
+
+    selectedNodeIds = newNodes.map((n) => n.id).toSet();
+    selectedWireId = null;
+
+    undoStack.add(CircuitAction(addedNodes: newNodes));
+    redoStack.clear();
+
+    _pathsDirty = true;
+    _recalculatePaths();
+    notifyCircuitChanged();
+  }
+
   void startWire(CircuitNode node, Pin pin) {
     if (pin.isInput) return;
 
@@ -1175,7 +1217,10 @@ class CircuitController extends ChangeNotifier {
     notifyCircuitChanged();
   }
 
-  void _recalculatePaths({List<String>? onlyWireIds, Offset? translationDelta}) {
+  void _recalculatePaths({
+    List<String>? onlyWireIds,
+    Offset? translationDelta,
+  }) {
     if (!_pathsDirty && onlyWireIds == null) return;
 
     final obstacles = circuit.nodes.toObstacles();

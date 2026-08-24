@@ -189,8 +189,19 @@ class _CircuitCanvasState extends State<CircuitCanvas>
                           controller.circuit,
                           point,
                         );
+                        if (nodeHit == null) return;
 
-                        if (nodeHit != null) {
+                        final isMultiSelection =
+                            controller.selectedNodeIds.length > 1 &&
+                            controller.selectedNodeIds.contains(nodeHit.id);
+
+                        if (isMultiSelection) {
+                          _showMultiSelectionContextMenu(
+                            context,
+                            details.globalPosition,
+                            controller.getSelectedNodes(),
+                          );
+                        } else {
                           controller.selectNode(nodeHit.id);
                           _showComponentContextMenu(
                             context,
@@ -807,5 +818,207 @@ class _CircuitCanvasState extends State<CircuitCanvas>
           break;
       }
     });
+  }
+
+  void _showMultiSelectionContextMenu(
+    BuildContext context,
+    Offset globalPosition,
+    List<CircuitNode> nodes,
+  ) {
+    final RenderBox overlay =
+        Overlay.of(context).context.findRenderObject() as RenderBox;
+
+    final allIO =
+        nodes.isNotEmpty &&
+        nodes.every((n) => n is InputNode || n is OutputNode);
+
+    showMenu<String>(
+      context: context,
+      position: RelativeRect.fromRect(
+        Rect.fromLTWH(globalPosition.dx, globalPosition.dy, 0, 0),
+        Offset.zero & overlay.size,
+      ),
+      color: const Color(0xff0f172a),
+      elevation: 8,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: const BorderSide(color: Color(0xff1f2937)),
+      ),
+      items: [
+        PopupMenuItem<String>(
+          enabled: false,
+          height: 36,
+          child: Text(
+            '${nodes.length} SELECTED',
+            style: const TextStyle(
+              color: Color(0xff38bdf8),
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.8,
+            ),
+          ),
+        ),
+        const PopupMenuDivider(height: 1),
+        if (allIO)
+          const PopupMenuItem<String>(
+            value: 'edit_labels',
+            child: Row(
+              children: [
+                Icon(
+                  Icons.edit_note_rounded,
+                  size: 18,
+                  color: Color(0xff38bdf8),
+                ),
+                SizedBox(width: 10),
+                Text(
+                  'Edit Labels',
+                  style: TextStyle(fontSize: 13, color: Colors.white),
+                ),
+              ],
+            ),
+          ),
+        const PopupMenuItem<String>(
+          value: 'duplicate',
+          child: Row(
+            children: [
+              Icon(Icons.copy_rounded, size: 18, color: Color(0xff94a3b8)),
+              SizedBox(width: 10),
+              Text(
+                'Duplicate',
+                style: TextStyle(fontSize: 13, color: Colors.white),
+              ),
+            ],
+          ),
+        ),
+        const PopupMenuItem<String>(
+          value: 'delete',
+          child: Row(
+            children: [
+              Icon(
+                Icons.delete_outline_rounded,
+                size: 18,
+                color: Colors.redAccent,
+              ),
+              SizedBox(width: 10),
+              Text(
+                'Delete All',
+                style: TextStyle(fontSize: 13, color: Colors.redAccent),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ).then((value) {
+      if (value == null) return;
+      switch (value) {
+        case 'edit_labels':
+          if (context.mounted) _showMultiLabelDialog(context, nodes);
+          break;
+        case 'duplicate':
+          widget.controller.duplicateSelected();
+          break;
+        case 'delete':
+          widget.controller.deleteSelected();
+          break;
+      }
+    });
+  }
+
+  void _showMultiLabelDialog(BuildContext context, List<CircuitNode> nodes) {
+    final ioNodes = nodes
+        .where((n) => n is InputNode || n is OutputNode)
+        .toList();
+
+    final controllers = <String, TextEditingController>{
+      for (final node in ioNodes)
+        node.id: TextEditingController(
+          text: node is InputNode
+              ? node.label
+              : node is OutputNode
+              ? node.label
+              : '',
+        ),
+    };
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xff0f172a),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+          side: const BorderSide(color: Color(0xff1f2937)),
+        ),
+        title: Text('Edit ${ioNodes.length} Labels'),
+        content: SizedBox(
+          width: 320,
+          child: ListView.separated(
+            shrinkWrap: true,
+            itemCount: ioNodes.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 10),
+            itemBuilder: (context, index) {
+              final node = ioNodes[index];
+              final typeLabel = node is InputNode ? 'Input' : 'Output';
+              return Row(
+                children: [
+                  SizedBox(
+                    width: 52,
+                    child: Text(
+                      typeLabel,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: Color(0xff64748b),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: TextField(
+                      controller: controllers[node.id],
+                      style: const TextStyle(fontSize: 13, color: Colors.white),
+                      decoration: InputDecoration(
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 8,
+                        ),
+                        filled: true,
+                        fillColor: const Color(0xff1e293b),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final labels = {
+                for (final e in controllers.entries) e.key: e.value.text,
+              };
+              widget.controller.updateNodeLabels(labels);
+              Navigator.pop(context);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xff38bdf8),
+              foregroundColor: const Color(0xff020617),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: const Text('Save All'),
+          ),
+        ],
+      ),
+    );
   }
 }
