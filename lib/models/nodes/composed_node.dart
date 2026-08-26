@@ -117,7 +117,7 @@ class SubCircuitDefinition {
 }
 
 class ComposedNode extends CircuitNode {
-  final SubCircuitDefinition definition;
+  final SubCircuitDefinition definition; // TODO: could be removed
   late final List<CircuitNode> internalNodes;
   late final List<Wire> internalWires;
   late final Circuit internalCircuit;

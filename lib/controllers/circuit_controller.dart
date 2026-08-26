@@ -1260,8 +1260,19 @@ class CircuitController extends ChangeNotifier {
             circuit.wires[i] = wire.copyWith(waypoints: newWaypoints);
           }
         } else if (fromMoved || toMoved) {
-          if (wire.waypoints.isEmpty) {
-            // No custom waypoints yet: do standard pathfinding
+          // Detect if moving the component crosses to the opposite side of the existing waypoints,
+          // which renders old intermediate waypoints obsolete and requires a full clean path reroute.
+          bool crossedSides = false;
+          if (wire.waypoints.isNotEmpty) {
+            if (fromMoved && wire.waypoints.first.dx < start.dx) {
+              crossedSides = true;
+            } else if (toMoved && wire.waypoints.last.dx > end.dx) {
+              crossedSides = true;
+            }
+          }
+
+          if (wire.waypoints.isEmpty || crossedSides) {
+            // Full reroute if no custom waypoints or if components crossed sides
             final points = PathFinder.findPath(
               start: start,
               end: end,
@@ -1276,9 +1287,6 @@ class CircuitController extends ChangeNotifier {
             List<Offset> waypoints = List<Offset>.from(wire.waypoints);
 
             if (fromMoved) {
-              // Reroute from start (component1) to target (immediate waypoint or end)
-              // If there's 1 waypoint: target is end pin. Remove waypoint 0 and reroute from start -> end.
-              // If there are >1 waypoints: target is waypoint[1]. Remove waypoint 0 and reroute start -> waypoint[1].
               final target = waypoints.length > 1 ? waypoints[1] : end;
               final subPath = PathFinder.findPath(
                 start: start,
@@ -1286,24 +1294,18 @@ class CircuitController extends ChangeNotifier {
                 obstacles: obstacles,
                 existingSegments: allSegments,
               );
-              // subPath starts with `start` and ends with `target`
               final newSubWaypoints = subPath.length <= 2
                   ? <Offset>[]
                   : subPath.sublist(1, subPath.length - 1);
 
               if (waypoints.length > 1) {
-                // Replace waypoint[0] with new sub-waypoints
                 waypoints = [...newSubWaypoints, ...waypoints.sublist(1)];
               } else {
-                // Replace waypoint[0] with new sub-waypoints
                 waypoints = newSubWaypoints;
               }
             }
 
             if (toMoved) {
-              // Reroute from immediate waypoint (or start) to end (component2)
-              // If there's 1 waypoint: startTarget is start pin. Remove last waypoint and reroute start -> end.
-              // If there are >1 waypoints: startTarget is waypoints[waypoints.length - 2].
               final startTarget = waypoints.length > 1
                   ? waypoints[waypoints.length - 2]
                   : start;

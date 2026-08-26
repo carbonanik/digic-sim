@@ -222,4 +222,3 @@ class OutputNode extends CircuitNode {
     };
   }
 }
-
