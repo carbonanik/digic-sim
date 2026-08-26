@@ -1,3 +1,5 @@
+import 'package:digital_logic_sim_2/controllers/create_node_factory.dart';
+import 'package:digital_logic_sim_2/controllers/grid.dart';
 import 'package:flutter/material.dart';
 import 'circuit_controller.dart';
 
@@ -6,11 +8,7 @@ class Workspace {
   String name;
   final CircuitController controller;
 
-  Workspace({
-    required this.id,
-    required this.name,
-    required this.controller,
-  });
+  Workspace({required this.id, required this.name, required this.controller});
 }
 
 class WorkspaceController extends ChangeNotifier {
@@ -19,11 +17,11 @@ class WorkspaceController extends ChangeNotifier {
 
   List<Workspace> get workspaces => _workspaces;
   int get activeIndex => _activeIndex;
-  
-  Workspace? get activeWorkspace => 
-      (_activeIndex >= 0 && _activeIndex < _workspaces.length) 
-          ? _workspaces[_activeIndex] 
-          : null;
+
+  Workspace? get activeWorkspace =>
+      (_activeIndex >= 0 && _activeIndex < _workspaces.length)
+      ? _workspaces[_activeIndex]
+      : null;
 
   CircuitController? get activeController => activeWorkspace?.controller;
 
@@ -33,7 +31,10 @@ class WorkspaceController extends ChangeNotifier {
   }
 
   void addWorkspace(String name) {
-    final controller = CircuitController();
+    final controller = CircuitController(
+      createNodeFactory: CreateNodeFactory(),
+      grid: Grid(),
+    );
     final workspace = Workspace(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       name: name,

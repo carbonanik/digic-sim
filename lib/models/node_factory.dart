@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'circuit_node.dart';
 import 'pin.dart';
-import 'gate_type.dart';
 import 'nodes/gate_node.dart';
 import 'nodes/io_nodes.dart';
 import 'nodes/display_nodes.dart';
@@ -14,12 +13,12 @@ import 'nodes/logic_probe_node.dart';
 class NodeFactory {
   static CircuitNode fromMap(Map<String, dynamic> map) {
     final String id = map['id'];
-    final Offset position = map['position'] != null 
-      ? Offset(
-          (map['position']['dx'] as num).toDouble(),
-          (map['position']['dy'] as num).toDouble(),
-        )
-      : Offset.zero;
+    final Offset position = map['position'] != null
+        ? Offset(
+            (map['position']['dx'] as num).toDouble(),
+            (map['position']['dy'] as num).toDouble(),
+          )
+        : Offset.zero;
     final List<Pin> inputPins = ((map['inputPins'] ?? []) as List)
         .map((p) => Pin.fromMap(p as Map<String, dynamic>))
         .toList();
@@ -36,7 +35,7 @@ class NodeFactory {
           position: position,
           inputPins: inputPins,
           outputPins: outputPins,
-          type: GateType.values.firstWhere((e) => e.name == map['gateType']),
+          type: Gate.values.firstWhere((e) => e.name == map['gateType']),
         );
       case 'input':
         return InputNode(

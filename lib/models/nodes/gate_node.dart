@@ -1,10 +1,11 @@
 import 'package:digital_logic_sim_2/models/pin.dart';
 import 'package:flutter/material.dart';
 import '../circuit_node.dart';
-import '../gate_type.dart';
+
+enum Gate { and, or, not, nand, nor, xor }
 
 class GateNode extends CircuitNode {
-  final GateType type;
+  final Gate type;
 
   GateNode({
     required super.id,
@@ -18,25 +19,23 @@ class GateNode extends CircuitNode {
   void evaluate(List<bool> inputs) {
     bool result = false;
     switch (type) {
-      case GateType.and:
+      case Gate.and:
         result = inputs.length >= 2 && inputs.every((v) => v);
         break;
-      case GateType.or:
+      case Gate.or:
         result = inputs.any((v) => v);
         break;
-      case GateType.not:
+      case Gate.not:
         result = inputs.isNotEmpty ? !inputs.first : true;
         break;
-      case GateType.nand:
+      case Gate.nand:
         result = !(inputs.length >= 2 && inputs.every((v) => v));
         break;
-      case GateType.nor:
+      case Gate.nor:
         result = !inputs.any((v) => v);
         break;
-      case GateType.xor:
+      case Gate.xor:
         result = inputs.where((v) => v).length.isOdd;
-        break;
-      default:
         break;
     }
 
@@ -49,7 +48,7 @@ class GateNode extends CircuitNode {
     required Canvas canvas,
     required Rect rect,
     required Offset position,
-    required GateType type,
+    required Gate type,
     required Iterable<Pin> inputPins,
     required Iterable<Pin> outputPins,
     required Paint fillPaint,
@@ -81,16 +80,15 @@ class GateNode extends CircuitNode {
       extraPaths.lineTo(pinPos.dx, pinPos.dy);
     }
 
-    bool hasBubble =
-        type == GateType.not || type == GateType.nand || type == GateType.nor;
+    bool hasBubble = type == Gate.not || type == Gate.nand || type == Gate.nor;
     double shapeRight = right;
     if (hasBubble) {
       shapeRight -= 10;
     }
 
     switch (type) {
-      case GateType.and:
-      case GateType.nand:
+      case Gate.and:
+      case Gate.nand:
         final flatRight = shapeRight - h / 2;
         path.moveTo(left, top);
         path.lineTo(flatRight, top);
@@ -103,9 +101,9 @@ class GateNode extends CircuitNode {
         path.close();
         break;
 
-      case GateType.or:
-      case GateType.nor:
-      case GateType.xor:
+      case Gate.or:
+      case Gate.nor:
+      case Gate.xor:
         final backCurveCtrlX = left + w * 0.3;
         path.moveTo(left, top);
         path.quadraticBezierTo(left + w * 0.6, top, shapeRight, top + h / 2);
@@ -113,7 +111,7 @@ class GateNode extends CircuitNode {
         path.quadraticBezierTo(backCurveCtrlX, top + h / 2, left, top);
         path.close();
 
-        if (type == GateType.xor) {
+        if (type == Gate.xor) {
           extraPaths.moveTo(left - 8, top);
           extraPaths.quadraticBezierTo(
             backCurveCtrlX - 8,
@@ -124,15 +122,11 @@ class GateNode extends CircuitNode {
         }
         break;
 
-      case GateType.not:
+      case Gate.not:
         path.moveTo(left, top + 6);
         path.lineTo(shapeRight, top + h / 2);
         path.lineTo(left, bottom - 6);
         path.close();
-        break;
-
-      default:
-        path.addRRect(RRect.fromRectAndRadius(rect, const Radius.circular(16)));
         break;
     }
 

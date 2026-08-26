@@ -5,7 +5,6 @@ import '../models/circuit.dart';
 import '../models/circuit_node.dart';
 import '../models/pin.dart';
 import '../models/wire.dart';
-import '../models/gate_type.dart';
 import '../models/nodes/gate_node.dart';
 import '../models/nodes/composed_node.dart';
 import '../models/nodes/io_nodes.dart';
@@ -428,31 +427,29 @@ class OverlayPainter extends CustomPainter {
       size = isDisplay ? const Size(80, 128) : const Size(112, 64);
     }
 
-    final ghostPaint = Paint()..color = Colors.white.withOpacity(0.35);
-
     // Avoid saveLayer by using opacity in the child components or drawing with opacity paint
     // For simplicity, we wrap the drawing in a layer-like logic but without saveLayer if possible
     // Here we can just pass the opacity paint to GateNode.paintGate or equivalent
 
-    GateType? gateType;
+    Gate? gateType;
     switch (selectedTool) {
       case EditorTool.and:
-        gateType = GateType.and;
+        gateType = Gate.and;
         break;
       case EditorTool.or:
-        gateType = GateType.or;
+        gateType = Gate.or;
         break;
       case EditorTool.not:
-        gateType = GateType.not;
+        gateType = Gate.not;
         break;
       case EditorTool.nand:
-        gateType = GateType.nand;
+        gateType = Gate.nand;
         break;
       case EditorTool.nor:
-        gateType = GateType.nor;
+        gateType = Gate.nor;
         break;
       case EditorTool.xor:
-        gateType = GateType.xor;
+        gateType = Gate.xor;
         break;
       default:
         break;
@@ -474,21 +471,21 @@ class OverlayPainter extends CustomPainter {
         ..strokeCap = StrokeCap.round;
 
       final inputPins = <Pin>[
-        if (gateType != GateType.not)
+        if (gateType != Gate.not)
           Pin(
             id: 'a',
             nodeId: 'ghost',
             isInput: true,
             localPosition: const Offset(0, 16),
           ),
-        if (gateType != GateType.not)
+        if (gateType != Gate.not)
           Pin(
             id: 'b',
             nodeId: 'ghost',
             isInput: true,
             localPosition: const Offset(0, 48),
           ),
-        if (gateType == GateType.not)
+        if (gateType == Gate.not)
           Pin(
             id: 'in',
             nodeId: 'ghost',

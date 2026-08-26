@@ -1,4 +1,6 @@
 import 'package:digital_logic_sim_2/controllers/circuit_action.dart';
+import 'package:digital_logic_sim_2/controllers/create_node_factory.dart';
+import 'package:digital_logic_sim_2/controllers/grid.dart';
 import 'package:digital_logic_sim_2/simulator/logic_simulator.dart';
 import 'package:digital_logic_sim_2/utils/ext.dart';
 import 'package:flutter/material.dart';
@@ -7,23 +9,23 @@ import '../editor/editor_tools.dart';
 import '../editor/hit_test.dart';
 import '../models/circuit.dart';
 import '../models/circuit_node.dart';
-import '../models/gate_type.dart';
 import '../models/pin.dart';
 import '../models/wire.dart';
-import '../models/nodes/gate_node.dart';
 import '../models/nodes/io_nodes.dart';
-import '../models/nodes/display_nodes.dart';
 import '../models/nodes/clock_node.dart';
 import '../models/nodes/composed_node.dart';
 import '../models/nodes/waveform_node.dart';
-import '../models/nodes/rgb_led_node.dart';
-import '../models/nodes/logic_probe_node.dart';
 import '../utils/pathfinder.dart';
 import '../services/database_helper.dart';
 import 'dart:async';
 import 'dart:convert';
 
 class CircuitController extends ChangeNotifier {
+  final CreateNodeFactory createNodeFactory;
+  final Grid grid;
+
+  CircuitController({required this.createNodeFactory, required this.grid});
+
   @override
   void dispose() {
     _clockTimer?.cancel();
@@ -108,22 +110,25 @@ class CircuitController extends ChangeNotifier {
 
   // Wire dragging state
   WireHit? draggedWireHit;
-  Offset? _wireDragStartMousePos;
+  // Offset? _wireDragStartMousePos;
   List<Offset>? _initialWaypoints;
+
+  // Component dragging wire waypoints snapshot
+  Map<String, List<Offset>>? _initialDragWaypoints;
 
   void toggleGridSnapping() {
     snapToGridEnabled = !snapToGridEnabled;
     notifyListeners();
   }
 
-  Offset _snapToGrid(Offset point) {
-    if (!snapToGridEnabled) return point;
-    const double gridSize = 16.0;
-    return Offset(
-      (point.dx / gridSize).roundToDouble() * gridSize,
-      (point.dy / gridSize).roundToDouble() * gridSize,
-    );
-  }
+  // Offset _snapToGrid(Offset point) {
+  //   if (!snapToGridEnabled) return point;
+  //   const double gridSize = 16.0;
+  //   return Offset(
+  //     (point.dx / gridSize).roundToDouble() * gridSize,
+  //     (point.dy / gridSize).roundToDouble() * gridSize,
+  //   );
+  // }
 
   void resetDragAccumulator() {
     _dragAccumulator = Offset.zero;
@@ -160,7 +165,7 @@ class CircuitController extends ChangeNotifier {
     required PinHit? pinHit,
     required String? nodeId,
   }) {
-    final snapped = position != null ? _snapToGrid(position) : null;
+    final snapped = position != null ? grid.snap(position) : null;
 
     final changed =
         mousePosition != snapped ||
@@ -220,7 +225,7 @@ class CircuitController extends ChangeNotifier {
 
   void startWireDrag(WireHit hit, Offset mousePos) {
     draggedWireHit = hit;
-    _wireDragStartMousePos = mousePos;
+    // _wireDragStartMousePos = mousePos;
 
     // Bake waypoints if empty
     final wire = hit.wire;
@@ -252,7 +257,7 @@ class CircuitController extends ChangeNotifier {
   void updateWireDrag(Offset mousePos) {
     if (draggedWireHit == null || _initialWaypoints == null) return;
 
-    final snappedMouse = _snapToGrid(mousePos);
+    final snappedMouse = grid.snap(mousePos);
     final wire = draggedWireHit!.wire;
     final segmentIndex = draggedWireHit!.segmentIndex;
 
@@ -376,6 +381,7 @@ class CircuitController extends ChangeNotifier {
   }
 
   void endNodeMove() {
+    _initialDragWaypoints = null;
     if (selectedNodeIds.isNotEmpty) {
       _pathsDirty = true;
       _recalculatePaths();
@@ -417,48 +423,14 @@ class CircuitController extends ChangeNotifier {
   }
 
   void addGateFromTool(Offset position) {
-    position = _snapToGrid(position);
-
-    final GateType? type = switch (selectedTool) {
-      EditorTool.input => GateType.input,
-      EditorTool.output => GateType.output,
-      EditorTool.and => GateType.and,
-      EditorTool.or => GateType.or,
-      EditorTool.not => GateType.not,
-      EditorTool.nand => GateType.nand,
-      EditorTool.nor => GateType.nor,
-      EditorTool.xor => GateType.xor,
-      EditorTool.segmentDisplay => null,
-      EditorTool.clock => null,
-      EditorTool.waveform => null,
-      EditorTool.rgbLed => null,
-      EditorTool.logicProbe => null,
-      _ => null,
-    };
-
-    if (type == null &&
-        selectedTool != EditorTool.segmentDisplay &&
-        selectedTool != EditorTool.clock &&
-        selectedTool != EditorTool.waveform &&
-        selectedTool != EditorTool.rgbLed &&
-        selectedTool != EditorTool.logicProbe &&
-        selectedTool != EditorTool.custom) {
-      return;
-    }
+    position = grid.snap(position);
 
     if (selectedTool == EditorTool.custom && selectedCustomComponent != null) {
       addCustomComponent(selectedCustomComponent!, position);
       return;
     }
 
-    final node = switch (selectedTool) {
-      EditorTool.segmentDisplay => _createSegmentDisplay(position),
-      EditorTool.clock => _createClock(position),
-      EditorTool.waveform => _createWaveform(position),
-      EditorTool.rgbLed => _createRGBLED(position),
-      EditorTool.logicProbe => _createLogicProbe(position),
-      _ => _createNode(type!, position),
-    };
+    final node = createNodeFactory.create(selectedTool, position);
     circuit.nodes.add(node);
 
     _updateClockTimer();
@@ -695,7 +667,7 @@ class CircuitController extends ChangeNotifier {
       final snappedDelta = Offset(stepsX * gridSize, gridSize * stepsY);
       for (final node in circuit.nodes) {
         if (selectedNodeIds.contains(node.id)) {
-          node.position = _snapToGrid(node.position) + snappedDelta;
+          node.position = grid.snap(node.position) + snappedDelta;
         }
       }
       _dragAccumulator -= snappedDelta;
@@ -798,7 +770,7 @@ class CircuitController extends ChangeNotifier {
   }
 
   void updateTemporaryWire(Offset point) {
-    temporaryWireEnd = _snapToGrid(point);
+    temporaryWireEnd = grid.snap(point);
     notifyOverlayChanged();
   }
 
@@ -850,196 +822,6 @@ class CircuitController extends ChangeNotifier {
     notifyOverlayChanged();
   }
 
-  CircuitNode _createNode(GateType type, Offset position) {
-    final id = UniqueKey().toString();
-
-    switch (type) {
-      case GateType.input:
-        return InputNode(
-          id: id,
-          position: position,
-          inputPins: const [],
-          outputPins: [
-            Pin(
-              id: 'out',
-              nodeId: id,
-              isInput: false,
-              localPosition: const Offset(112, 32),
-            ),
-          ],
-        );
-
-      case GateType.output:
-        return OutputNode(
-          id: id,
-          position: position,
-          inputPins: [
-            Pin(
-              id: 'in',
-              nodeId: id,
-              isInput: true,
-              localPosition: const Offset(0, 32),
-            ),
-          ],
-          outputPins: const [],
-        );
-
-      case GateType.not:
-        return GateNode(
-          id: id,
-          type: type,
-          position: position,
-          inputPins: [
-            Pin(
-              id: 'in',
-              nodeId: id,
-              isInput: true,
-              localPosition: const Offset(0, 32),
-            ),
-          ],
-          outputPins: [
-            Pin(
-              id: 'out',
-              nodeId: id,
-              isInput: false,
-              localPosition: const Offset(112, 32),
-            ),
-          ],
-        );
-
-      default:
-        return GateNode(
-          id: id,
-          type: type,
-          position: position,
-          inputPins: [
-            Pin(
-              id: 'a',
-              nodeId: id,
-              isInput: true,
-              localPosition: const Offset(0, 16),
-            ),
-            Pin(
-              id: 'b',
-              nodeId: id,
-              isInput: true,
-              localPosition: const Offset(0, 48),
-            ),
-          ],
-          outputPins: [
-            Pin(
-              id: 'out',
-              nodeId: id,
-              isInput: false,
-              localPosition: const Offset(112, 32),
-            ),
-          ],
-        );
-    }
-  }
-
-  CircuitNode _createSegmentDisplay(Offset position) {
-    final id = UniqueKey().toString();
-    final inputPins = List.generate(7, (i) {
-      return Pin(
-        id: 'seg_$i',
-        nodeId: id,
-        isInput: true,
-        localPosition: Offset(0, 16.0 + i * 16.0),
-      );
-    });
-
-    return SegmentDisplayNode(
-      id: id,
-      position: position,
-      inputPins: inputPins,
-      outputPins: const [],
-    );
-  }
-
-  CircuitNode _createClock(Offset position) {
-    final id = UniqueKey().toString();
-    return ClockNode(
-      id: id,
-      position: position,
-      inputPins: const [],
-      outputPins: [
-        Pin(
-          id: 'out',
-          nodeId: id,
-          isInput: false,
-          localPosition: const Offset(112, 32),
-        ),
-      ],
-    );
-  }
-
-  CircuitNode _createWaveform(Offset position) {
-    final id = UniqueKey().toString();
-    final inputPins = List.generate(4, (i) {
-      return Pin(
-        id: 'in_$i',
-        nodeId: id,
-        isInput: true,
-        localPosition: Offset(0, 48.0 + i * 32.0),
-      );
-    });
-
-    return WaveformNode(
-      id: id,
-      position: position,
-      inputPins: inputPins,
-      outputPins: const [],
-    );
-  }
-
-  CircuitNode _createRGBLED(Offset position) {
-    final id = UniqueKey().toString();
-    final inputPins = [
-      Pin(
-        id: 'r',
-        nodeId: id,
-        isInput: true,
-        localPosition: const Offset(0, 16),
-      ),
-      Pin(
-        id: 'g',
-        nodeId: id,
-        isInput: true,
-        localPosition: const Offset(0, 48),
-      ),
-      Pin(
-        id: 'b',
-        nodeId: id,
-        isInput: true,
-        localPosition: const Offset(0, 80),
-      ),
-    ];
-    return RGBLEDNode(
-      id: id,
-      position: position,
-      inputPins: inputPins,
-      outputPins: const [],
-    );
-  }
-
-  CircuitNode _createLogicProbe(Offset position) {
-    final id = UniqueKey().toString();
-    return LogicProbeNode(
-      id: id,
-      position: position,
-      inputPins: [
-        Pin(
-          id: 'in',
-          nodeId: id,
-          isInput: true,
-          localPosition: const Offset(0, 32),
-        ),
-      ],
-      outputPins: const [],
-    );
-  }
-
   void saveCurrentAsComponent({
     required String name,
     required Color color,
@@ -1047,10 +829,6 @@ class CircuitController extends ChangeNotifier {
     required List<String> outputLabels,
   }) {
     if (circuit.nodes.isEmpty) return;
-
-    // 1. Identify external inputs and outputs
-    final inputNodes = circuit.nodes.whereType<InputNode>().toList();
-    final outputNodes = circuit.nodes.whereType<OutputNode>().toList();
 
     // 2. Clone current nodes and wires
     int inIdx = 0;
@@ -1101,7 +879,7 @@ class CircuitController extends ChangeNotifier {
   }
 
   void addCustomComponent(SubCircuitDefinition definition, Offset position) {
-    position = _snapToGrid(position);
+    position = grid.snap(position);
     final id = UniqueKey().toString();
 
     // Create external pins based on internal Input/Output nodes
@@ -1260,18 +1038,27 @@ class CircuitController extends ChangeNotifier {
             circuit.wires[i] = wire.copyWith(waypoints: newWaypoints);
           }
         } else if (fromMoved || toMoved) {
-          // Detect if moving the component crosses to the opposite side of the existing waypoints,
+          // Snapshot initial wire waypoints at drag start if not already done
+          _initialDragWaypoints ??= {
+            for (final w in circuit.wires) w.id: List<Offset>.from(w.waypoints),
+          };
+
+          // Always recalculate relative to the base waypoints snapshot from before drag started
+          final baseWaypoints =
+              _initialDragWaypoints![wire.id] ?? wire.waypoints;
+
+          // Detect if moving the component crosses to the opposite side of the base waypoints,
           // which renders old intermediate waypoints obsolete and requires a full clean path reroute.
           bool crossedSides = false;
-          if (wire.waypoints.isNotEmpty) {
-            if (fromMoved && wire.waypoints.first.dx < start.dx) {
+          if (baseWaypoints.isNotEmpty) {
+            if (fromMoved && baseWaypoints.first.dx < start.dx) {
               crossedSides = true;
-            } else if (toMoved && wire.waypoints.last.dx > end.dx) {
+            } else if (toMoved && baseWaypoints.last.dx > end.dx) {
               crossedSides = true;
             }
           }
 
-          if (wire.waypoints.isEmpty || crossedSides) {
+          if (baseWaypoints.isEmpty || crossedSides) {
             // Full reroute if no custom waypoints or if components crossed sides
             final points = PathFinder.findPath(
               start: start,
@@ -1284,7 +1071,7 @@ class CircuitController extends ChangeNotifier {
                 : points.sublist(1, points.length - 1);
             circuit.wires[i] = wire.copyWith(waypoints: newWaypoints);
           } else {
-            List<Offset> waypoints = List<Offset>.from(wire.waypoints);
+            List<Offset> waypoints = List<Offset>.from(baseWaypoints);
 
             if (fromMoved) {
               final target = waypoints.length > 1 ? waypoints[1] : end;
