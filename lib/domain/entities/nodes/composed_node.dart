@@ -1,10 +1,11 @@
+import 'package:digital_logic_sim_2/domain/entities/circuit.dart';
+import 'package:digital_logic_sim_2/domain/entities/circuit_node.dart';
+import 'package:digital_logic_sim_2/models/node_factory.dart';
+import 'package:digital_logic_sim_2/domain/entities/nodes/io_nodes.dart';
+import 'package:digital_logic_sim_2/models/pin_layout.dart';
+import 'package:digital_logic_sim_2/domain/entities/wire.dart';
 import 'package:flutter/material.dart';
-import '../../simulator/logic_simulator.dart';
-import '../circuit.dart';
-import '../circuit_node.dart';
-import '../node_factory.dart';
-import '../wire.dart';
-import 'io_nodes.dart';
+import '../../../../../../simulator/logic_simulator.dart';
 
 class SubCircuitDefinition {
   final String id;
@@ -14,6 +15,12 @@ class SubCircuitDefinition {
   final Color color;
   final List<String> inputLabels;
   final List<String> outputLabels;
+
+  /// Explicit pin placements keyed by the underlying InputNode/OutputNode
+  /// id. Any pin not present here falls back to the default (left/right,
+  /// natural order) via [effectivePinPlacements]. Mutable so the designer
+  /// can update it in place and we can persist it.
+  Map<String, PinPlacement> pinPlacements;
 
   List<CircuitNode> get nodes {
     if (_nodes.isEmpty) {
@@ -33,6 +40,42 @@ class SubCircuitDefinition {
       }
     }
     return _wires;
+  }
+
+  /// The list of pins (in stable definition order) this IC exposes,
+  /// independent of how they're currently arranged on the body.
+  List<PinInfo> get pinInfos {
+    final inputNodes = nodes.whereType<InputNode>().toList();
+    final outputNodes = nodes.whereType<OutputNode>().toList();
+    return [
+      for (int i = 0; i < inputNodes.length; i++)
+        PinInfo(
+          key: inputNodes[i].id,
+          label: i < inputLabels.length && inputLabels[i].isNotEmpty
+              ? inputLabels[i]
+              : inputNodes[i].label,
+          isInput: true,
+        ),
+      for (int i = 0; i < outputNodes.length; i++)
+        PinInfo(
+          key: outputNodes[i].id,
+          label: i < outputLabels.length && outputLabels[i].isNotEmpty
+              ? outputLabels[i]
+              : outputNodes[i].label,
+          isInput: false,
+        ),
+    ];
+  }
+
+  /// [pinPlacements] with any missing pins filled in via the default
+  /// left/right layout, so callers always get a complete map.
+  Map<String, PinPlacement> get effectivePinPlacements {
+    final infos = pinInfos;
+    final defaults = PinLayoutEngine.defaultPlacements(infos);
+    return {
+      for (final info in infos)
+        info.key: pinPlacements[info.key] ?? defaults[info.key]!,
+    };
   }
 
   static final List<SubCircuitDefinition> registry = [];
@@ -74,8 +117,10 @@ class SubCircuitDefinition {
     this.color = const Color(0xff334155),
     this.inputLabels = const [],
     this.outputLabels = const [],
+    Map<String, PinPlacement>? pinPlacements,
   }) : _nodes = nodes,
-       _wires = wires;
+       _wires = wires,
+       pinPlacements = pinPlacements ?? {};
 
   Map<String, dynamic> toMap({bool includeNodes = true}) {
     return {
@@ -87,6 +132,7 @@ class SubCircuitDefinition {
       'color': color.value,
       'inputLabels': inputLabels,
       'outputLabels': outputLabels,
+      'pinPlacements': pinPlacements.values.map((p) => p.toMap()).toList(),
     };
   }
 
@@ -100,6 +146,10 @@ class SubCircuitDefinition {
       return resolved;
     }
 
+    final placementsList = (map['pinPlacements'] as List? ?? [])
+        .map((p) => PinPlacement.fromMap(p as Map<String, dynamic>))
+        .toList();
+
     return SubCircuitDefinition(
       id: id,
       name: name,
@@ -112,6 +162,7 @@ class SubCircuitDefinition {
       color: Color(map['color'] ?? 0xff334155),
       inputLabels: List<String>.from(map['inputLabels'] ?? []),
       outputLabels: List<String>.from(map['outputLabels'] ?? []),
+      pinPlacements: {for (final p in placementsList) p.pinKey: p},
     );
   }
 }
@@ -122,6 +173,10 @@ class ComposedNode extends CircuitNode {
   late final List<Wire> internalWires;
   late final Circuit internalCircuit;
 
+  late IcLayoutResult _layout;
+  late List<String> _inputPinKeys;
+  late List<String> _outputPinKeys;
+
   ComposedNode({
     required super.id,
     required super.position,
@@ -130,7 +185,37 @@ class ComposedNode extends CircuitNode {
     required super.outputPins,
   }) {
     _initializeInternalCircuit();
+    _applyLayout();
   }
+
+  /// Recomputes pin positions from `definition.effectivePinPlacements`
+  /// and writes them onto the runtime [inputPins]/[outputPins]. Call this
+  /// again after editing the definition's pin layout so an existing node
+  /// on the canvas picks up the change.
+  void _applyLayout() {
+    final inputNodes = definition.nodes.whereType<InputNode>().toList();
+    final outputNodes = definition.nodes.whereType<OutputNode>().toList();
+    _inputPinKeys = inputNodes.map((n) => n.id).toList();
+    _outputPinKeys = outputNodes.map((n) => n.id).toList();
+
+    _layout = PinLayoutEngine.compute(
+      pins: definition.pinInfos,
+      placements: definition.effectivePinPlacements,
+    );
+
+    for (int i = 0; i < inputPins.length && i < _inputPinKeys.length; i++) {
+      final pos = _layout.positionFor(_inputPinKeys[i]);
+      if (pos != null) inputPins[i].localPosition = pos;
+    }
+    for (int i = 0; i < outputPins.length && i < _outputPinKeys.length; i++) {
+      final pos = _layout.positionFor(_outputPinKeys[i]);
+      if (pos != null) outputPins[i].localPosition = pos;
+    }
+  }
+
+  /// Public hook the controller can call on every ComposedNode instance
+  /// backed by a definition whose pin layout just changed.
+  void refreshLayout() => _applyLayout();
 
   void _initializeInternalCircuit() {
     final nodeMap = <String, CircuitNode>{};
@@ -159,13 +244,7 @@ class ComposedNode extends CircuitNode {
   }
 
   @override
-  Size get size {
-    final maxPins = (inputPins.length > outputPins.length)
-        ? inputPins.length
-        : outputPins.length;
-    final height = (maxPins * 16.0 + 32.0).clamp(80.0, 640.0);
-    return Size(160, height);
-  }
+  Size get size => _layout.size;
 
   @override
   void evaluate(List<bool> inputs) {
@@ -235,6 +314,14 @@ class ComposedNode extends CircuitNode {
     );
   }
 
+  /// Label + which side a pin renders its text on now depends on the
+  /// pin's side, not just whether it's an input or output, so the painter
+  /// asks for this instead of hardcoding "inputs on left".
+  PinSide sideOf(String pinKey) {
+    return definition.effectivePinPlacements[pinKey]?.side ??
+        (_inputPinKeys.contains(pinKey) ? PinSide.left : PinSide.right);
+  }
+
   String inputPinLabelAt(int index) {
     if (index < definition.inputLabels.length &&
         definition.inputLabels[index].isNotEmpty) {
@@ -262,6 +349,17 @@ class ComposedNode extends CircuitNode {
 
     return '';
   }
+
+  /// Side that pin `index` (into inputPins) currently renders on - use this
+  /// in CircuitPainter instead of assuming left, so labels are anchored
+  /// correctly regardless of layout.
+  PinSide inputSideAt(int index) => index < _inputPinKeys.length
+      ? sideOf(_inputPinKeys[index])
+      : PinSide.left;
+
+  PinSide outputSideAt(int index) => index < _outputPinKeys.length
+      ? sideOf(_outputPinKeys[index])
+      : PinSide.right;
 
   @override
   CircuitNode clone(String newId) {

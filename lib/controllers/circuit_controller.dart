@@ -1,20 +1,21 @@
 import 'package:digital_logic_sim_2/controllers/circuit_action.dart';
 import 'package:digital_logic_sim_2/controllers/create_node_factory.dart';
 import 'package:digital_logic_sim_2/controllers/grid.dart';
+import 'package:digital_logic_sim_2/models/pin_layout.dart';
 import 'package:digital_logic_sim_2/simulator/logic_simulator.dart';
 import 'package:digital_logic_sim_2/utils/ext.dart';
 import 'package:flutter/material.dart';
 
 import '../editor/editor_tools.dart';
 import '../editor/hit_test.dart';
-import '../models/circuit.dart';
-import '../models/circuit_node.dart';
-import '../models/pin.dart';
-import '../models/wire.dart';
-import '../models/nodes/io_nodes.dart';
-import '../models/nodes/clock_node.dart';
-import '../models/nodes/composed_node.dart';
-import '../models/nodes/waveform_node.dart';
+import '../domain/entities/circuit.dart';
+import '../domain/entities/circuit_node.dart';
+import '../domain/entities/pin.dart';
+import '../domain/entities/wire.dart';
+import '../domain/entities/nodes/io_nodes.dart';
+import '../domain/entities/nodes/clock_node.dart';
+import '../domain/entities/nodes/composed_node.dart';
+import '../domain/entities/nodes/waveform_node.dart';
 import '../utils/pathfinder.dart';
 import '../services/database_helper.dart';
 import 'dart:async';
@@ -827,6 +828,7 @@ class CircuitController extends ChangeNotifier {
     required Color color,
     required List<String> inputLabels,
     required List<String> outputLabels,
+    Map<String, PinPlacement>? pinPlacements,
   }) {
     if (circuit.nodes.isEmpty) return;
 
@@ -870,6 +872,7 @@ class CircuitController extends ChangeNotifier {
       color: color,
       inputLabels: inputLabels,
       outputLabels: outputLabels,
+      pinPlacements: pinPlacements,
     );
 
     customDefinitions.add(definition);
@@ -911,12 +914,34 @@ class CircuitController extends ChangeNotifier {
       inputPins: inputPins,
       outputPins: outputPins,
     );
+    node.refreshLayout();
 
     circuit.nodes.add(node);
     undoStack.add(CircuitAction(addedNodes: [node]));
     redoStack.clear();
 
     _simulateCircuit();
+    _pathsDirty = true;
+    _recalculatePaths();
+    notifyCircuitChanged();
+  }
+
+  void applyPinLayout(
+    SubCircuitDefinition definition,
+    Map<String, PinPlacement> newPlacements,
+  ) {
+    definition.pinPlacements = newPlacements;
+    DatabaseHelper.saveIC(definition);
+
+    // Any ComposedNode already on THIS canvas backed by this definition
+    // was built before the change and has stale pin positions baked into
+    // its Pin objects — it needs to be told to recompute.
+    for (final node in circuit.nodes.whereType<ComposedNode>()) {
+      if (node.definition == definition) {
+        node.refreshLayout();
+      }
+    }
+
     _pathsDirty = true;
     _recalculatePaths();
     notifyCircuitChanged();

@@ -1,5 +1,5 @@
 import 'package:digital_logic_sim_2/controllers/workspace_controller.dart';
-import 'package:digital_logic_sim_2/models/nodes/composed_node.dart';
+import 'package:digital_logic_sim_2/domain/entities/nodes/composed_node.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 

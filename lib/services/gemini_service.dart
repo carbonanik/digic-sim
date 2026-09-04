@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../models/nodes/composed_node.dart';
+import '../domain/entities/nodes/composed_node.dart';
 
 /// Calls the Gemini API and returns a JSON string representing a logic circuit
 /// that matches the [prompt] description.
@@ -215,16 +215,15 @@ OUTPUT RULES:
   }) async {
     final url = Uri.parse('$_baseUrl?key=$apiKey');
 
-    final systemPrompt = buildSystemPrompt(availableComponents: availableComponents);
+    final systemPrompt = buildSystemPrompt(
+      availableComponents: availableComponents,
+    );
 
     final body = jsonEncode({
       'contents': [
         {
           'parts': [
-            {
-              'text':
-                  '$systemPrompt\n\nUser request: $prompt',
-            },
+            {'text': '$systemPrompt\n\nUser request: $prompt'},
           ],
         },
       ],

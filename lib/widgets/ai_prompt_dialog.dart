@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../controllers/circuit_controller.dart';
-import '../models/nodes/composed_node.dart';
+import '../domain/entities/nodes/composed_node.dart';
 import '../services/gemini_service.dart';
 import '../utils/preset_library.dart';
 
@@ -135,8 +135,11 @@ class _AiPromptDialogState extends State<_AiPromptDialog>
         SnackBar(
           content: Row(
             children: [
-              const Icon(Icons.check_circle_outline,
-                  color: Color(0xff4ade80), size: 18),
+              const Icon(
+                Icons.check_circle_outline,
+                color: Color(0xff4ade80),
+                size: 18,
+              ),
               const SizedBox(width: 12),
               const Text('Circuit generated and loaded on canvas!'),
             ],
@@ -174,10 +177,7 @@ class _AiPromptDialogState extends State<_AiPromptDialog>
               blurRadius: 60,
               spreadRadius: 10,
             ),
-            BoxShadow(
-              color: Colors.black.withOpacity(0.6),
-              blurRadius: 40,
-            ),
+            BoxShadow(color: Colors.black.withOpacity(0.6), blurRadius: 40),
           ],
         ),
         child: Column(
@@ -280,7 +280,11 @@ class _AiPromptDialogState extends State<_AiPromptDialog>
                   SnackBar(
                     content: Row(
                       children: const [
-                        Icon(Icons.check_circle_outline, color: Color(0xff4ade80), size: 16),
+                        Icon(
+                          Icons.check_circle_outline,
+                          color: Color(0xff4ade80),
+                          size: 16,
+                        ),
                         SizedBox(width: 8),
                         Text('System prompt copied to clipboard!'),
                       ],
@@ -329,8 +333,11 @@ class _AiPromptDialogState extends State<_AiPromptDialog>
               onTap: () {
                 // Toggle show/hide — handled by obscureText above
               },
-              child: const Icon(Icons.key_rounded,
-                  size: 18, color: Color(0xff4b5563)),
+              child: const Icon(
+                Icons.key_rounded,
+                size: 18,
+                color: Color(0xff4b5563),
+              ),
             ),
           ),
         ),
@@ -342,10 +349,7 @@ class _AiPromptDialogState extends State<_AiPromptDialog>
             Expanded(
               child: Text(
                 'Get a free key at aistudio.google.com. Key is stored in memory only.',
-                style: const TextStyle(
-                  color: Color(0xff4b5563),
-                  fontSize: 11,
-                ),
+                style: const TextStyle(color: Color(0xff4b5563), fontSize: 11),
               ),
             ),
           ],
@@ -363,7 +367,11 @@ class _AiPromptDialogState extends State<_AiPromptDialog>
         TextField(
           controller: _promptController,
           maxLines: 4,
-          style: const TextStyle(color: Colors.white, fontSize: 14, height: 1.5),
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 14,
+            height: 1.5,
+          ),
           decoration: _inputDeco(
             'e.g. "Design a full adder circuit with inputs A, B, Cin and outputs Sum and Cout"',
           ),
@@ -394,8 +402,10 @@ class _AiPromptDialogState extends State<_AiPromptDialog>
               onTap: () => _promptController.text = 'Design a $e circuit',
               borderRadius: BorderRadius.circular(20),
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xff1e293b),
                   borderRadius: BorderRadius.circular(20),
@@ -435,9 +445,7 @@ class _AiPromptDialogState extends State<_AiPromptDialog>
           decoration: BoxDecoration(
             color: const Color(0xff111827),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: const Color(0xff8b5cf6).withOpacity(0.3),
-            ),
+            border: Border.all(color: const Color(0xff8b5cf6).withOpacity(0.3)),
           ),
           child: Row(
             children: [
@@ -492,17 +500,18 @@ class _AiPromptDialogState extends State<_AiPromptDialog>
       decoration: BoxDecoration(
         color: const Color(0xff052e16).withOpacity(0.6),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: const Color(0xff4ade80).withOpacity(0.3),
-        ),
+        border: Border.all(color: const Color(0xff4ade80).withOpacity(0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.check_circle_rounded,
-                  color: Color(0xff4ade80), size: 20),
+              const Icon(
+                Icons.check_circle_rounded,
+                color: Color(0xff4ade80),
+                size: 20,
+              ),
               const SizedBox(width: 12),
               const Expanded(
                 child: Text(
@@ -560,8 +569,11 @@ class _AiPromptDialogState extends State<_AiPromptDialog>
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.error_outline_rounded,
-              color: Colors.redAccent.shade100, size: 20),
+          Icon(
+            Icons.error_outline_rounded,
+            color: Colors.redAccent.shade100,
+            size: 20,
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -656,26 +668,25 @@ class _AiPromptDialogState extends State<_AiPromptDialog>
   }
 
   InputDecoration _inputDeco(String hint, {Widget? suffix}) => InputDecoration(
-        hintText: hint,
-        hintStyle: const TextStyle(color: Color(0xff374151), fontSize: 13),
-        filled: true,
-        fillColor: const Color(0xff0f172a),
-        suffixIcon: suffix,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xff1f2937)),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xff1f2937)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xff7c3aed), width: 2),
-        ),
-      );
+    hintText: hint,
+    hintStyle: const TextStyle(color: Color(0xff374151), fontSize: 13),
+    filled: true,
+    fillColor: const Color(0xff0f172a),
+    suffixIcon: suffix,
+    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: const BorderSide(color: Color(0xff1f2937)),
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: const BorderSide(color: Color(0xff1f2937)),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: const BorderSide(color: Color(0xff7c3aed), width: 2),
+    ),
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -708,8 +719,7 @@ class _GradientButtonState extends State<_GradientButton> {
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
-      cursor:
-          enabled ? SystemMouseCursors.click : SystemMouseCursors.forbidden,
+      cursor: enabled ? SystemMouseCursors.click : SystemMouseCursors.forbidden,
       child: GestureDetector(
         onTap: widget.onTap,
         child: AnimatedContainer(

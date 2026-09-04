@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'circuit_node.dart';
-import 'pin.dart';
-import 'nodes/gate_node.dart';
-import 'nodes/io_nodes.dart';
-import 'nodes/display_nodes.dart';
-import 'nodes/clock_node.dart';
-import 'nodes/composed_node.dart';
-import 'nodes/waveform_node.dart';
-import 'nodes/rgb_led_node.dart';
-import 'nodes/logic_probe_node.dart';
+import '../domain/entities/circuit_node.dart';
+import '../domain/entities/pin.dart';
+import '../domain/entities/nodes/gate_node.dart';
+import '../domain/entities/nodes/io_nodes.dart';
+import '../domain/entities/nodes/display_nodes.dart';
+import '../domain/entities/nodes/clock_node.dart';
+import '../domain/entities/nodes/composed_node.dart';
+import '../domain/entities/nodes/waveform_node.dart';
+import '../domain/entities/nodes/rgb_led_node.dart';
+import '../domain/entities/nodes/logic_probe_node.dart';
 
 class NodeFactory {
   static CircuitNode fromMap(Map<String, dynamic> map) {

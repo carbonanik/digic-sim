@@ -1,14 +1,15 @@
 import 'package:digital_logic_sim_2/editor/circuit_painter.dart';
-import 'package:digital_logic_sim_2/models/circuit_node.dart';
+import 'package:digital_logic_sim_2/domain/entities/circuit_node.dart';
+import 'package:digital_logic_sim_2/widgets/ic_pin_layout_designer.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../controllers/circuit_controller.dart';
-import '../models/nodes/clock_node.dart';
-import '../models/nodes/composed_node.dart';
-import '../models/nodes/gate_node.dart';
-import '../models/nodes/io_nodes.dart';
+import '../domain/entities/nodes/clock_node.dart';
+import '../domain/entities/nodes/composed_node.dart';
+import '../domain/entities/nodes/gate_node.dart';
+import '../domain/entities/nodes/io_nodes.dart';
 import 'editor_tools.dart';
 import 'hit_test.dart';
 
@@ -754,6 +755,24 @@ class _CircuitCanvasState extends State<CircuitCanvas>
               ],
             ),
           ),
+        if (node is ComposedNode)
+          const PopupMenuItem<String>(
+            value: 'edit_pin_layout',
+            child: Row(
+              children: [
+                Icon(
+                  Icons.dashboard_customize_rounded,
+                  size: 18,
+                  color: Color(0xff38bdf8),
+                ),
+                SizedBox(width: 10),
+                Text(
+                  'Edit Pin Layout',
+                  style: TextStyle(fontSize: 13, color: Colors.white),
+                ),
+              ],
+            ),
+          ),
         const PopupMenuItem<String>(
           value: 'duplicate',
           child: Row(
@@ -785,7 +804,7 @@ class _CircuitCanvasState extends State<CircuitCanvas>
           ),
         ),
       ],
-    ).then((value) {
+    ).then((value) async {
       if (value == null) return;
       if (value.startsWith('freq_')) {
         final freqStr = value.replaceFirst('freq_', '');
@@ -805,6 +824,20 @@ class _CircuitCanvasState extends State<CircuitCanvas>
         case 'open_ic':
           if (node is ComposedNode) {
             widget.controller.loadDefinition(node.definition);
+          }
+          break;
+        case 'edit_pin_layout':
+          if (node is ComposedNode && context.mounted) {
+            final result = await IcPinLayoutDesigner.show(
+              context,
+              icName: node.definition.name,
+              icColor: node.definition.color,
+              pins: node.definition.pinInfos,
+              initialPlacements: node.definition.effectivePinPlacements,
+            );
+            if (result != null) {
+              widget.controller.applyPinLayout(node.definition, result);
+            }
           }
           break;
         case 'duplicate':

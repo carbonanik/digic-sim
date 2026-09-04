@@ -1,5 +1,5 @@
-import 'package:digital_logic_sim_2/models/circuit_node.dart';
-import 'package:digital_logic_sim_2/models/wire.dart';
+import 'package:digital_logic_sim_2/domain/entities/circuit_node.dart';
+import 'package:digital_logic_sim_2/domain/entities/wire.dart';
 
 class CircuitAction {
   final List<CircuitNode> addedNodes;

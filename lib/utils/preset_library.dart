@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/services.dart';
-import '../models/nodes/composed_node.dart';
+import '../domain/entities/nodes/composed_node.dart';
 
 class PresetLibrary {
   static List<SubCircuitDefinition> _cachedPresets = [];

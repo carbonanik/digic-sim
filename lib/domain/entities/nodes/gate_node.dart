@@ -1,4 +1,4 @@
-import 'package:digital_logic_sim_2/models/pin.dart';
+import 'package:digital_logic_sim_2/domain/entities/pin.dart';
 import 'package:flutter/material.dart';
 import '../circuit_node.dart';
 

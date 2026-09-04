@@ -1,15 +1,15 @@
 import 'package:digital_logic_sim_2/editor/editor_tools.dart';
-import 'package:digital_logic_sim_2/models/nodes/clock_node.dart';
-import 'package:digital_logic_sim_2/models/nodes/display_nodes.dart';
-import 'package:digital_logic_sim_2/models/nodes/gate_node.dart';
-import 'package:digital_logic_sim_2/models/nodes/io_nodes.dart';
-import 'package:digital_logic_sim_2/models/nodes/logic_probe_node.dart';
-import 'package:digital_logic_sim_2/models/nodes/rgb_led_node.dart';
-import 'package:digital_logic_sim_2/models/nodes/waveform_node.dart';
-import 'package:digital_logic_sim_2/models/pin.dart';
+import 'package:digital_logic_sim_2/domain/entities/nodes/clock_node.dart';
+import 'package:digital_logic_sim_2/domain/entities/nodes/display_nodes.dart';
+import 'package:digital_logic_sim_2/domain/entities/nodes/gate_node.dart';
+import 'package:digital_logic_sim_2/domain/entities/nodes/io_nodes.dart';
+import 'package:digital_logic_sim_2/domain/entities/nodes/logic_probe_node.dart';
+import 'package:digital_logic_sim_2/domain/entities/nodes/rgb_led_node.dart';
+import 'package:digital_logic_sim_2/domain/entities/nodes/waveform_node.dart';
+import 'package:digital_logic_sim_2/domain/entities/pin.dart';
 import 'package:flutter/material.dart';
 
-import '../models/circuit_node.dart';
+import '../domain/entities/circuit_node.dart';
 
 class CreateNodeFactory {
   CircuitNode create(EditorTool tool, Offset position) {

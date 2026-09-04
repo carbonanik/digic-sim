@@ -4,7 +4,7 @@ class Pin {
   final String id;
   final String nodeId;
   final bool isInput;
-  final Offset localPosition;
+  Offset localPosition;
   bool value;
 
   Pin({

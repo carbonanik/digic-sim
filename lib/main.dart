@@ -1,6 +1,8 @@
-import 'package:digital_logic_sim_2/models/nodes/io_nodes.dart';
+import 'package:digital_logic_sim_2/domain/entities/nodes/io_nodes.dart';
+import 'package:digital_logic_sim_2/models/pin_layout.dart';
 import 'package:digital_logic_sim_2/widgets/ai_prompt_dialog.dart';
 import 'package:digital_logic_sim_2/widgets/component_toolbar.dart';
+import 'package:digital_logic_sim_2/widgets/ic_pin_layout_designer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'controllers/circuit_controller.dart';
@@ -338,120 +340,190 @@ class _TopBar extends StatelessWidget {
     );
 
     Color selectedColor = const Color(0xff1e3a8a);
+    Map<String, PinPlacement> pinPlacements = {};
 
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          backgroundColor: const Color(0xff0f172a),
-          title: const Text('IC Designer'),
-          content: SizedBox(
-            width: 450,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('COMPONENT NAME', style: _headerStyle),
-                  TextField(
-                    controller: nameController,
-                    decoration: _inputDeco('e.g. Full Adder'),
-                    autofocus: true,
-                  ),
-                  const SizedBox(height: 20),
-                  const Text('BODY COLOR', style: _headerStyle),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    children:
-                        [
-                              const Color(0xff1e3a8a),
-                              const Color(0xff581c87),
-                              const Color(0xff701a75),
-                              const Color(0xff14532d),
-                              const Color(0xff7c2d12),
-                              const Color(0xff0f172a),
-                            ]
-                            .map(
-                              (color) => GestureDetector(
-                                onTap: () =>
-                                    setState(() => selectedColor = color),
-                                child: Container(
-                                  width: 32,
-                                  height: 32,
-                                  decoration: BoxDecoration(
-                                    color: color,
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: selectedColor == color
-                                          ? Colors.white
-                                          : Colors.transparent,
-                                      width: 2,
+        builder: (context, setState) {
+          return AlertDialog(
+            backgroundColor: const Color(0xff0f172a),
+            title: const Text('IC Designer'),
+            content: SizedBox(
+              width: 450,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('COMPONENT NAME', style: _headerStyle),
+                    TextField(
+                      controller: nameController,
+                      decoration: _inputDeco('e.g. Full Adder'),
+                      autofocus: true,
+                    ),
+                    const SizedBox(height: 20),
+                    const Text('BODY COLOR', style: _headerStyle),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      children:
+                          [
+                                const Color(0xff1e3a8a),
+                                const Color(0xff581c87),
+                                const Color(0xff701a75),
+                                const Color(0xff14532d),
+                                const Color(0xff7c2d12),
+                                const Color(0xff0f172a),
+                              ]
+                              .map(
+                                (color) => GestureDetector(
+                                  onTap: () =>
+                                      setState(() => selectedColor = color),
+                                  child: Container(
+                                    width: 32,
+                                    height: 32,
+                                    decoration: BoxDecoration(
+                                      color: color,
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: selectedColor == color
+                                            ? Colors.white
+                                            : Colors.transparent,
+                                        width: 2,
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            )
-                            .toList(),
-                  ),
-                  const SizedBox(height: 20),
-                  if (inputNodes.isNotEmpty) ...[
-                    const Text('INPUT LABELS', style: _headerStyle),
-                    const SizedBox(height: 8),
-                    ...List.generate(
-                      inputNodes.length,
-                      (i) => Padding(
-                        padding: const EdgeInsets.only(bottom: 8.0),
-                        child: TextField(
-                          controller: inputControllers[i],
-                          decoration: _inputDeco('Input ${i + 1} Label'),
+                              )
+                              .toList(),
+                    ),
+                    const SizedBox(height: 20),
+                    OutlinedButton.icon(
+                      icon: const Icon(
+                        Icons.dashboard_customize_rounded,
+                        size: 16,
+                      ),
+                      label: const Text('Arrange Pins'),
+                      onPressed: () async {
+                        final pins = [
+                          for (int i = 0; i < inputNodes.length; i++)
+                            PinInfo(
+                              key: inputNodes[i].id,
+                              label: inputControllers[i].text,
+                              isInput: true,
+                            ),
+                          for (int i = 0; i < outputNodes.length; i++)
+                            PinInfo(
+                              key: outputNodes[i].id,
+                              label: outputControllers[i].text,
+                              isInput: false,
+                            ),
+                        ];
+                        final result = await IcPinLayoutDesigner.show(
+                          context,
+                          icName: nameController.text.isEmpty
+                              ? 'IC'
+                              : nameController.text,
+                          icColor: selectedColor,
+                          pins: pins,
+                          initialPlacements:
+                              pinPlacements, // preserves edits if reopened
+                        );
+                        if (result != null) {
+                          setState(() => pinPlacements = result);
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 20),
+
+                    if (inputNodes.isNotEmpty) ...[
+                      const Text('INPUT LABELS', style: _headerStyle),
+                      const SizedBox(height: 8),
+                      ...List.generate(
+                        inputNodes.length,
+                        (i) => Padding(
+                          padding: const EdgeInsets.only(bottom: 8.0),
+                          child: TextField(
+                            controller: inputControllers[i],
+                            decoration: _inputDeco('Input ${i + 1} Label'),
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                  ],
-                  if (outputNodes.isNotEmpty) ...[
-                    const Text('OUTPUT LABELS', style: _headerStyle),
-                    const SizedBox(height: 8),
-                    ...List.generate(
-                      outputNodes.length,
-                      (i) => Padding(
-                        padding: const EdgeInsets.only(bottom: 8.0),
-                        child: TextField(
-                          controller: outputControllers[i],
-                          decoration: _inputDeco('Output ${i + 1} Label'),
+                      const SizedBox(height: 12),
+                    ],
+                    if (outputNodes.isNotEmpty) ...[
+                      const Text('OUTPUT LABELS', style: _headerStyle),
+                      const SizedBox(height: 8),
+                      ...List.generate(
+                        outputNodes.length,
+                        (i) => Padding(
+                          padding: const EdgeInsets.only(bottom: 8.0),
+                          child: TextField(
+                            controller: outputControllers[i],
+                            decoration: _inputDeco('Output ${i + 1} Label'),
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text(
-                'Cancel',
-                style: TextStyle(color: Colors.white70),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(color: Colors.white70),
+                ),
               ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (nameController.text.isNotEmpty) {
-                  controller.saveCurrentAsComponent(
-                    name: nameController.text,
-                    color: selectedColor,
-                    inputLabels: inputControllers.map((c) => c.text).toList(),
-                    outputLabels: outputControllers.map((c) => c.text).toList(),
-                  );
-                  Navigator.pop(context);
-                }
-              },
-              child: const Text('Create IC'),
-            ),
-          ],
-        ),
+              // ElevatedButton(
+              //   onPressed: () async {
+              //     final pins = [
+              //       for (int i = 0; i < inputNodes.length; i++)
+              //         PinInfo(
+              //           key: inputNodes[i].id,
+              //           label: inputControllers[i].text,
+              //           isInput: true,
+              //         ),
+              //       for (int i = 0; i < outputNodes.length; i++)
+              //         PinInfo(
+              //           key: outputNodes[i].id,
+              //           label: outputControllers[i].text,
+              //           isInput: false,
+              //         ),
+              //     ];
+              //     final placements = await IcPinLayoutDesigner.show(
+              //       context,
+              //       icName: nameController.text,
+              //       icColor: selectedColor,
+              //       pins: pins,
+              //       initialPlacements: {},
+              //     );
+              //   },
+              //   child: const Text('Pin Layout'),
+              // ),
+              ElevatedButton(
+                onPressed: () {
+                  if (nameController.text.isNotEmpty) {
+                    controller.saveCurrentAsComponent(
+                      name: nameController.text,
+                      color: selectedColor,
+                      inputLabels: inputControllers.map((c) => c.text).toList(),
+                      outputLabels: outputControllers
+                          .map((c) => c.text)
+                          .toList(),
+                      pinPlacements: pinPlacements,
+                    );
+                    Navigator.pop(context);
+                  }
+                },
+                child: const Text('Create IC'),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

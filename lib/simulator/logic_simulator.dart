@@ -1,7 +1,7 @@
-import '../models/circuit.dart';
-import '../models/circuit_node.dart';
-import '../models/pin.dart';
-import '../models/wire.dart';
+import '../domain/entities/circuit.dart';
+import '../domain/entities/circuit_node.dart';
+import '../domain/entities/pin.dart';
+import '../domain/entities/wire.dart';
 
 class LogicSimulationResult {
   const LogicSimulationResult({
