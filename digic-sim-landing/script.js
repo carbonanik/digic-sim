@@ -1,7 +1,7 @@
 // Configure your live URLs here before publishing to GitHub Pages.
 // Keep empty to use the safe on-page preview fallback.
 const CONFIG = {
-  appUrl: '',       // e.g. 'https://your-username.github.io/logic-lab-app/'
+  appUrl: 'https://digic-sim.web.app',
   githubUrl: '',    // e.g. 'https://github.com/your-username/logic-lab'
 };
 
