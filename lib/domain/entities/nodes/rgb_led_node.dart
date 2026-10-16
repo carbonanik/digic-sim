@@ -18,7 +18,7 @@ class RGBLEDNode extends CircuitNode {
 
   @override
   void evaluate(List<bool> inputs) {
-    if (inputs.length >= 1) r = inputs[0];
+    if (inputs.isNotEmpty) r = inputs[0];
     if (inputs.length >= 2) g = inputs[1];
     if (inputs.length >= 3) b = inputs[2];
   }
@@ -26,11 +26,11 @@ class RGBLEDNode extends CircuitNode {
   @override
   void paint(Canvas canvas, bool isSelected, {bool isHovered = false}) {
     final rect = RRect.fromRectAndRadius(this.rect, const Radius.circular(16));
-    
+
     final fillPaint = Paint()..color = const Color(0xff0f172a);
     final borderPaint = Paint()
-      ..color = isSelected 
-          ? const Color(0xfffacc15) 
+      ..color = isSelected
+          ? const Color(0xfffacc15)
           : (isHovered ? const Color(0xff475569) : const Color(0xff334155))
       ..strokeWidth = isSelected ? 3 : 2
       ..style = PaintingStyle.stroke;
@@ -41,7 +41,7 @@ class RGBLEDNode extends CircuitNode {
     // Draw LED
     final ledCenter = position + Offset(size.width / 2 + 10, 48);
     final ledRadius = 24.0;
-    
+
     final ledColor = Color.fromARGB(
       255,
       r ? 255 : 30,
@@ -60,7 +60,7 @@ class RGBLEDNode extends CircuitNode {
     final ledPaint = Paint()
       ..color = ledColor
       ..style = PaintingStyle.fill;
-    
+
     canvas.drawCircle(ledCenter, ledRadius, ledPaint);
 
     // Reflection/Highlight
@@ -70,9 +70,21 @@ class RGBLEDNode extends CircuitNode {
     canvas.drawCircle(ledCenter - const Offset(8, 8), 6, highlightPaint);
 
     // Labels
-    _drawPinLabel(canvas, 'R', position + inputPins[0].localPosition + const Offset(12, -6));
-    _drawPinLabel(canvas, 'G', position + inputPins[1].localPosition + const Offset(12, -6));
-    _drawPinLabel(canvas, 'B', position + inputPins[2].localPosition + const Offset(12, -6));
+    _drawPinLabel(
+      canvas,
+      'R',
+      position + inputPins[0].localPosition + const Offset(12, -6),
+    );
+    _drawPinLabel(
+      canvas,
+      'G',
+      position + inputPins[1].localPosition + const Offset(12, -6),
+    );
+    _drawPinLabel(
+      canvas,
+      'B',
+      position + inputPins[2].localPosition + const Offset(12, -6),
+    );
   }
 
   void _drawPinLabel(Canvas canvas, String text, Offset pos) {
@@ -103,9 +115,6 @@ class RGBLEDNode extends CircuitNode {
 
   @override
   Map<String, dynamic> toMap({bool isNested = false}) {
-    return {
-      ...super.toMap(isNested: isNested),
-      'type': 'rgb_led',
-    };
+    return {...super.toMap(isNested: isNested), 'type': 'rgb_led'};
   }
 }

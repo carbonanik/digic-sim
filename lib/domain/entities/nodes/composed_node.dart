@@ -1,11 +1,11 @@
+import 'package:digital_logic_sim_2/data/models/pin_layout.dart';
 import 'package:digital_logic_sim_2/domain/entities/circuit.dart';
 import 'package:digital_logic_sim_2/domain/entities/circuit_node.dart';
-import 'package:digital_logic_sim_2/models/node_factory.dart';
+import 'package:digital_logic_sim_2/features/component_library/node_factory.dart';
 import 'package:digital_logic_sim_2/domain/entities/nodes/io_nodes.dart';
-import 'package:digital_logic_sim_2/models/pin_layout.dart';
 import 'package:digital_logic_sim_2/domain/entities/wire.dart';
+import 'package:digital_logic_sim_2/simulation/engine/logic_engine.dart';
 import 'package:flutter/material.dart';
-import '../../../../../../simulator/logic_simulator.dart';
 
 class SubCircuitDefinition {
   final String id;
