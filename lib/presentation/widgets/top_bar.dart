@@ -41,7 +41,7 @@ class TopBar extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'LOGIC LAB WORKSPACE',
+                'DIGIC SIM WORKSPACE',
                 style: TextStyle(
                   color: Color(0xff4b5563),
                   fontSize: 10,

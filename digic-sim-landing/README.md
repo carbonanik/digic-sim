@@ -1,6 +1,6 @@
-# Logic Lab — Landing Page
+# Digic Sim — Landing Page
 
-A responsive, static product landing page for the Logic Lab digital logic simulator. Built using plain HTML, CSS, and JavaScript, with no framework or build step.
+A responsive, static product landing page for the Digic Sim digital logic simulator. Built using plain HTML, CSS, and JavaScript, with no framework or build step.
 
 ## Preview
 
@@ -40,7 +40,7 @@ No `npm install`, build command, or backend is required. Asset paths are relativ
 - `index.html`: text, sections, SEO and accessibility metadata
 - `styles.css`: theme, components and responsive styles
 - `script.js`: URLs, mobile menu, interactive signal demo and scroll reveals
-- `assets/simulator.png`: screenshot of the real Logic Lab application
+- `assets/simulator.png`: screenshot of the real Digic Sim application
 - `assets/logic-lab-banner.png`: share preview image (AI-generated promotional graphic)
 - `assets/favicon.svg`: brand favicon
 

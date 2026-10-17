@@ -728,7 +728,7 @@ class _AppLogo extends StatelessWidget {
         ),
         const SizedBox(width: 14),
         const Text(
-          'LOGIC LAB',
+          'DIGIC SIM',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w900,
