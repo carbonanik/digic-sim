@@ -19,11 +19,11 @@ Edit the `CONFIG` object at the top of **`script.js`**:
 ```js
 const CONFIG = {
   appUrl: 'https://digic-sim.web.app',
-  githubUrl: 'https://github.com/YOUR_USERNAME/YOUR_REPO',
+  githubUrl: 'https://github.com/carbonanik/digic-sim',
 };
 ```
 
-The Launch buttons link to the live simulator at `https://digic-sim.web.app`. Set `githubUrl` to your repository URL to enable the GitHub links; until then, they scroll to the app preview instead of pointing to an unrelated repository.
+The Launch buttons link to the live simulator at `https://digic-sim.web.app`. The GitHub links point to the [Digic Sim repository](https://github.com/carbonanik/digic-sim).
 
 ## Publish using GitHub Pages
 

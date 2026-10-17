@@ -2,7 +2,7 @@
 // Keep empty to use the safe on-page preview fallback.
 const CONFIG = {
   appUrl: 'https://digic-sim.web.app',
-  githubUrl: '',    // e.g. 'https://github.com/your-username/digic-sim'
+  githubUrl: 'https://github.com/carbonanik/digic-sim',
 };
 
 document.documentElement.classList.add('js');
