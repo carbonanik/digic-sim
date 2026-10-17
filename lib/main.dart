@@ -1,3 +1,4 @@
+import 'package:digital_logic_sim_2/core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:digital_logic_sim_2/features/component_library/preset_library.dart';
 import 'package:digital_logic_sim_2/presentation/controllers/circuit_controller.dart';
@@ -16,7 +17,7 @@ class LogicDesignerApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Logic Designer',
+      title: AppConstants.appTitle,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         brightness: Brightness.dark,
