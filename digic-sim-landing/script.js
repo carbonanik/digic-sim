@@ -56,6 +56,24 @@ if (signalSwitch) {
   signalSwitch.addEventListener('click', () => updateSignal(signalSwitch.getAttribute('aria-pressed') !== 'true'));
 }
 
+const videoDialog = document.getElementById('video-dialog');
+const videoFrame = document.getElementById('how-it-works-video');
+const openVideoButton = document.getElementById('explore-video-button');
+const closeVideoButton = document.getElementById('video-dialog-close');
+const videoUrl = 'https://www.youtube-nocookie.com/embed/p5rqnpV8jc4?autoplay=1&rel=0';
+
+openVideoButton?.addEventListener('click', () => {
+  videoFrame.src = videoUrl;
+  videoDialog.showModal();
+});
+closeVideoButton?.addEventListener('click', () => videoDialog.close());
+videoDialog?.addEventListener('click', event => {
+  if (event.target === videoDialog) videoDialog.close();
+});
+videoDialog?.addEventListener('close', () => {
+  videoFrame.src = '';
+});
+
 document.getElementById('year').textContent = new Date().getFullYear();
 if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
   const observer = new IntersectionObserver(entries => {
