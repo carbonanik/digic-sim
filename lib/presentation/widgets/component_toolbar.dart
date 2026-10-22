@@ -596,7 +596,7 @@ class _ICCard extends StatelessWidget {
                   tooltip: 'Open in New Workspace',
                   onTap: () {
                     workspaceController.addWorkspace(def.name);
-                    workspaceController.activeController?.loadDefinition(def);
+                    workspaceController.activeController.loadDefinition(def);
                   },
                 ),
                 _SmallIconButton(

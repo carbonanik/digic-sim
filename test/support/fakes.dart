@@ -1,3 +1,6 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:digital_logic_sim_2/core/di/injection.dart';
+import 'package:digital_logic_sim_2/presentation/providers/editor_dependencies.dart';
 import 'package:digital_logic_sim_2/domain/entities/nodes/composed_node.dart';
 import 'package:digital_logic_sim_2/domain/repositories/custom_component_repository.dart';
 import 'package:digital_logic_sim_2/domain/services/circuit_generator.dart';
@@ -46,3 +49,14 @@ class FakeCircuitGenerator implements CircuitGenerator {
     return onGenerate == null ? response : await onGenerate!();
   }
 }
+
+ProviderContainer createTestContainer(AppDependencies dependencies) =>
+    ProviderContainer(
+      overrides: [
+        circuitSimulatorProvider.overrideWithValue(dependencies.simulator),
+        customComponentManagerProvider.overrideWithValue(
+          dependencies.customComponents,
+        ),
+        generateCircuitProvider.overrideWithValue(dependencies.generateCircuit),
+      ],
+    );

@@ -404,11 +404,11 @@ class _CircuitCanvasState extends State<CircuitCanvas>
                         controller.endNodeMove();
                       }
                     },
-                    child: AnimatedBuilder(
-                      animation: widget.controller,
-                      builder: (context, _) => Stack(
-                        children: [
-                          RepaintBoundary(
+                    child: Stack(
+                      children: [
+                        AnimatedBuilder(
+                          animation: widget.controller.circuitRepaint,
+                          builder: (context, _) => RepaintBoundary(
                             child: CustomPaint(
                               size: const Size(200000, 200000),
                               painter: CircuitPainter(
@@ -422,7 +422,10 @@ class _CircuitCanvasState extends State<CircuitCanvas>
                               ),
                             ),
                           ),
-                          RepaintBoundary(
+                        ),
+                        AnimatedBuilder(
+                          animation: widget.controller.overlayRepaint,
+                          builder: (context, _) => RepaintBoundary(
                             child: CustomPaint(
                               size: const Size(200000, 200000),
                               painter: OverlayPainter(
@@ -442,8 +445,8 @@ class _CircuitCanvasState extends State<CircuitCanvas>
                               ),
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -452,7 +455,7 @@ class _CircuitCanvasState extends State<CircuitCanvas>
                 top: 16,
                 right: 16,
                 child: AnimatedBuilder(
-                  animation: widget.controller,
+                  animation: widget.controller.circuitRepaint,
                   builder: (context, _) =>
                       _buildSimulationMonitor(widget.controller),
                 ),
@@ -814,8 +817,7 @@ class _CircuitCanvasState extends State<CircuitCanvas>
         final freqStr = value.replaceFirst('freq_', '');
         final parsed = double.tryParse(freqStr);
         if (parsed != null && node is ClockNode) {
-          node.frequency = parsed;
-          widget.controller.notifyCircuitChanged();
+          widget.controller.setClockFrequency(node.id, parsed);
         }
         return;
       }
@@ -845,10 +847,7 @@ class _CircuitCanvasState extends State<CircuitCanvas>
           }
           break;
         case 'duplicate':
-          final newNode = node.clone(UniqueKey().toString());
-          newNode.position = node.position + const Offset(32, 32);
-          widget.controller.circuit.nodes.add(newNode);
-          widget.controller.selectNode(newNode.id);
+          widget.controller.duplicateNode(node);
           break;
         case 'delete':
           widget.controller.removeNode(node);

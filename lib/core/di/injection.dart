@@ -5,12 +5,7 @@ import 'package:digital_logic_sim_2/domain/repositories/custom_component_reposit
 import 'package:digital_logic_sim_2/domain/services/circuit_generator.dart';
 import 'package:digital_logic_sim_2/domain/services/circuit_simulator.dart';
 import 'package:digital_logic_sim_2/domain/usecases/generate_circuit.dart';
-import 'package:digital_logic_sim_2/presentation/controllers/circuit_controller.dart';
-import 'package:digital_logic_sim_2/presentation/controllers/circuit_simulation_service.dart';
-import 'package:digital_logic_sim_2/presentation/controllers/create_node_factory.dart';
 import 'package:digital_logic_sim_2/presentation/controllers/custom_component_manager.dart';
-import 'package:digital_logic_sim_2/presentation/controllers/grid.dart';
-import 'package:digital_logic_sim_2/presentation/controllers/workspace_controller.dart';
 import 'package:digital_logic_sim_2/simulation/logic_circuit_simulator.dart';
 
 /// Composition root: concrete infrastructure is selected only here.
@@ -42,15 +37,6 @@ class AppDependencies {
       AppDependencies._production(http.Client());
 
   Future<void> initialize() => customComponents.initialize();
-
-  WorkspaceController createWorkspaceController() => WorkspaceController(
-    createCircuitController: () => CircuitController(
-      createNodeFactory: CreateNodeFactory(),
-      grid: Grid(),
-      simulationService: CircuitSimulationService(simulator: simulator),
-      customComponentManager: customComponents,
-    ),
-  );
 
   void dispose() => _ownedHttpClient?.close();
 }

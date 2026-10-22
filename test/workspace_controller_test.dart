@@ -1,3 +1,4 @@
+import 'package:digital_logic_sim_2/presentation/controllers/workspace_controller.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:digital_logic_sim_2/core/di/injection.dart';
 import 'package:digital_logic_sim_2/simulation/logic_circuit_simulator.dart';
@@ -11,8 +12,9 @@ void main() {
   );
 
   test('Closing a preceding tab preserves the active workspace', () {
-    final workspaces = dependencies().createWorkspaceController();
-    addTearDown(workspaces.dispose);
+    final container = createTestContainer(dependencies());
+    addTearDown(container.dispose);
+    final workspaces = container.read(workspaceControllerProvider.notifier);
     workspaces.addWorkspace('Second');
     workspaces.addWorkspace('Third');
     final active = workspaces.activeWorkspace;
@@ -24,13 +26,14 @@ void main() {
   });
 
   test('Closing the last workspace creates a fresh usable controller', () {
-    final workspaces = dependencies().createWorkspaceController();
-    addTearDown(workspaces.dispose);
+    final container = createTestContainer(dependencies());
+    addTearDown(container.dispose);
+    final workspaces = container.read(workspaceControllerProvider.notifier);
     final oldController = workspaces.activeController;
     workspaces.closeWorkspace(0);
     expect(workspaces.workspaces, hasLength(1));
     expect(workspaces.activeController, isNot(same(oldController)));
-    expect(workspaces.activeWorkspace!.name, 'Main Workspace');
+    expect(workspaces.activeWorkspace.name, 'Main Workspace');
   });
 
   test(
@@ -38,16 +41,14 @@ void main() {
     () async {
       final first = dependencies();
       final second = dependencies();
-      final workspaces = first.createWorkspaceController();
-      addTearDown(workspaces.dispose);
-      workspaces.activeController!.importIC(
+      final container = createTestContainer(first);
+      addTearDown(container.dispose);
+      final workspaces = container.read(workspaceControllerProvider.notifier);
+      workspaces.activeController.importIC(
         '{"id":"shared","name":"Shared","nodes":[],"wires":[]}',
       );
       workspaces.addWorkspace('Second');
-      expect(
-        workspaces.activeController!.customDefinitions.single.id,
-        'shared',
-      );
+      expect(workspaces.activeController.customDefinitions.single.id, 'shared');
       expect(second.customComponents.customDefinitions, isEmpty);
       expect(
         () => first.customComponents.customDefinitions.clear(),

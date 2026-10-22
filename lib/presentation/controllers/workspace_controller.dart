@@ -1,88 +1,97 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'circuit_controller.dart';
 
+@immutable
 class Workspace {
   final String id;
-  String name;
-  final CircuitController controller;
-
-  Workspace({required this.id, required this.name, required this.controller});
+  final String name;
+  const Workspace({required this.id, required this.name});
 }
 
-class WorkspaceController extends ChangeNotifier {
-  final CircuitController Function() _createCircuitController;
-  final List<Workspace> _workspaces = [];
-  int _nextWorkspaceId = 0;
-  int _activeIndex = -1;
+@immutable
+class WorkspaceState {
+  final List<Workspace> workspaces;
+  final int activeIndex;
+  WorkspaceState({
+    required List<Workspace> workspaces,
+    required this.activeIndex,
+  }) : workspaces = List.unmodifiable(workspaces);
+  Workspace get activeWorkspace => workspaces[activeIndex];
+}
 
-  List<Workspace> get workspaces => List.unmodifiable(_workspaces);
-  int get activeIndex => _activeIndex;
+final workspaceControllerProvider =
+    NotifierProvider<WorkspaceController, WorkspaceState>(
+      WorkspaceController.new,
+    );
 
-  Workspace? get activeWorkspace =>
-      (_activeIndex >= 0 && _activeIndex < _workspaces.length)
-      ? _workspaces[_activeIndex]
-      : null;
+/// Owns tab metadata and the explicit open/close lifetime of each document.
+class WorkspaceController extends Notifier<WorkspaceState> {
+  int _nextWorkspaceId = 1;
 
-  CircuitController? get activeController => activeWorkspace?.controller;
+  @override
+  WorkspaceState build() => WorkspaceState(
+    workspaces: [const Workspace(id: 'workspace_0', name: 'Main Workspace')],
+    activeIndex: 0,
+  );
 
-  WorkspaceController({
-    required CircuitController Function() createCircuitController,
-  }) : _createCircuitController = createCircuitController {
-    // Start with one workspace
-    addWorkspace('Main Workspace');
-  }
+  List<Workspace> get workspaces => state.workspaces;
+  int get activeIndex => state.activeIndex;
+  Workspace get activeWorkspace => state.activeWorkspace;
+  CircuitController get activeController => controllerFor(activeWorkspace.id);
+  CircuitController controllerFor(String id) =>
+      ref.read(circuitControllerProvider(id).notifier);
 
   void addWorkspace(String name) {
-    final controller = _createCircuitController();
     final workspace = Workspace(
       id: 'workspace_${_nextWorkspaceId++}',
       name: name,
-      controller: controller,
     );
-    _workspaces.add(workspace);
-    _activeIndex = _workspaces.length - 1;
-    notifyListeners();
+    state = WorkspaceState(
+      workspaces: [...state.workspaces, workspace],
+      activeIndex: state.workspaces.length,
+    );
   }
 
   void switchWorkspace(int index) {
-    if (index >= 0 && index < _workspaces.length) {
-      _activeIndex = index;
-      notifyListeners();
+    if (index < 0 ||
+        index >= state.workspaces.length ||
+        index == state.activeIndex) {
+      return;
     }
+    state = WorkspaceState(workspaces: state.workspaces, activeIndex: index);
   }
 
   void closeWorkspace(int index) {
-    if (index >= 0 && index < _workspaces.length) {
-      // If closing the last workspace, we might want to prevent it or add a new one.
-      final workspace = _workspaces[index];
-      workspace.controller.dispose();
-      _workspaces.removeAt(index);
-
-      if (_workspaces.isEmpty) {
-        addWorkspace('Main Workspace');
-        return;
-      }
-      if (index < _activeIndex) {
-        _activeIndex--;
-      } else if (_activeIndex >= _workspaces.length) {
-        _activeIndex = _workspaces.length - 1;
-      }
-      notifyListeners();
+    if (index < 0 || index >= state.workspaces.length) return;
+    final closed = state.workspaces[index];
+    controllerFor(closed.id).close();
+    final remaining = [...state.workspaces]..removeAt(index);
+    if (remaining.isEmpty) {
+      remaining.add(
+        Workspace(
+          id: 'workspace_${_nextWorkspaceId++}',
+          name: 'Main Workspace',
+        ),
+      );
     }
+    var activeIndex = state.activeIndex;
+    if (index < activeIndex) activeIndex--;
+    if (activeIndex >= remaining.length) activeIndex = remaining.length - 1;
+    state = WorkspaceState(workspaces: remaining, activeIndex: activeIndex);
   }
 
   void renameWorkspace(int index, String newName) {
-    if (index >= 0 && index < _workspaces.length) {
-      _workspaces[index].name = newName;
-      notifyListeners();
-    }
-  }
-
-  @override
-  void dispose() {
-    for (final workspace in _workspaces) {
-      workspace.controller.dispose();
-    }
-    super.dispose();
+    if (index < 0 || index >= state.workspaces.length) return;
+    state = WorkspaceState(
+      workspaces: [
+        for (var i = 0; i < state.workspaces.length; i++)
+          if (i == index)
+            Workspace(id: state.workspaces[i].id, name: newName)
+          else
+            state.workspaces[i],
+      ],
+      activeIndex: state.activeIndex,
+    );
   }
 }

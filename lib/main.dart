@@ -1,5 +1,7 @@
 import 'package:digital_logic_sim_2/core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:digital_logic_sim_2/presentation/providers/editor_dependencies.dart';
 import 'package:digital_logic_sim_2/features/component_library/preset_library.dart';
 import 'package:digital_logic_sim_2/core/di/injection.dart';
 import 'package:digital_logic_sim_2/presentation/screens/logic_designer_screen.dart';
@@ -19,21 +21,27 @@ class LogicDesignerApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: AppConstants.appTitle,
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xff0f172a),
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xff38bdf8),
-          brightness: Brightness.dark,
+    return ProviderScope(
+      overrides: [
+        circuitSimulatorProvider.overrideWithValue(dependencies.simulator),
+        customComponentManagerProvider.overrideWithValue(
+          dependencies.customComponents,
         ),
-        useMaterial3: true,
-      ),
-      home: LogicDesignerScreen(
-        createWorkspaceController: dependencies.createWorkspaceController,
-        generateCircuit: dependencies.generateCircuit,
+        generateCircuitProvider.overrideWithValue(dependencies.generateCircuit),
+      ],
+      child: MaterialApp(
+        title: AppConstants.appTitle,
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          brightness: Brightness.dark,
+          scaffoldBackgroundColor: const Color(0xff0f172a),
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: const Color(0xff38bdf8),
+            brightness: Brightness.dark,
+          ),
+          useMaterial3: true,
+        ),
+        home: const LogicDesignerScreen(),
       ),
     );
   }

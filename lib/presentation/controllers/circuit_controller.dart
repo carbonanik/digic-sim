@@ -1,888 +1,213 @@
-import 'package:digital_logic_sim_2/core/utils/extensions.dart';
-import 'package:digital_logic_sim_2/core/utils/pathfinder.dart';
-import 'package:digital_logic_sim_2/domain/entities/pin_layout.dart';
+import 'dart:ui';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:digital_logic_sim_2/domain/entities/circuit.dart';
 import 'package:digital_logic_sim_2/domain/entities/circuit_node.dart';
 import 'package:digital_logic_sim_2/domain/entities/nodes/composed_node.dart';
-import 'package:digital_logic_sim_2/domain/entities/nodes/io_nodes.dart';
 import 'package:digital_logic_sim_2/domain/entities/pin.dart';
+import 'package:digital_logic_sim_2/domain/entities/pin_layout.dart';
 import 'package:digital_logic_sim_2/domain/entities/wire.dart';
 import 'package:digital_logic_sim_2/presentation/canvas/hit_test.dart';
-import 'package:digital_logic_sim_2/presentation/controllers/commands/circuit_command.dart';
-import 'package:digital_logic_sim_2/presentation/controllers/commands/command_history.dart';
-import 'package:digital_logic_sim_2/presentation/controllers/create_node_factory.dart';
-import 'package:digital_logic_sim_2/presentation/controllers/custom_component_manager.dart';
-import 'package:digital_logic_sim_2/presentation/controllers/grid.dart';
-import 'package:digital_logic_sim_2/presentation/controllers/circuit_simulation_service.dart';
-import 'package:digital_logic_sim_2/presentation/controllers/wire_routing_service.dart';
-import 'package:digital_logic_sim_2/presentation/controllers/editor_state.dart';
+import 'package:digital_logic_sim_2/presentation/providers/editor_dependencies.dart';
 import 'package:digital_logic_sim_2/presentation/tools/editor_tools.dart';
-import 'package:flutter/material.dart';
+import 'circuit/circuit_document_actions.dart';
+import 'circuit/circuit_session.dart';
+import 'circuit/circuit_view_state.dart';
+import 'circuit/custom_component_actions.dart';
+import 'circuit/editor_interaction_controller.dart';
+import 'circuit/node_movement_controller.dart';
+import 'circuit/wire_interaction_controller.dart';
+import 'circuit_simulation_service.dart';
+import 'create_node_factory.dart';
+import 'custom_component_manager.dart';
+import 'grid.dart';
 
-class CircuitController extends ChangeNotifier {
-  final CreateNodeFactory createNodeFactory;
-  final Grid grid;
-  final EditorState editor;
-  final CircuitSimulationService _simulationService;
-  final CustomComponentManager _customComponentManager;
-  final WireRoutingService _wireRoutingService;
+final circuitControllerProvider = NotifierProvider.autoDispose
+    .family<CircuitController, CircuitViewState, String>(CircuitController.new);
 
-  CircuitController({
-    required this.createNodeFactory,
-    required this.grid,
-    required CircuitSimulationService simulationService,
-    required CustomComponentManager customComponentManager,
-    WireRoutingService? wireRoutingService,
-    EditorState? editor,
-  }) : editor = editor ?? EditorState(),
-       _simulationService = simulationService,
-       _customComponentManager = customComponentManager,
-       _wireRoutingService = wireRoutingService ?? WireRoutingService();
+/// Adapts workspace actions to immutable Riverpod UI state. Editing algorithms,
+/// gesture state, persistence, and simulation resource ownership are delegated.
+class CircuitController extends Notifier<CircuitViewState> {
+  final String workspaceId;
+  CircuitController(this.workspaceId);
+
+  late CircuitSession _session;
+  late CircuitDocumentActions _document;
+  late EditorInteractionController _interaction;
+  late WireInteractionController _wires;
+  late NodeMovementController _movement;
+  late CustomComponentActions _components;
+  late CustomComponentManager _catalog;
+  late VoidCallback _releaseWorkspace;
 
   @override
-  void dispose() {
-    _simulationService.dispose();
-    super.dispose();
+  CircuitViewState build() {
+    _catalog = ref.watch(customComponentManagerProvider);
+    _session = CircuitSession(
+      nodeFactory: CreateNodeFactory(),
+      grid: Grid(),
+      simulation: CircuitSimulationService(
+        simulator: ref.watch(circuitSimulatorProvider),
+      ),
+    );
+    _document = CircuitDocumentActions(_session);
+    _interaction = EditorInteractionController(_session);
+    _wires = WireInteractionController(_session);
+    _movement = NodeMovementController(_session);
+    _components = CustomComponentActions(_session, _catalog);
+    // A workspace is a document, so it survives temporarily having no widgets.
+    final lifetime = ref.keepAlive();
+    _releaseWorkspace = lifetime.close;
+    _session.onUiChanged = () {
+      if (ref.mounted && !_session.isClosed) {
+        state = CircuitViewState.fromSession(_session);
+      }
+    };
+    ref.onDispose(_session.dispose);
+    return CircuitViewState.fromSession(_session);
   }
 
-  // Simulation Getters
-  double get simulationFps => _simulationService.simulationFps;
-  double get averageSimulationMs => _simulationService.averageSimulationMs;
-  int get lastSimulationSteps => _simulationService.lastSimulationSteps;
-  bool get lastSimulationStabilized =>
-      _simulationService.lastSimulationStabilized;
-
-  // Custom Definition Delegation
-  List<SubCircuitDefinition> get customDefinitions =>
-      _customComponentManager.customDefinitions;
-
-  String exportIC(SubCircuitDefinition definition) {
-    return _customComponentManager.exportIC(definition);
+  /// Stop input/timers immediately; Riverpod releases the provider after its
+  /// remaining widgets detach. Late pointer and dialog callbacks become no-ops.
+  void close() {
+    _session.dispose();
+    _releaseWorkspace();
   }
 
-  void importIC(String json) {
-    final definition = _customComponentManager.importIC(json);
-    if (definition != null) {
-      notifyListeners();
-    }
+  void _run(VoidCallback action) {
+    if (!_session.isClosed && ref.mounted) action();
   }
 
-  void removeCustomDefinition(SubCircuitDefinition definition) {
-    _customComponentManager.removeCustomDefinition(definition);
-    notifyListeners();
-  }
-
-  // Circuit State
-  Circuit circuit = Circuit(nodes: [], wires: []);
-
-  // EditorState Delegation Getters & Setters
-  EditorTool get selectedTool => editor.selectedTool;
-  set selectedTool(EditorTool tool) => editor.selectedTool = tool;
-
+  // Runtime access for hit testing and painting. Edits go through actions;
+  // application UI observes the immutable provider state.
+  Circuit get circuit => _session.circuit;
+  Grid get grid => _session.grid;
+  EditorTool get selectedTool => _session.editor.selectedTool;
   SubCircuitDefinition? get selectedCustomComponent =>
-      editor.selectedCustomComponent;
-  set selectedCustomComponent(SubCircuitDefinition? component) =>
-      editor.selectedCustomComponent = component;
+      _session.editor.selectedCustomComponent;
+  Set<String> get selectedNodeIds =>
+      Set.unmodifiable(_session.editor.selectedNodeIds);
+  String? get selectedWireId => _session.editor.selectedWireId;
+  Rect? get selectionRect => _session.editor.selectionRect;
+  PinSelection? get wireStart => _session.editor.wireStart;
+  PinHit? get hoveredPin => _session.editor.hoveredPin;
+  String? get hoveredNodeId => _session.editor.hoveredNodeId;
+  Offset? get mousePosition => _session.editor.mousePosition;
+  Offset? get temporaryWireEnd => _session.editor.temporaryWireEnd;
+  WireHit? get draggedWireHit => _session.editor.draggedWireHit;
+  bool get snapToGridEnabled => _session.snapToGridEnabled;
+  bool get canUndo => _session.history.canUndo;
+  bool get canRedo => _session.history.canRedo;
+  bool get isClosed => _session.isClosed;
+  int get circuitRepaintCounter => _session.circuitRepaint.value;
+  int get overlayRepaintCounter => _session.overlayRepaint.value;
+  ValueListenable<int> get circuitRepaint => _session.circuitRepaint;
+  ValueListenable<int> get overlayRepaint => _session.overlayRepaint;
+  double get simulationFps => _session.simulation.simulationFps;
+  double get averageSimulationMs => _session.simulation.averageSimulationMs;
+  int get lastSimulationSteps => _session.simulation.lastSimulationSteps;
+  bool get lastSimulationStabilized =>
+      _session.simulation.lastSimulationStabilized;
+  List<SubCircuitDefinition> get customDefinitions =>
+      _catalog.customDefinitions;
 
-  Set<String> get selectedNodeIds => editor.selectedNodeIds;
-  set selectedNodeIds(Set<String> ids) => editor.selectedNodeIds = ids;
-
-  String? get selectedWireId => editor.selectedWireId;
-  set selectedWireId(String? id) => editor.selectedWireId = id;
-
-  Rect? get selectionRect => editor.selectionRect;
-  set selectionRect(Rect? rect) => editor.selectionRect = rect;
-
-  Offset? get _selectionStart => editor.selectionStart;
-  set _selectionStart(Offset? start) => editor.selectionStart = start;
-
-  PinSelection? get wireStart => editor.wireStart;
-  set wireStart(PinSelection? selection) => editor.wireStart = selection;
-
-  PinHit? get hoveredPin => editor.hoveredPin;
-  set hoveredPin(PinHit? hit) => editor.hoveredPin = hit;
-
-  String? get hoveredNodeId => editor.hoveredNodeId;
-  set hoveredNodeId(String? id) => editor.hoveredNodeId = id;
-
-  Offset? get mousePosition => editor.mousePosition;
-  set mousePosition(Offset? pos) => editor.mousePosition = pos;
-
-  Offset? get temporaryWireEnd => editor.temporaryWireEnd;
-  set temporaryWireEnd(Offset? end) => editor.temporaryWireEnd = end;
-
-  WireHit? get draggedWireHit => editor.draggedWireHit;
-  set draggedWireHit(WireHit? hit) => editor.draggedWireHit = hit;
-
-  List<Offset>? get _initialWaypoints => editor.initialWaypoints;
-  set _initialWaypoints(List<Offset>? waypoints) =>
-      editor.initialWaypoints = waypoints;
-
-  final CommandHistory commandHistory = CommandHistory();
-  bool get canUndo => commandHistory.canUndo;
-  bool get canRedo => commandHistory.canRedo;
-
-  int circuitRepaintCounter = 0;
-  int overlayRepaintCounter = 0;
-
-  Offset _dragAccumulator = Offset.zero;
-  bool snapToGridEnabled = true;
-
-  bool _pathsDirty = true;
-
-  void toggleGridSnapping() {
-    snapToGridEnabled = !snapToGridEnabled;
-    notifyListeners();
-  }
-
-  void resetDragAccumulator() {
-    _dragAccumulator = Offset.zero;
-  }
-
-  void selectTool(EditorTool tool) {
-    selectedTool = tool;
-    if (tool != EditorTool.custom) {
-      selectedCustomComponent = null;
-    }
-    selectedNodeIds.clear();
-    selectedWireId = null;
-    selectionRect = null;
-    wireStart = null;
-    hoveredPin = null;
-    temporaryWireEnd = null;
-    notifyListeners();
-  }
-
-  void selectCustomComponent(SubCircuitDefinition definition) {
-    selectedTool = EditorTool.custom;
-    selectedCustomComponent = definition;
-    selectedNodeIds.clear();
-    selectedWireId = null;
-    selectionRect = null;
-    wireStart = null;
-    hoveredPin = null;
-    temporaryWireEnd = null;
-    notifyListeners();
-  }
-
+  void toggleGridSnapping() => _run(_interaction.toggleGridSnapping);
+  void selectTool(EditorTool tool) => _run(() => _interaction.selectTool(tool));
+  void selectCustomComponent(SubCircuitDefinition definition) =>
+      _run(() => _interaction.selectCustomComponent(definition));
+  void selectNode(String? nodeId, {bool multi = false}) =>
+      _run(() => _interaction.selectNode(nodeId, multi: multi));
+  void selectWire(String? wireId) =>
+      _run(() => _interaction.selectWire(wireId));
+  List<CircuitNode> getSelectedNodes() => _interaction.getSelectedNodes();
+  bool isNodeSelected(String nodeId) => _interaction.isNodeSelected(nodeId);
   void updateHoverState({
     required Offset? position,
     required PinHit? pinHit,
     required String? nodeId,
-  }) {
-    final snapped = position != null ? grid.snap(position) : null;
+  }) => _run(
+    () => _interaction.updateHoverState(
+      position: position,
+      pinHit: pinHit,
+      nodeId: nodeId,
+    ),
+  );
+  void startMarqueeSelection(Offset position) =>
+      _run(() => _interaction.startMarqueeSelection(position));
+  void updateMarqueeSelection(Offset position) =>
+      _run(() => _interaction.updateMarqueeSelection(position));
+  void endMarqueeSelection() => _run(_interaction.endMarqueeSelection);
 
-    final changed =
-        mousePosition != snapped ||
-        hoveredPin?.node.id != pinHit?.node.id ||
-        hoveredPin?.pin.id != pinHit?.pin.id ||
-        hoveredNodeId != nodeId;
-
-    if (!changed) return;
-
-    mousePosition = snapped;
-    hoveredPin = pinHit;
-    hoveredNodeId = nodeId;
-
-    notifyOverlayChanged();
-  }
-
-  void notifyCircuitChanged() {
-    circuitRepaintCounter++;
-    overlayRepaintCounter++;
-    super.notifyListeners();
-  }
-
-  void notifyOverlayChanged() {
-    overlayRepaintCounter++;
-    super.notifyListeners();
-  }
-
-  void _simulateCircuit() {
-    _simulationService.simulate(circuit);
-  }
-
-  void _updateClockTimer() {
-    _simulationService.updateClockTimer(
-      circuit: circuit,
-      onTick: notifyCircuitChanged,
-    );
-  }
-
-  void clear() {
-    circuit.nodes.clear();
-    circuit.wires.clear();
-    editor.reset();
-    _updateClockTimer();
-    _pathsDirty = true;
-    commandHistory.clear();
-    notifyCircuitChanged();
-  }
-
-  void startWireDrag(WireHit hit, Offset mousePos) {
-    draggedWireHit = hit;
-
-    final wire = hit.wire;
-    if (wire.waypoints.isEmpty) {
-      final start = _wireRoutingService.getWireStart(circuit, wire);
-      final end = _wireRoutingService.getWireEnd(circuit, wire);
-      if (start != null && end != null) {
-        final points = PathFinder.findPath(
-          start: start,
-          end: end,
-          obstacles: circuit.nodes.toObstacles(),
-        );
-        _initialWaypoints = points.length <= 2
-            ? []
-            : points.sublist(1, points.length - 1);
-      } else {
-        _initialWaypoints = [];
-      }
+  void clear() => _run(_document.clear);
+  void addGateFromTool(Offset position) => _run(() {
+    final definition = selectedCustomComponent;
+    if (selectedTool == EditorTool.custom && definition != null) {
+      _components.addCustomComponent(definition, position);
     } else {
-      _initialWaypoints = List.from(wire.waypoints);
+      _document.addGateFromTool(position);
     }
-    notifyListeners();
-  }
-
-  void updateWireDrag(Offset mousePos) {
-    if (draggedWireHit == null || _initialWaypoints == null) return;
-
-    final snappedMouse = grid.snap(mousePos);
-    final wire = draggedWireHit!.wire;
-    final segmentIndex = draggedWireHit!.segmentIndex;
-
-    final start = _wireRoutingService.getWireStart(circuit, wire);
-    final end = _wireRoutingService.getWireEnd(circuit, wire);
-
-    if (start == null || end == null) return;
-
-    final points = [start, ..._initialWaypoints!, end];
-
-    if (segmentIndex < 0 || segmentIndex >= points.length - 1) return;
-
-    final p1 = points[segmentIndex];
-    final p2 = points[segmentIndex + 1];
-
-    final isHorizontal = (p1.dy - p2.dy).abs() < 0.1;
-    final isVertical = (p1.dx - p2.dx).abs() < 0.1;
-
-    if (!isHorizontal && !isVertical) return;
-
-    final List<Offset> newPoints;
-
-    if (isHorizontal) {
-      final newY = snappedMouse.dy;
-      newPoints = [
-        ...points.take(segmentIndex + 1),
-        Offset(p1.dx, newY),
-        Offset(p2.dx, newY),
-        ...points.skip(segmentIndex + 1),
-      ];
-    } else {
-      final newX = snappedMouse.dx;
-      newPoints = [
-        ...points.take(segmentIndex + 1),
-        Offset(newX, p1.dy),
-        Offset(newX, p2.dy),
-        ...points.skip(segmentIndex + 1),
-      ];
-    }
-
-    final simplifiedPoints = _wireRoutingService.simplifyOrthogonalPoints(
-      newPoints,
-    );
-
-    final newWaypoints = simplifiedPoints.length <= 2
-        ? <Offset>[]
-        : simplifiedPoints.sublist(1, simplifiedPoints.length - 1);
-
-    final wireIndex = circuit.wires.indexWhere((w) => w.id == wire.id);
-
-    if (wireIndex != -1) {
-      circuit.wires[wireIndex] = wire.copyWith(waypoints: newWaypoints);
-      _pathsDirty = true;
-      _recalculatePaths();
-      notifyCircuitChanged();
-    }
-  }
-
-  void endWireDrag() {
-    if (draggedWireHit != null) {
-      if (_initialWaypoints != null) {
-        final currentWaypoints = draggedWireHit!.wire.waypoints;
-        commandHistory.push(
-          UpdateWireWaypointsCommand(
-            wireId: draggedWireHit!.wire.id,
-            oldWaypoints: _initialWaypoints!,
-            newWaypoints: List.from(currentWaypoints),
-          ),
-        );
-      }
-      draggedWireHit = null;
-      _initialWaypoints = null;
-      _pathsDirty = true;
-      _recalculatePaths();
-      notifyCircuitChanged();
-    }
-  }
-
-  void endNodeMove() {
-    _wireRoutingService.clearDragWaypoints();
-    if (selectedNodeIds.isNotEmpty) {
-      _pathsDirty = true;
-      _recalculatePaths();
-      notifyCircuitChanged();
-    }
-  }
-
-  void addGateFromTool(Offset position) {
-    position = grid.snap(position);
-
-    if (selectedTool == EditorTool.custom && selectedCustomComponent != null) {
-      addCustomComponent(selectedCustomComponent!, position);
-      return;
-    }
-
-    final node = createNodeFactory.create(selectedTool, position);
-    circuit.nodes.add(node);
-
-    _updateClockTimer();
-
-    commandHistory.push(AddNodesCommand([node]));
-
-    _simulateCircuit();
-    _pathsDirty = true;
-    _recalculatePaths();
-    notifyCircuitChanged();
-  }
-
-  void removeNode(CircuitNode node) {
-    final removedWires = circuit.wires.where((w) {
-      return w.fromNodeId == node.id || w.toNodeId == node.id;
-    }).toList();
-
-    for (final wire in removedWires) {
-      circuit.wires.remove(wire);
-      if (selectedWireId == wire.id) {
-        selectedWireId = null;
-      }
-    }
-
-    circuit.nodes.remove(node);
-    selectedNodeIds.remove(node.id);
-
-    _updateClockTimer();
-
-    commandHistory.push(
-      RemoveNodesAndWiresCommand(nodes: [node], wires: removedWires),
-    );
-
-    _simulateCircuit();
-    _pathsDirty = true;
-    _recalculatePaths();
-    notifyCircuitChanged();
-  }
-
-  void removeWire(Wire wire) {
-    circuit.wires.remove(wire);
-
-    if (selectedWireId == wire.id) {
-      selectedWireId = null;
-    }
-
-    commandHistory.push(RemoveWireCommand(wire));
-
-    _simulateCircuit();
-    _pathsDirty = true;
-    _recalculatePaths();
-    notifyCircuitChanged();
-  }
-
-  void deleteSelected() {
-    if (selectedNodeIds.isNotEmpty) {
-      final nodesToRemove = circuit.nodes
-          .where((n) => selectedNodeIds.contains(n.id))
-          .toList();
-
-      final removedWires = <Wire>[];
-      final removedNodes = <CircuitNode>[];
-
-      for (final node in nodesToRemove) {
-        final nodeWires = circuit.wires.where((w) {
-          return w.fromNodeId == node.id || w.toNodeId == node.id;
-        }).toList();
-
-        for (final wire in nodeWires) {
-          circuit.wires.remove(wire);
-          if (selectedWireId == wire.id) {
-            selectedWireId = null;
-          }
-          if (!removedWires.contains(wire)) {
-            removedWires.add(wire);
-          }
-        }
-
-        circuit.nodes.remove(node);
-        removedNodes.add(node);
-      }
-
-      selectedNodeIds.clear();
-
-      _updateClockTimer();
-
-      commandHistory.push(
-        RemoveNodesAndWiresCommand(nodes: removedNodes, wires: removedWires),
-      );
-
-      _simulateCircuit();
-      _pathsDirty = true;
-      _recalculatePaths();
-      notifyCircuitChanged();
-    } else if (selectedWireId != null) {
-      final wire = circuit.wires
-          .where((w) => w.id == selectedWireId)
-          .firstOrNull;
-      if (wire != null) {
-        removeWire(wire);
-      }
-    }
-  }
-
-  void resetWirePath(String wireId) {
-    final wireIndex = circuit.wires.indexWhere((w) => w.id == wireId);
-    if (wireIndex != -1) {
-      final oldWire = circuit.wires[wireIndex];
-      circuit.wires[wireIndex] = oldWire.copyWith(waypoints: []);
-      _pathsDirty = true;
-      _recalculatePaths();
-      notifyListeners();
-    }
-  }
-
-  void undo() {
-    if (commandHistory.undo(circuit)) {
-      _updateClockTimer();
-      _simulateCircuit();
-      _pathsDirty = true;
-      _recalculatePaths();
-      notifyCircuitChanged();
-    }
-  }
-
-  void redo() {
-    if (commandHistory.redo(circuit)) {
-      _updateClockTimer();
-      _simulateCircuit();
-      _pathsDirty = true;
-      _recalculatePaths();
-      notifyCircuitChanged();
-    }
-  }
-
-  void selectNode(String? nodeId, {bool multi = false}) {
-    if (nodeId == null) {
-      selectedNodeIds.clear();
-    } else {
-      if (multi) {
-        if (selectedNodeIds.contains(nodeId)) {
-          selectedNodeIds.remove(nodeId);
-        } else {
-          selectedNodeIds.add(nodeId);
-        }
-      } else {
-        if (!selectedNodeIds.contains(nodeId)) {
-          selectedNodeIds = {nodeId};
-        }
-      }
-    }
-    selectedWireId = null;
-    notifyCircuitChanged();
-  }
-
-  void selectWire(String? wireId) {
-    selectedWireId = wireId;
-    selectedNodeIds.clear();
-    notifyCircuitChanged();
-  }
-
-  void moveSelectedNodes(Offset delta) {
-    if (selectedNodeIds.isEmpty) return;
-
-    if (!snapToGridEnabled) {
-      for (final node in circuit.nodes) {
-        if (selectedNodeIds.contains(node.id)) {
-          node.position += delta;
-        }
-      }
-      final affectedWireIds = circuit.wires
-          .where(
-            (w) =>
-                selectedNodeIds.contains(w.fromNodeId) ||
-                selectedNodeIds.contains(w.toNodeId),
-          )
-          .map((w) => w.id)
-          .toList();
-
-      _pathsDirty = true;
-      _recalculatePaths(onlyWireIds: affectedWireIds, translationDelta: delta);
-      notifyCircuitChanged();
-      return;
-    }
-
-    _dragAccumulator += delta;
-    const double gridSize = 16.0;
-    final int stepsX = (_dragAccumulator.dx / gridSize).round();
-    final int stepsY = (_dragAccumulator.dy / gridSize).round();
-
-    if (stepsX != 0 || stepsY != 0) {
-      final snappedDelta = Offset(stepsX * gridSize, gridSize * stepsY);
-      for (final node in circuit.nodes) {
-        if (selectedNodeIds.contains(node.id)) {
-          node.position = grid.snap(node.position) + snappedDelta;
-        }
-      }
-      _dragAccumulator -= snappedDelta;
-
-      final affectedWireIds = circuit.wires
-          .where(
-            (w) =>
-                selectedNodeIds.contains(w.fromNodeId) ||
-                selectedNodeIds.contains(w.toNodeId),
-          )
-          .map((w) => w.id)
-          .toList();
-
-      _recalculatePaths(
-        onlyWireIds: affectedWireIds,
-        translationDelta: snappedDelta,
-      );
-      notifyCircuitChanged();
-    }
-  }
-
-  List<CircuitNode> getSelectedNodes() {
-    return circuit.nodes.where((n) => selectedNodeIds.contains(n.id)).toList();
-  }
-
-  bool isNodeSelected(String nodeId) => selectedNodeIds.contains(nodeId);
-
-  void handleNodeAction(String nodeId, Offset localPosition) {
-    final node = circuit.nodes.where((n) => n.id == nodeId).firstOrNull;
-    if (node == null) return;
-
-    if (node.onAction(localPosition)) {
-      _simulateCircuit();
-      notifyCircuitChanged();
-    }
-  }
-
-  void updateNodeLabel(String nodeId, String label) {
-    final node = circuit.nodes.where((n) => n.id == nodeId).firstOrNull;
-    if (node == null) return;
-
-    if (node is InputNode) {
-      node.label = label;
-    } else if (node is OutputNode) {
-      node.label = label;
-    }
-
-    notifyCircuitChanged();
-  }
-
-  void updateNodeLabels(Map<String, String> labels) {
-    bool changed = false;
-    for (final node in circuit.nodes) {
-      final label = labels[node.id];
-      if (label == null) continue;
-      if (node is InputNode) {
-        node.label = label;
-        changed = true;
-      } else if (node is OutputNode) {
-        node.label = label;
-        changed = true;
-      }
-    }
-    if (changed) notifyCircuitChanged();
-  }
-
-  void duplicateSelected() {
-    if (selectedNodeIds.isEmpty) return;
-
-    final nodesToDuplicate = circuit.nodes
-        .where((n) => selectedNodeIds.contains(n.id))
-        .toList();
-
-    final newNodes = <CircuitNode>[];
-    for (final node in nodesToDuplicate) {
-      final newNode = node.clone(UniqueKey().toString());
-      newNode.position = node.position + const Offset(32, 32);
-      circuit.nodes.add(newNode);
-      newNodes.add(newNode);
-    }
-
-    selectedNodeIds = newNodes.map((n) => n.id).toSet();
-    selectedWireId = null;
-
-    commandHistory.push(AddNodesCommand(newNodes));
-
-    _pathsDirty = true;
-    _recalculatePaths();
-    notifyCircuitChanged();
-  }
-
-  void startWire(CircuitNode node, Pin pin) {
-    if (pin.isInput) return;
-
-    wireStart = PinSelection(node: node, pin: pin);
-    temporaryWireEnd = node.position + pin.localPosition;
-    notifyOverlayChanged();
-  }
-
-  void updateTemporaryWire(Offset point) {
-    temporaryWireEnd = grid.snap(point);
-    notifyOverlayChanged();
-  }
-
-  void finishWire(CircuitNode node, Pin pin) {
-    if (wireStart == null) return;
-    if (!pin.isInput) return;
-
-    final start = wireStart!;
-
-    if (start.node.id == node.id) {
-      cancelWire();
-      return;
-    }
-
-    final inputAlreadyUsed = circuit.wires.any((wire) {
-      return wire.toNodeId == node.id && wire.toPinId == pin.id;
-    });
-
-    if (inputAlreadyUsed) {
-      cancelWire();
-      return;
-    }
-
-    final wire = Wire(
-      id: UniqueKey().toString(),
-      fromNodeId: start.node.id,
-      fromPinId: start.pin.id,
-      toNodeId: node.id,
-      toPinId: pin.id,
-    );
-    circuit.wires.add(wire);
-
-    commandHistory.push(AddWiresCommand([wire]));
-
-    wireStart = null;
-    temporaryWireEnd = null;
-
-    _simulateCircuit();
-    _pathsDirty = true;
-    _recalculatePaths();
-    notifyCircuitChanged();
-  }
-
-  void cancelWire() {
-    wireStart = null;
-    temporaryWireEnd = null;
-    notifyOverlayChanged();
-  }
-
+  });
+  void removeNode(CircuitNode node) => _run(() => _document.removeNode(node));
+  void removeWire(Wire wire) => _run(() => _document.removeWire(wire));
+  void deleteSelected() => _run(_document.deleteSelected);
+  void undo() => _run(_document.undo);
+  void redo() => _run(_document.redo);
+  void handleNodeAction(String nodeId, Offset localPosition) =>
+      _run(() => _document.handleNodeAction(nodeId, localPosition));
+  void updateNodeLabel(String nodeId, String label) =>
+      _run(() => _document.updateNodeLabel(nodeId, label));
+  void updateNodeLabels(Map<String, String> labels) =>
+      _run(() => _document.updateNodeLabels(labels));
+  void duplicateSelected() => _run(_document.duplicateSelected);
+  void duplicateNode(CircuitNode node) =>
+      _run(() => _document.duplicateNode(node));
+  void loadDefinition(SubCircuitDefinition definition) =>
+      _run(() => _document.loadDefinition(definition));
+  void setClockFrequency(String nodeId, double frequency) =>
+      _run(() => _document.setClockFrequency(nodeId, frequency));
+
+  void startWire(CircuitNode node, Pin pin) =>
+      _run(() => _wires.startWire(node, pin));
+  void updateTemporaryWire(Offset point) =>
+      _run(() => _wires.updateTemporaryWire(point));
+  void finishWire(CircuitNode node, Pin pin) =>
+      _run(() => _wires.finishWire(node, pin));
+  void cancelWire() => _run(_wires.cancelWire);
+  void startWireDrag(WireHit hit, Offset mousePos) =>
+      _run(() => _wires.startWireDrag(hit, mousePos));
+  void updateWireDrag(Offset mousePos) =>
+      _run(() => _wires.updateWireDrag(mousePos));
+  void endWireDrag() => _run(_wires.endWireDrag);
+  void resetWirePath(String wireId) => _run(() => _wires.resetWirePath(wireId));
+  void resetDragAccumulator() => _run(_movement.resetDragAccumulator);
+  void moveSelectedNodes(Offset delta) =>
+      _run(() => _movement.moveSelectedNodes(delta));
+  void endNodeMove() => _run(_movement.endNodeMove);
+
+  String exportIC(SubCircuitDefinition definition) =>
+      _components.exportIC(definition);
+  void importIC(String json) => _run(() => _components.importIC(json));
+  void removeCustomDefinition(SubCircuitDefinition definition) =>
+      _run(() => _components.removeCustomDefinition(definition));
+  void addCustomComponent(SubCircuitDefinition definition, Offset position) =>
+      _run(() => _components.addCustomComponent(definition, position));
+  void applyPinLayout(
+    SubCircuitDefinition definition,
+    Map<String, PinPlacement> placements,
+  ) => _run(() => _components.applyPinLayout(definition, placements));
   void saveCurrentAsComponent({
     required String name,
     required Color color,
     required List<String> inputLabels,
     required List<String> outputLabels,
     Map<String, PinPlacement>? pinPlacements,
-  }) {
-    if (circuit.nodes.isEmpty) return;
-
-    int inIdx = 0;
-    int outIdx = 0;
-    final clonedNodes = circuit.nodes.map((n) {
-      final clone = n.clone(n.id);
-      if (clone is InputNode) {
-        if (inIdx < inputLabels.length) {
-          clone.label = inputLabels[inIdx];
-        }
-        inIdx++;
-      } else if (clone is OutputNode) {
-        if (outIdx < outputLabels.length) {
-          clone.label = outputLabels[outIdx];
-        }
-        outIdx++;
-      }
-      return clone;
-    }).toList();
-    final clonedWires = circuit.wires
-        .map(
-          (w) => Wire(
-            id: w.id,
-            fromNodeId: w.fromNodeId,
-            fromPinId: w.fromPinId,
-            toNodeId: w.toNodeId,
-            toPinId: w.toPinId,
-            waypoints: List.from(w.waypoints),
-          ),
-        )
-        .toList();
-
-    final definition = SubCircuitDefinition(
-      id: name.replaceAll(' ', '_').toLowerCase(),
+  }) => _run(
+    () => _components.saveCurrentAsComponent(
       name: name,
-      nodes: clonedNodes,
-      wires: clonedWires,
       color: color,
       inputLabels: inputLabels,
       outputLabels: outputLabels,
       pinPlacements: pinPlacements,
-    );
-
-    _customComponentManager.saveCustomDefinition(definition);
-    notifyListeners();
-  }
-
-  void addCustomComponent(SubCircuitDefinition definition, Offset position) {
-    position = grid.snap(position);
-    final id = UniqueKey().toString();
-
-    final inputNodes = definition.nodes.whereType<InputNode>().toList();
-    final outputNodes = definition.nodes.whereType<OutputNode>().toList();
-
-    final inputPins = List.generate(inputNodes.length, (i) {
-      return Pin(
-        id: 'in_$i',
-        nodeId: id,
-        isInput: true,
-        localPosition: Offset(0, 32.0 + i * 16.0),
-      );
-    });
-
-    final outputPins = List.generate(outputNodes.length, (i) {
-      return Pin(
-        id: 'out_$i',
-        nodeId: id,
-        isInput: false,
-        localPosition: Offset(160, 32.0 + i * 16.0),
-      );
-    });
-
-    final node = ComposedNode(
-      id: id,
-      position: position,
-      definition: definition,
-      inputPins: inputPins,
-      outputPins: outputPins,
-    );
-    node.refreshLayout();
-
-    circuit.nodes.add(node);
-    commandHistory.push(AddNodesCommand([node]));
-
-    _simulateCircuit();
-    _pathsDirty = true;
-    _recalculatePaths();
-    notifyCircuitChanged();
-  }
-
-  void applyPinLayout(
-    SubCircuitDefinition definition,
-    Map<String, PinPlacement> newPlacements,
-  ) {
-    _customComponentManager.updatePinLayout(definition, newPlacements);
-
-    for (final node in circuit.nodes.whereType<ComposedNode>()) {
-      if (node.definition == definition) {
-        node.refreshLayout();
-      }
-    }
-
-    _pathsDirty = true;
-    _recalculatePaths();
-    notifyCircuitChanged();
-  }
-
-  void startMarqueeSelection(Offset position) {
-    _selectionStart = position;
-    selectionRect = Rect.fromPoints(position, position);
-    notifyOverlayChanged();
-  }
-
-  void updateMarqueeSelection(Offset position) {
-    if (_selectionStart == null) return;
-    selectionRect = Rect.fromPoints(_selectionStart!, position);
-
-    selectedNodeIds.clear();
-    final nodes = HitTesting.findNodesInRect(circuit, selectionRect!);
-    for (final node in nodes) {
-      selectedNodeIds.add(node.id);
-    }
-
-    notifyOverlayChanged();
-    notifyCircuitChanged();
-  }
-
-  void endMarqueeSelection() {
-    selectionRect = null;
-    _selectionStart = null;
-    notifyOverlayChanged();
-    notifyCircuitChanged();
-  }
-
-  void loadDefinition(SubCircuitDefinition definition) {
-    clear();
-
-    int inputIdx = 0;
-    int outputIdx = 0;
-
-    for (final node in definition.nodes) {
-      final newNode = node.clone(node.id);
-      if (newNode is InputNode) {
-        if (inputIdx < definition.inputLabels.length) {
-          newNode.label = definition.inputLabels[inputIdx];
-        }
-        inputIdx++;
-      } else if (newNode is OutputNode) {
-        if (outputIdx < definition.outputLabels.length) {
-          newNode.label = definition.outputLabels[outputIdx];
-        }
-        outputIdx++;
-      }
-      circuit.nodes.add(newNode);
-    }
-
-    for (final wire in definition.wires) {
-      circuit.wires.add(
-        Wire(
-          id: wire.id,
-          fromNodeId: wire.fromNodeId,
-          fromPinId: wire.fromPinId,
-          toNodeId: wire.toNodeId,
-          toPinId: wire.toPinId,
-          waypoints: List.from(wire.waypoints),
-        ),
-      );
-    }
-
-    _updateClockTimer();
-    _simulateCircuit();
-    _pathsDirty = true;
-    _recalculatePaths();
-    notifyCircuitChanged();
-  }
-
-  void _recalculatePaths({
-    List<String>? onlyWireIds,
-    Offset? translationDelta,
-  }) {
-    _wireRoutingService.recalculatePaths(
-      circuit: circuit,
-      selectedNodeIds: selectedNodeIds,
-      pathsDirty: _pathsDirty,
-      setPathsDirty: (dirty) => _pathsDirty = dirty,
-      onlyWireIds: onlyWireIds,
-      translationDelta: translationDelta,
-    );
-  }
+    ),
+  );
 }
