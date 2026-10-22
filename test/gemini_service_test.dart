@@ -1,4 +1,7 @@
 import 'dart:convert';
+import 'package:digital_logic_sim_2/domain/entities/nodes/composed_node.dart';
+import 'package:digital_logic_sim_2/domain/entities/nodes/io_nodes.dart';
+import 'package:digital_logic_sim_2/domain/entities/pin_layout.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -38,6 +41,78 @@ void main() {
       client: client,
     ).generateCircuit(apiKey: 'test-key', prompt: 'adder');
     expect(jsonDecode(result), {'nodes': [], 'wires': []});
+  });
+
+  test('Catalog uses real IC pin geometry and fallback labels', () {
+    final client = MockClient((_) async => http.Response('', 200));
+    addTearDown(client.close);
+    final definition = SubCircuitDefinition(
+      id: 'custom_layout',
+      name: 'Custom "IC"',
+      nodes: [
+        InputNode(
+          id: 'a',
+          position: Offset.zero,
+          inputPins: [],
+          outputPins: [],
+          label: 'A',
+        ),
+        InputNode(
+          id: 'b',
+          position: Offset.zero,
+          inputPins: [],
+          outputPins: [],
+          label: 'B',
+        ),
+        OutputNode(
+          id: 'out',
+          position: Offset.zero,
+          inputPins: [],
+          outputPins: [],
+          label: 'Result',
+        ),
+      ],
+      wires: [],
+      pinPlacements: {
+        'a': const PinPlacement(
+          pinKey: 'a',
+          side: PinSide.top,
+          order: 0,
+          gapUnits: 1,
+        ),
+        'b': const PinPlacement(pinKey: 'b', side: PinSide.top, order: 1),
+        'out': const PinPlacement(
+          pinKey: 'out',
+          side: PinSide.bottom,
+          order: 0,
+          gapUnits: 10,
+        ),
+      },
+    );
+    final prompt = GeminiService(
+      client: client,
+    ).buildSystemPrompt(availableComponents: [definition]);
+    final example =
+        jsonDecode(
+              prompt
+                  .split('Example JSON (copy pin geometry exactly):\n')
+                  .last
+                  .trim(),
+            )
+            as Map<String, dynamic>;
+    expect(example['definition']['name'], 'Custom "IC"');
+    expect(example['inputPins'], hasLength(2));
+    expect(example['outputPins'], hasLength(1));
+    expect(example['inputPins'][0]['localPosition'], {'dx': 48.0, 'dy': 0.0});
+    expect(example['inputPins'][1]['localPosition'], {'dx': 64.0, 'dy': 0.0});
+    expect(example['outputPins'][0]['localPosition'], {
+      'dx': 192.0,
+      'dy': 80.0,
+    });
+    expect(example['inputPins'][0]['id'], 'in_0');
+    expect(example['outputPins'][0]['id'], 'out_0');
+    expect(prompt, contains('Body size: 224.0 by 80.0 units.'));
+    expect(prompt, contains('label: "Result"'));
   });
 
   test('Maps API errors to the domain exception', () async {
