@@ -1,22 +1,25 @@
-import 'dart:convert';
-
-import 'package:digital_logic_sim_2/data/datasources/remote/gemini_api.dart';
+import 'package:digital_logic_sim_2/domain/usecases/generate_circuit.dart';
 import 'package:digital_logic_sim_2/features/component_library/preset_library.dart';
 import 'package:digital_logic_sim_2/presentation/controllers/circuit_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:digital_logic_sim_2/domain/entities/nodes/composed_node.dart';
-
 // ---------------------------------------------------------------------------
 // Public entry-point: call this from the top-bar AI button
 // ---------------------------------------------------------------------------
 
-void showAiPromptDialog(BuildContext context, CircuitController controller) {
+void showAiPromptDialog(
+  BuildContext context,
+  CircuitController controller,
+  GenerateCircuit generateCircuit,
+) {
   showDialog(
     context: context,
     barrierColor: Colors.black.withOpacity(0.7),
-    builder: (_) => _AiPromptDialog(controller: controller),
+    builder: (_) => _AiPromptDialog(
+      controller: controller,
+      generateCircuit: generateCircuit,
+    ),
   );
 }
 
@@ -32,7 +35,11 @@ enum _AiState { idle, loading, success, error }
 
 class _AiPromptDialog extends StatefulWidget {
   final CircuitController controller;
-  const _AiPromptDialog({required this.controller});
+  final GenerateCircuit generateCircuit;
+  const _AiPromptDialog({
+    required this.controller,
+    required this.generateCircuit,
+  });
 
   @override
   State<_AiPromptDialog> createState() => _AiPromptDialogState();
@@ -45,7 +52,8 @@ class _AiPromptDialogState extends State<_AiPromptDialog>
 
   _AiState _state = _AiState.idle;
   String _errorMessage = '';
-  String _generatedJson = '';
+  GeneratedCircuit? _generatedCircuit;
+  String get _generatedJson => _generatedCircuit?.json ?? '';
 
   late final AnimationController _shimmerController;
 
@@ -74,27 +82,12 @@ class _AiPromptDialogState extends State<_AiPromptDialog>
     final apiKey = _apiKeyController.text.trim();
     final prompt = _promptController.text.trim();
 
-    if (apiKey.isEmpty) {
-      setState(() {
-        _state = _AiState.error;
-        _errorMessage = 'Please enter your Gemini API key.';
-      });
-      return;
-    }
-    if (prompt.isEmpty) {
-      setState(() {
-        _state = _AiState.error;
-        _errorMessage = 'Please describe the circuit you want to generate.';
-      });
-      return;
-    }
-
     _savedApiKey = apiKey;
 
     setState(() {
       _state = _AiState.loading;
       _errorMessage = '';
-      _generatedJson = '';
+      _generatedCircuit = null;
     });
 
     try {
@@ -102,21 +95,18 @@ class _AiPromptDialogState extends State<_AiPromptDialog>
         ...PresetLibrary.presets,
         ...widget.controller.customDefinitions,
       ];
-      final json = await GeminiService.generateCircuit(
+      final generated = await widget.generateCircuit(
         apiKey: apiKey,
         prompt: prompt,
         availableComponents: availableComponents,
       );
+      if (!mounted) return;
       setState(() {
         _state = _AiState.success;
-        _generatedJson = json;
-      });
-    } on GeminiException catch (e) {
-      setState(() {
-        _state = _AiState.error;
-        _errorMessage = e.message;
+        _generatedCircuit = generated;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _state = _AiState.error;
         _errorMessage = e.toString();
@@ -127,9 +117,7 @@ class _AiPromptDialogState extends State<_AiPromptDialog>
   void _applyToCanvas() {
     if (_generatedJson.isEmpty) return;
     try {
-      final map = jsonDecode(_generatedJson) as Map<String, dynamic>;
-      final definition = SubCircuitDefinition.fromMap(map);
-      widget.controller.loadDefinition(definition);
+      widget.controller.loadDefinition(_generatedCircuit!.definition);
       Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -153,6 +141,7 @@ class _AiPromptDialogState extends State<_AiPromptDialog>
         ),
       );
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _state = _AiState.error;
         _errorMessage = 'Failed to parse circuit: $e';
@@ -272,7 +261,7 @@ class _AiPromptDialogState extends State<_AiPromptDialog>
                 final presets = PresetLibrary.presets;
                 final customDefs = widget.controller.customDefinitions;
                 final allComposed = [...presets, ...customDefs];
-                final systemPrompt = GeminiService.buildSystemPrompt(
+                final systemPrompt = widget.generateCircuit.buildSystemPrompt(
                   availableComponents: allComposed,
                 );
                 Clipboard.setData(ClipboardData(text: systemPrompt));

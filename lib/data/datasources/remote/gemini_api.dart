@@ -1,12 +1,16 @@
 import 'dart:convert';
+import 'package:digital_logic_sim_2/domain/services/circuit_generator.dart';
 import 'package:http/http.dart' as http;
 import 'package:digital_logic_sim_2/domain/entities/nodes/composed_node.dart';
 
 /// Calls the Gemini API and returns a JSON string representing a logic circuit
 /// that matches the [prompt] description.
-class GeminiService {
+class GeminiService implements CircuitGenerator {
+  final http.Client _client;
+
+  GeminiService({required http.Client client}) : _client = client;
   static const _baseUrl =
-      'https://generativelanguage.googleapis.com/v1beta/package:digital_logic_sim_2/data/models/gemini-3-flash-preview:generateContent';
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent';
 
   static const _systemPrompt = '''
 You are an expert digital logic circuit designer. The user will describe a logic circuit in natural language.
@@ -154,7 +158,8 @@ OUTPUT RULES:
 - Make sure every wire references valid node IDs and pin IDs that exist in the nodes list.
 ''';
 
-  static String buildSystemPrompt({
+  @override
+  String buildSystemPrompt({
     List<SubCircuitDefinition> availableComponents = const [],
   }) {
     final componentsSection = StringBuffer();
@@ -207,8 +212,9 @@ OUTPUT RULES:
 
   /// Generates circuit JSON from [prompt] using the Gemini API.
   /// Returns the raw JSON string on success.
-  /// Throws a [GeminiException] on failure.
-  static Future<String> generateCircuit({
+  /// Throws a [CircuitGenerationException] on failure.
+  @override
+  Future<String> generateCircuit({
     required String apiKey,
     required String prompt,
     List<SubCircuitDefinition> availableComponents = const [],
@@ -234,7 +240,7 @@ OUTPUT RULES:
       },
     });
 
-    final response = await http.post(
+    final response = await _client.post(
       url,
       headers: {'Content-Type': 'application/json'},
       body: body,
@@ -246,19 +252,21 @@ OUTPUT RULES:
         final err = jsonDecode(response.body);
         message = err['error']?['message'] ?? message;
       } catch (_) {}
-      throw GeminiException(message);
+      throw CircuitGenerationException(message);
     }
 
     final decoded = jsonDecode(response.body) as Map<String, dynamic>;
     final candidates = decoded['candidates'] as List?;
     if (candidates == null || candidates.isEmpty) {
-      throw const GeminiException('No candidates returned from Gemini API.');
+      throw const CircuitGenerationException(
+        'No candidates returned from Gemini API.',
+      );
     }
 
     final content = candidates[0]['content'] as Map<String, dynamic>?;
     final parts = content?['parts'] as List?;
     if (parts == null || parts.isEmpty) {
-      throw const GeminiException('Empty response from Gemini API.');
+      throw const CircuitGenerationException('Empty response from Gemini API.');
     }
 
     String text = (parts[0]['text'] as String).trim();
@@ -274,16 +282,9 @@ OUTPUT RULES:
     try {
       jsonDecode(text);
     } catch (e) {
-      throw GeminiException('Invalid JSON in model response: $e');
+      throw CircuitGenerationException('Invalid JSON in model response: $e');
     }
 
     return text;
   }
-}
-
-class GeminiException implements Exception {
-  final String message;
-  const GeminiException(this.message);
-  @override
-  String toString() => 'GeminiException: $message';
 }

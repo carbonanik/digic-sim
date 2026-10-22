@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:digital_logic_sim_2/data/models/pin_layout.dart';
+import 'package:digital_logic_sim_2/domain/entities/pin_layout.dart';
 import 'package:digital_logic_sim_2/domain/entities/nodes/io_nodes.dart';
 import 'package:digital_logic_sim_2/presentation/controllers/circuit_controller.dart';
 import 'package:digital_logic_sim_2/presentation/widgets/ic_pin_layout_designer.dart';

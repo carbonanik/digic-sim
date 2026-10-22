@@ -1,6 +1,7 @@
+import 'node_renderer.dart';
+import 'renderers/gate_node.dart';
 import 'package:digital_logic_sim_2/core/utils/extensions.dart';
 import 'package:digital_logic_sim_2/core/utils/pathfinder.dart';
-import 'package:digital_logic_sim_2/presentation/controllers/circuit_controller.dart';
 import 'package:digital_logic_sim_2/presentation/tools/editor_tools.dart';
 import 'package:flutter/material.dart';
 import 'package:digital_logic_sim_2/domain/entities/circuit.dart';
@@ -430,7 +431,7 @@ class OverlayPainter extends CustomPainter {
 
     // Avoid saveLayer by using opacity in the child components or drawing with opacity paint
     // For simplicity, we wrap the drawing in a layer-like logic but without saveLayer if possible
-    // Here we can just pass the opacity paint to GateNode.paintGate or equivalent
+    // Here we can just pass the opacity paint to GateNodeRendering.paintGate or equivalent
 
     Gate? gateType;
     switch (selectedTool) {
@@ -503,7 +504,7 @@ class OverlayPainter extends CustomPainter {
         ),
       ];
 
-      GateNode.paintGate(
+      GateNodeRendering.paintGate(
         canvas: canvas,
         rect: Rect.fromLTWH(ghostPos.dx, ghostPos.dy, size.width, size.height),
         position: ghostPos,

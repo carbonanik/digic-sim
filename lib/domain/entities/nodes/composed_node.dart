@@ -1,11 +1,11 @@
-import 'package:digital_logic_sim_2/data/models/pin_layout.dart';
+import 'package:digital_logic_sim_2/domain/entities/pin_layout.dart';
 import 'package:digital_logic_sim_2/domain/entities/circuit.dart';
 import 'package:digital_logic_sim_2/domain/entities/circuit_node.dart';
-import 'package:digital_logic_sim_2/features/component_library/node_factory.dart';
+import 'package:digital_logic_sim_2/domain/factories/node_factory.dart';
 import 'package:digital_logic_sim_2/domain/entities/nodes/io_nodes.dart';
 import 'package:digital_logic_sim_2/domain/entities/wire.dart';
-import 'package:digital_logic_sim_2/simulation/engine/logic_engine.dart';
-import 'package:flutter/material.dart';
+import 'package:digital_logic_sim_2/domain/services/logic_engine.dart';
+import 'dart:ui';
 
 class SubCircuitDefinition {
   final String id;
@@ -263,55 +263,6 @@ class ComposedNode extends CircuitNode {
         outputPins[i].value = outputNodes[i].value;
       }
     }
-  }
-
-  @override
-  void paint(Canvas canvas, bool isSelected, {bool isHovered = false}) {
-    final rect = RRect.fromRectAndRadius(this.rect, const Radius.circular(12));
-
-    final fillPaint = Paint()..color = definition.color;
-    final borderPaint = Paint()
-      ..color = isSelected
-          ? const Color(0xfffacc15)
-          : (isHovered ? const Color(0xff94a3b8) : const Color(0xff475569))
-      ..strokeWidth = isSelected ? 3 : (isHovered ? 2.5 : 2)
-      ..style = PaintingStyle.stroke;
-
-    canvas.drawRRect(rect, fillPaint);
-
-    if (isHovered && !isSelected) {
-      final hoverGlow = Paint()
-        ..color = const Color(0xff94a3b8).withOpacity(0.3)
-        ..strokeWidth = 6
-        ..style = PaintingStyle.stroke
-        ..strokeCap = StrokeCap.round
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2);
-      canvas.drawRRect(rect, hoverGlow);
-    }
-
-    canvas.drawRRect(rect, borderPaint);
-
-    _drawLabel(canvas);
-  }
-
-  void _drawLabel(Canvas canvas) {
-    final textPainter = TextPainter(
-      text: TextSpan(
-        text: definition.name,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 15,
-          fontWeight: FontWeight.w900,
-          letterSpacing: 0.5,
-        ),
-      ),
-      textDirection: TextDirection.ltr,
-    );
-    textPainter.layout(maxWidth: size.width - 20);
-    textPainter.paint(
-      canvas,
-      position + Offset((size.width - textPainter.width) / 2, 10),
-    );
   }
 
   /// Label + which side a pin renders its text on now depends on the

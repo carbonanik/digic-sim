@@ -1,27 +1,24 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:digital_logic_sim_2/data/models/pin_layout.dart';
-import 'package:digital_logic_sim_2/data/repositories/sqlite_custom_component_repository.dart';
+import 'package:digital_logic_sim_2/domain/entities/pin_layout.dart';
 import 'package:digital_logic_sim_2/domain/entities/nodes/composed_node.dart';
 import 'package:digital_logic_sim_2/domain/repositories/custom_component_repository.dart';
 
 class CustomComponentManager {
   final CustomComponentRepository _repository;
-  static final List<SubCircuitDefinition> _globalCustomDefinitions = [];
+  final List<SubCircuitDefinition> _definitions = [];
 
-  CustomComponentManager({CustomComponentRepository? repository})
-      : _repository = repository ?? SqliteCustomComponentRepository();
+  CustomComponentManager({required CustomComponentRepository repository})
+    : _repository = repository;
 
-  List<SubCircuitDefinition> get customDefinitions => _globalCustomDefinitions;
+  List<SubCircuitDefinition> get customDefinitions =>
+      List.unmodifiable(_definitions);
 
-  static Future<void> initializeCustomDefinitions({
-    CustomComponentRepository? repository,
-  }) async {
-    final repo = repository ?? SqliteCustomComponentRepository();
-    final list = await repo.loadAll();
-    _globalCustomDefinitions.clear();
+  Future<void> initialize() async {
+    final list = await _repository.loadAll();
+    _definitions.clear();
     for (final def in list) {
-      _globalCustomDefinitions.add(def);
+      _definitions.add(def);
       SubCircuitDefinition.register(def);
     }
   }
@@ -34,7 +31,7 @@ class CustomComponentManager {
     try {
       final map = jsonDecode(json);
       final definition = SubCircuitDefinition.fromMap(map);
-      customDefinitions.add(definition);
+      _definitions.add(definition);
       SubCircuitDefinition.register(definition);
       _repository.save(definition);
       return definition;
@@ -45,13 +42,13 @@ class CustomComponentManager {
   }
 
   void removeCustomDefinition(SubCircuitDefinition definition) {
-    customDefinitions.remove(definition);
+    _definitions.remove(definition);
     SubCircuitDefinition.registry.remove(definition);
     _repository.delete(definition.id);
   }
 
   void saveCustomDefinition(SubCircuitDefinition definition) {
-    customDefinitions.add(definition);
+    _definitions.add(definition);
     SubCircuitDefinition.register(definition);
     _repository.save(definition);
   }

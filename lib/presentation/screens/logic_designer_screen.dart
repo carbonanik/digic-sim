@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:digital_logic_sim_2/domain/usecases/generate_circuit.dart';
 import 'package:flutter/services.dart';
 import 'package:digital_logic_sim_2/presentation/canvas/circuit_canvas.dart';
 import 'package:digital_logic_sim_2/presentation/controllers/workspace_controller.dart';
@@ -8,14 +9,27 @@ import 'package:digital_logic_sim_2/presentation/widgets/top_bar.dart';
 import 'package:digital_logic_sim_2/presentation/widgets/workspace_tabs.dart';
 
 class LogicDesignerScreen extends StatefulWidget {
-  const LogicDesignerScreen({super.key});
+  final WorkspaceController Function() createWorkspaceController;
+  final GenerateCircuit generateCircuit;
+
+  const LogicDesignerScreen({
+    super.key,
+    required this.createWorkspaceController,
+    required this.generateCircuit,
+  });
 
   @override
   State<LogicDesignerScreen> createState() => _LogicDesignerScreenState();
 }
 
 class _LogicDesignerScreenState extends State<LogicDesignerScreen> {
-  final WorkspaceController workspaceController = WorkspaceController();
+  late final WorkspaceController workspaceController;
+
+  @override
+  void initState() {
+    super.initState();
+    workspaceController = widget.createWorkspaceController();
+  }
 
   @override
   void dispose() {
@@ -78,6 +92,7 @@ class _LogicDesignerScreenState extends State<LogicDesignerScreen> {
                           builder: (context, _) => TopBar(
                             controller: controller,
                             workspaceName: activeWorkspace.name,
+                            generateCircuit: widget.generateCircuit,
                           ),
                         );
                       },

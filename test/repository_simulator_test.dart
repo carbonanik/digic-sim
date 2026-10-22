@@ -6,7 +6,7 @@ import 'package:digital_logic_sim_2/domain/repositories/custom_component_reposit
 import 'package:digital_logic_sim_2/domain/services/circuit_simulator.dart';
 import 'package:digital_logic_sim_2/presentation/controllers/circuit_simulation_service.dart';
 import 'package:digital_logic_sim_2/presentation/controllers/custom_component_manager.dart';
-import 'package:digital_logic_sim_2/simulation/engine/logic_engine.dart';
+import 'package:digital_logic_sim_2/domain/services/logic_engine.dart';
 
 class MockCustomComponentRepository implements CustomComponentRepository {
   final List<SubCircuitDefinition> definitions = [];

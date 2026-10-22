@@ -1,0 +1,100 @@
+import 'package:flutter/material.dart';
+import 'package:digital_logic_sim_2/domain/entities/nodes/waveform_node.dart';
+
+extension WaveformNodeRendering on WaveformNode {
+  void paint(Canvas canvas, bool isSelected, {bool isHovered = false}) {
+    final rect = RRect.fromRectAndRadius(this.rect, const Radius.circular(12));
+
+    final fillPaint = Paint()..color = const Color(0xff020617);
+    final borderPaint = Paint()
+      ..color = isSelected
+          ? const Color(0xff38bdf8)
+          : (isHovered ? const Color(0xff1f2937) : const Color(0xff0f172a))
+      ..strokeWidth = isSelected ? 2 : 1
+      ..style = PaintingStyle.stroke;
+
+    canvas.drawRRect(rect, fillPaint);
+    canvas.drawRRect(rect, borderPaint);
+
+    // Draw header
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: 'LOGIC ANALYZER',
+        style: TextStyle(
+          color: const Color(0xff38bdf8).withOpacity(0.8),
+          fontSize: 9,
+          fontWeight: FontWeight.w900,
+          letterSpacing: 1,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    textPainter.layout();
+    textPainter.paint(canvas, position + const Offset(12, 10));
+
+    // Draw waveforms
+    for (int i = 0; i < histories.length; i++) {
+      _drawWaveform(canvas, i);
+    }
+  }
+
+  void _drawWaveform(Canvas canvas, int index) {
+    final history = histories[index];
+    final startY = position.dy + 38 + index * 32;
+    final startX = position.dx + 40;
+    final width = size.width - 52;
+    final height = 24.0;
+    final step = width / (WaveformNode.maxHistory - 1);
+
+    final bgPaint = Paint()
+      ..color = const Color(0xff1e293b).withOpacity(0.3)
+      ..style = PaintingStyle.fill;
+
+    canvas.drawRect(Rect.fromLTWH(startX, startY, width, height), bgPaint);
+
+    final path = Path();
+    bool first = true;
+
+    int i = 0;
+    bool? prevVal;
+    for (final val in history) {
+      final x = startX + i * step;
+      final y = startY + (val ? 4 : height - 4);
+
+      if (first) {
+        path.moveTo(x, y);
+        first = false;
+      } else {
+        if (prevVal != val) {
+          path.lineTo(x, startY + (prevVal! ? 4 : height - 4));
+        }
+        path.lineTo(x, y);
+      }
+      prevVal = val;
+      i++;
+    }
+
+    final wavePaint = Paint()
+      ..color = const Color(0xff38bdf8)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5
+      ..strokeCap = StrokeCap.square;
+
+    canvas.drawPath(path, wavePaint);
+
+    // Draw label
+    final labelPainter = TextPainter(
+      text: TextSpan(
+        text: 'CH$index',
+        style: const TextStyle(
+          color: Color(0xff4b5563),
+          fontSize: 8,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    labelPainter.layout();
+    labelPainter.paint(canvas, Offset(position.dx + 12, startY + 5));
+  }
+}

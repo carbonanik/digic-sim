@@ -396,16 +396,19 @@ class _SectionHeader extends StatelessWidget {
         children: [
           Icon(icon, size: 14, color: const Color(0xff4b5563)),
           const SizedBox(width: 8),
-          Text(
-            title,
-            style: const TextStyle(
-              color: Color(0xff64748b),
-              fontSize: 11,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 1.2,
+          Expanded(
+            child: Text(
+              title,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+              style: const TextStyle(
+                color: Color(0xff64748b),
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1.2,
+              ),
             ),
           ),
-          const Spacer(),
           if (onAction != null)
             InkWell(
               onTap: onAction,
@@ -727,13 +730,15 @@ class _AppLogo extends StatelessWidget {
           child: const Icon(Icons.bolt, color: Colors.white, size: 22),
         ),
         const SizedBox(width: 14),
-        const Text(
-          'DIGIC SIM',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w900,
-            letterSpacing: 0.5,
-            color: Colors.white,
+        const Flexible(
+          child: Text(
+            'DIGIC SIM',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 0.5,
+              color: Colors.white,
+            ),
           ),
         ),
       ],

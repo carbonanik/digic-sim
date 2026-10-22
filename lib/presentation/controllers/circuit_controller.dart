@@ -1,6 +1,6 @@
 import 'package:digital_logic_sim_2/core/utils/extensions.dart';
 import 'package:digital_logic_sim_2/core/utils/pathfinder.dart';
-import 'package:digital_logic_sim_2/data/models/pin_layout.dart';
+import 'package:digital_logic_sim_2/domain/entities/pin_layout.dart';
 import 'package:digital_logic_sim_2/domain/entities/circuit.dart';
 import 'package:digital_logic_sim_2/domain/entities/circuit_node.dart';
 import 'package:digital_logic_sim_2/domain/entities/nodes/composed_node.dart';
@@ -30,14 +30,13 @@ class CircuitController extends ChangeNotifier {
   CircuitController({
     required this.createNodeFactory,
     required this.grid,
-    CircuitSimulationService? simulationService,
-    CustomComponentManager? customComponentManager,
+    required CircuitSimulationService simulationService,
+    required CustomComponentManager customComponentManager,
     WireRoutingService? wireRoutingService,
     EditorState? editor,
   }) : editor = editor ?? EditorState(),
-       _simulationService = simulationService ?? CircuitSimulationService(),
-       _customComponentManager =
-           customComponentManager ?? CustomComponentManager(),
+       _simulationService = simulationService,
+       _customComponentManager = customComponentManager,
        _wireRoutingService = wireRoutingService ?? WireRoutingService();
 
   @override
@@ -56,10 +55,6 @@ class CircuitController extends ChangeNotifier {
   // Custom Definition Delegation
   List<SubCircuitDefinition> get customDefinitions =>
       _customComponentManager.customDefinitions;
-
-  static Future<void> initializeCustomDefinitions() async {
-    await CustomComponentManager.initializeCustomDefinitions();
-  }
 
   String exportIC(SubCircuitDefinition definition) {
     return _customComponentManager.exportIC(definition);
@@ -217,9 +212,8 @@ class CircuitController extends ChangeNotifier {
   void clear() {
     circuit.nodes.clear();
     circuit.wires.clear();
-    selectedNodeIds.clear();
-    temporaryWireEnd = null;
-    draggedWireHit = null;
+    editor.reset();
+    _updateClockTimer();
     _pathsDirty = true;
     commandHistory.clear();
     notifyCircuitChanged();

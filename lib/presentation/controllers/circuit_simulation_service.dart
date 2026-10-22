@@ -4,7 +4,6 @@ import 'package:digital_logic_sim_2/domain/entities/circuit.dart';
 import 'package:digital_logic_sim_2/domain/entities/nodes/clock_node.dart';
 import 'package:digital_logic_sim_2/domain/entities/nodes/waveform_node.dart';
 import 'package:digital_logic_sim_2/domain/services/circuit_simulator.dart';
-import 'package:digital_logic_sim_2/simulation/logic_circuit_simulator.dart';
 
 class CircuitSimulationService {
   final CircuitSimulator _simulator;
@@ -19,8 +18,8 @@ class CircuitSimulationService {
   int _simulationMicrosInWindow = 0;
   DateTime _simulationWindowStartedAt = DateTime.now();
 
-  CircuitSimulationService({CircuitSimulator? simulator})
-      : _simulator = simulator ?? LogicCircuitSimulator();
+  CircuitSimulationService({required CircuitSimulator simulator})
+    : _simulator = simulator;
 
   void dispose() {
     _clockTimer?.cancel();
@@ -54,7 +53,10 @@ class CircuitSimulationService {
     final hasClocks = circuit.nodes.any((n) => n is ClockNode);
     final hasWaveforms = circuit.nodes.any((n) => n is WaveformNode);
 
-    if ((hasClocks || hasWaveforms) && _clockTimer == null) {
+    // A new circuit or waveform set must replace the previous timer closure.
+    _clockTimer?.cancel();
+    _clockTimer = null;
+    if (hasClocks || hasWaveforms) {
       _clockTimer = Timer.periodic(const Duration(milliseconds: 20), (timer) {
         bool changed = false;
         final now = DateTime.now();
@@ -75,9 +77,6 @@ class CircuitSimulationService {
           onTick();
         }
       });
-    } else if (!hasClocks && !hasWaveforms && _clockTimer != null) {
-      _clockTimer?.cancel();
-      _clockTimer = null;
     }
   }
 }

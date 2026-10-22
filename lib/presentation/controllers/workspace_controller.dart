@@ -1,5 +1,3 @@
-import 'package:digital_logic_sim_2/presentation/controllers/create_node_factory.dart';
-import 'package:digital_logic_sim_2/presentation/controllers/grid.dart';
 import 'package:flutter/material.dart';
 import 'circuit_controller.dart';
 
@@ -12,10 +10,12 @@ class Workspace {
 }
 
 class WorkspaceController extends ChangeNotifier {
+  final CircuitController Function() _createCircuitController;
   final List<Workspace> _workspaces = [];
+  int _nextWorkspaceId = 0;
   int _activeIndex = -1;
 
-  List<Workspace> get workspaces => _workspaces;
+  List<Workspace> get workspaces => List.unmodifiable(_workspaces);
   int get activeIndex => _activeIndex;
 
   Workspace? get activeWorkspace =>
@@ -25,18 +25,17 @@ class WorkspaceController extends ChangeNotifier {
 
   CircuitController? get activeController => activeWorkspace?.controller;
 
-  WorkspaceController() {
+  WorkspaceController({
+    required CircuitController Function() createCircuitController,
+  }) : _createCircuitController = createCircuitController {
     // Start with one workspace
     addWorkspace('Main Workspace');
   }
 
   void addWorkspace(String name) {
-    final controller = CircuitController(
-      createNodeFactory: CreateNodeFactory(),
-      grid: Grid(),
-    );
+    final controller = _createCircuitController();
     final workspace = Workspace(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: 'workspace_${_nextWorkspaceId++}',
       name: name,
       controller: controller,
     );
@@ -61,15 +60,12 @@ class WorkspaceController extends ChangeNotifier {
 
       if (_workspaces.isEmpty) {
         addWorkspace('Main Workspace');
-      } else {
-        if (_activeIndex >= _workspaces.length) {
-          _activeIndex = _workspaces.length - 1;
-        } else if (_activeIndex == index) {
-          // Stay on the same index if possible, otherwise adjust
-          if (_activeIndex >= _workspaces.length) {
-            _activeIndex = _workspaces.length - 1;
-          }
-        }
+        return;
+      }
+      if (index < _activeIndex) {
+        _activeIndex--;
+      } else if (_activeIndex >= _workspaces.length) {
+        _activeIndex = _workspaces.length - 1;
       }
       notifyListeners();
     }

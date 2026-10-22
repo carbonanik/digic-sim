@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:flutter/material.dart';
+import 'dart:ui';
 
 import 'pin.dart';
 
@@ -20,10 +20,9 @@ abstract class CircuitNode {
   Size get size => const Size(112, 64);
   Offset get randomPosition =>
       position +
-      Offset(Random().nextInt(10) as double, Random().nextInt(10) as double);
+      Offset(Random().nextInt(10).toDouble(), Random().nextInt(10).toDouble());
   Rect get rect => position & size;
 
-  void paint(Canvas canvas, bool isSelected, {bool isHovered = false});
   void evaluate(List<bool> inputs);
   bool onAction(Offset localPosition) => false;
 

@@ -1,18 +1,21 @@
 import 'package:digital_logic_sim_2/core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:digital_logic_sim_2/features/component_library/preset_library.dart';
-import 'package:digital_logic_sim_2/presentation/controllers/circuit_controller.dart';
+import 'package:digital_logic_sim_2/core/di/injection.dart';
 import 'package:digital_logic_sim_2/presentation/screens/logic_designer_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await PresetLibrary.initialize();
-  await CircuitController.initializeCustomDefinitions();
-  runApp(const LogicDesignerApp());
+  final dependencies = AppDependencies.production();
+  await dependencies.initialize();
+  runApp(LogicDesignerApp(dependencies: dependencies));
 }
 
 class LogicDesignerApp extends StatelessWidget {
-  const LogicDesignerApp({super.key});
+  final AppDependencies dependencies;
+
+  const LogicDesignerApp({super.key, required this.dependencies});
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +31,10 @@ class LogicDesignerApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: const LogicDesignerScreen(),
+      home: LogicDesignerScreen(
+        createWorkspaceController: dependencies.createWorkspaceController,
+        generateCircuit: dependencies.generateCircuit,
+      ),
     );
   }
 }

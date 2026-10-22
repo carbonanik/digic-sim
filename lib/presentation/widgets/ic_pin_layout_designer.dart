@@ -1,4 +1,4 @@
-import 'package:digital_logic_sim_2/data/models/pin_layout.dart';
+import 'package:digital_logic_sim_2/domain/entities/pin_layout.dart';
 import 'package:flutter/material.dart';
 
 /// A visual designer for arranging an IC's pins: drag pins between the

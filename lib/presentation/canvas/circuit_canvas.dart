@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:digital_logic_sim_2/presentation/canvas/circuit_painter.dart';
 import 'package:digital_logic_sim_2/domain/entities/circuit_node.dart';
 import 'package:digital_logic_sim_2/presentation/controllers/circuit_controller.dart';
@@ -33,6 +34,7 @@ class _CircuitCanvasState extends State<CircuitCanvas>
   late AnimationController _toastAnimController;
   late Animation<double> _toastOpacity;
   bool _toastVisible = true;
+  Timer? _toastTimer;
 
   /// Converts a screen-space [point] to scene-space coordinates,
   /// accounting for the current pan and zoom of the InteractiveViewer.
@@ -57,7 +59,7 @@ class _CircuitCanvasState extends State<CircuitCanvas>
     // Fade in
     _toastAnimController.forward();
     // Hold then fade out
-    Future.delayed(const Duration(seconds: 3), () {
+    _toastTimer = Timer(const Duration(seconds: 3), () {
       if (mounted) {
         _toastAnimController.reverse().then((_) {
           if (mounted) setState(() => _toastVisible = false);
@@ -68,6 +70,8 @@ class _CircuitCanvasState extends State<CircuitCanvas>
 
   @override
   void dispose() {
+    _toastTimer?.cancel();
+    transformationController.dispose();
     _toastAnimController.dispose();
     _focusNode.dispose();
     super.dispose();

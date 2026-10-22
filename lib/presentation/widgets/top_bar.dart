@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:digital_logic_sim_2/domain/usecases/generate_circuit.dart';
 import 'package:digital_logic_sim_2/presentation/controllers/circuit_controller.dart';
 import 'package:digital_logic_sim_2/presentation/tools/editor_tools.dart';
 import 'package:digital_logic_sim_2/presentation/widgets/ai_prompt_dialog.dart';
@@ -7,17 +8,20 @@ import 'package:digital_logic_sim_2/presentation/widgets/ic_designer_dialog.dart
 class TopBar extends StatelessWidget {
   final CircuitController controller;
   final String workspaceName;
+  final GenerateCircuit generateCircuit;
 
   const TopBar({
     super.key,
     required this.controller,
     required this.workspaceName,
+    required this.generateCircuit,
   });
 
   @override
   Widget build(BuildContext context) {
     final hasSelection =
-        controller.selectedNodeIds.isNotEmpty || controller.selectedWireId != null;
+        controller.selectedNodeIds.isNotEmpty ||
+        controller.selectedWireId != null;
 
     return Container(
       height: 64,
@@ -114,7 +118,10 @@ class TopBar extends StatelessWidget {
           const SizedBox(width: 12),
 
           // AI Generate Action
-          _AiButton(onTap: () => showAiPromptDialog(context, controller)),
+          _AiButton(
+            onTap: () =>
+                showAiPromptDialog(context, controller, generateCircuit),
+          ),
           const SizedBox(width: 12),
 
           // IC Action
@@ -435,8 +442,9 @@ class _AiButtonState extends State<_AiButton>
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xff8b5cf6)
-                        .withOpacity(_hovered ? 0.6 : _glow.value * 0.5),
+                    color: const Color(
+                      0xff8b5cf6,
+                    ).withOpacity(_hovered ? 0.6 : _glow.value * 0.5),
                     blurRadius: _hovered ? 18 : 10,
                     spreadRadius: _hovered ? 2 : 0,
                   ),

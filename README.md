@@ -32,3 +32,10 @@ Choose a component from the left toolbar and place it on the canvas. Connect com
 Useful shortcuts: `S` selects the selection tool, `Delete` or `Backspace` removes selected items, `Ctrl+Z` undoes, and `Ctrl+Shift+Z` redoes.
 
 AI circuit generation is optional and requires a Gemini API key, which can be entered in the AI Generate dialog.
+
+## Architecture
+
+The domain owns circuit rules, data adapters handle persistence and HTTP, and
+presentation owns editor interactions and rendering. Dependencies are wired in
+`lib/core/di/injection.dart`. See [architecture notes](docs/architecture.md) for
+layer boundaries, ownership, and guidance for adding components or providers.
