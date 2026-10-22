@@ -254,17 +254,20 @@ class _AiPromptDialogState extends State<_AiPromptDialog>
             ),
           ),
           Tooltip(
-            message: 'Copy System Prompt for testing',
+            message: 'Copy full prompt with circuit description',
             child: IconButton(
               icon: const Icon(Icons.copy_rounded, color: Color(0xff06b6d4)),
-              onPressed: () {
+              onPressed: () async {
                 final presets = PresetLibrary.presets;
                 final customDefs = widget.controller.customDefinitions;
                 final allComposed = [...presets, ...customDefs];
                 final systemPrompt = widget.generateCircuit.buildSystemPrompt(
                   availableComponents: allComposed,
                 );
-                Clipboard.setData(ClipboardData(text: systemPrompt));
+                final fullPrompt =
+                    '$systemPrompt\n\nUser request: ${_promptController.text.trim()}';
+                await Clipboard.setData(ClipboardData(text: fullPrompt));
+                if (!mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Row(
@@ -275,7 +278,7 @@ class _AiPromptDialogState extends State<_AiPromptDialog>
                           size: 16,
                         ),
                         SizedBox(width: 8),
-                        Text('System prompt copied to clipboard!'),
+                        Text('Full prompt copied to clipboard!'),
                       ],
                     ),
                     behavior: SnackBarBehavior.floating,
